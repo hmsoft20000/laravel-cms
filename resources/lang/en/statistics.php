@@ -1,0 +1,102 @@
+<?php
+
+return [
+    'validation' => [
+        'store' => [
+            'messages' => [
+                'value.required' => 'The value field is required.',
+                'value.string' => 'The value must be a string.',
+                'value.max' => 'The value must be less than 255 characters.',
+                'type.required' => 'The type field is required.',
+                'type.in' => 'The type must be number, percentage, or text.',
+                'sort_number.integer' => 'The sort number must be an integer.',
+                'sort_number.min' => 'The sort number must be at least 0.',
+                'is_active.boolean' => 'The active status must be true or false.',
+                'locales.array' => 'The translations must be an array.',
+                'locales.min' => 'At least one translation must be provided.',
+                'locales.*.locale.required' => 'The locale code is required.',
+                'locales.*.locale.string' => 'The locale code must be a string.',
+                'locales.*.title.string' => 'The title must be a string.',
+                'locales.*.title.max' => 'The title must be less than 255 characters.',
+            ],
+            'attributes' => [
+                'value' => 'Value',
+                'type' => 'Type',
+                'sort_number' => 'Sort Number',
+                'is_active' => 'Active Status',
+                'locales' => 'Translations',
+                'locales.*.locale' => 'Locale Code',
+                'locales.*.title' => 'Title',
+            ],
+        ],
+        'update' => [
+            'messages' => [
+                'value.required' => 'The value field is required.',
+                'value.string' => 'The value must be a string.',
+                'value.max' => 'The value must be less than 255 characters.',
+                'type.required' => 'The type field is required.',
+                'type.in' => 'The type must be number, percentage, or text.',
+                'sort_number.integer' => 'The sort number must be an integer.',
+                'sort_number.min' => 'The sort number must be at least 0.',
+                'is_active.boolean' => 'The active status must be true or false.',
+                'locales.array' => 'The translations must be an array.',
+                'locales.min' => 'At least one translation must be provided.',
+                'locales.*.locale.required' => 'The locale code is required.',
+                'locales.*.locale.string' => 'The locale code must be a string.',
+                'locales.*.title.string' => 'The title must be a string.',
+                'locales.*.title.max' => 'The title must be less than 255 characters.',
+            ],
+            'attributes' => [
+                'value' => 'Value',
+                'type' => 'Type',
+                'sort_number' => 'Sort Number',
+                'is_active' => 'Active Status',
+                'locales' => 'Translations',
+                'locales.*.locale' => 'Locale Code',
+                'locales.*.title' => 'Title',
+            ],
+        ],
+        'update_all' => [
+            'messages' => [
+                '*.required' => 'The data is required.',
+                '*.array' => 'The data must be an array.',
+                '*.id.required' => 'The statistics ID is required.',
+                '*.id.integer' => 'The statistics ID must be an integer.',
+                '*.id.exists' => 'The selected statistics does not exist.',
+                '*.value.required' => 'The value field is required.',
+                '*.value.string' => 'The value must be a string.',
+                '*.value.max' => 'The value must be less than 255 characters.',
+                '*.type.required' => 'The type field is required.',
+                '*.type.in' => 'The type must be number, percentage, or text.',
+                '*.sort_number.integer' => 'The sort number must be an integer.',
+                '*.sort_number.min' => 'The sort number must be at least 0.',
+                '*.is_active.boolean' => 'The active status must be true or false.',
+                '*.locales.array' => 'The translations must be an array.',
+                '*.locales.min' => 'At least one translation must be provided.',
+                '*.locales.*.locale.required' => 'The locale code is required.',
+                '*.locales.*.locale.string' => 'The locale code must be a string.',
+                '*.locales.*.title.string' => 'The title must be a string.',
+                '*.locales.*.title.max' => 'The title must be less than 255 characters.',
+            ],
+            'attributes' => [
+                '*' => 'Data',
+                '*.id' => 'Statistics ID',
+                '*.value' => 'Value',
+                '*.type' => 'Type',
+                '*.sort_number' => 'Sort Number',
+                '*.is_active' => 'Active Status',
+                '*.locales' => 'Translations',
+                '*.locales.*.locale' => 'Locale Code',
+                '*.locales.*.title' => 'Title',
+            ],
+        ],
+        'delete' => [
+            'messages' => [
+                // No specific validation rules for delete
+            ],
+            'attributes' => [
+                // No specific attributes for delete
+            ],
+        ],
+    ],
+];

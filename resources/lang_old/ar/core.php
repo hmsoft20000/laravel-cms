@@ -1,0 +1,236 @@
+<?php
+
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Core System Language Lines
+    |--------------------------------------------------------------------------
+    |
+    | The following language lines are used for core system functionality
+    | and are not related to specific resources or frontend content.
+    |
+    */
+
+    // System Messages
+    'system' => [
+        'title' => 'نظام إدارة المحتوى',
+        'version' => 'الإصدار',
+        'maintenance_mode' => 'وضع الصيانة',
+        'maintenance_mode_on' => 'النظام في وضع الصيانة',
+        'maintenance_mode_off' => 'النظام متاح للاستخدام',
+        'system_error' => 'خطأ في النظام',
+        'database_error' => 'خطأ في قاعدة البيانات',
+        'cache_cleared' => 'تم مسح الذاكرة المؤقتة',
+        'config_updated' => 'تم تحديث الإعدادات',
+    ],
+
+    // Authentication
+    'auth' => [
+        'login' => 'تسجيل الدخول',
+        'logout' => 'تسجيل الخروج',
+        'register' => 'إنشاء حساب',
+        'forgot_password' => 'نسيت كلمة المرور',
+        'reset_password' => 'إعادة تعيين كلمة المرور',
+        'change_password' => 'تغيير كلمة المرور',
+        'profile' => 'الملف الشخصي',
+        'settings' => 'الإعدادات',
+        'unauthorized' => 'غير مصرح لك بالوصول',
+        'forbidden' => 'ممنوع الوصول',
+        'session_expired' => 'انتهت صلاحية الجلسة',
+        'invalid_credentials' => 'بيانات الاعتماد غير صحيحة',
+        'account_locked' => 'الحساب مقفل',
+        'account_suspended' => 'الحساب معلق',
+    ],
+
+    // Common UI Elements
+    'ui' => [
+        'loading' => 'جاري التحميل...',
+        'saving' => 'جاري الحفظ...',
+        'processing' => 'جاري المعالجة...',
+        'searching' => 'جاري البحث...',
+        'no_results' => 'لا توجد نتائج',
+        'no_data' => 'لا توجد بيانات',
+        'empty_state' => 'حالة فارغة',
+        'error_occurred' => 'حدث خطأ',
+        'success' => 'نجح',
+        'failed' => 'فشل',
+        'warning' => 'تحذير',
+        'info' => 'معلومات',
+        'confirm' => 'تأكيد',
+        'cancel' => 'إلغاء',
+        'ok' => 'حسناً',
+        'yes' => 'نعم',
+        'no' => 'لا',
+        'close' => 'إغلاق',
+        'save' => 'حفظ',
+        'edit' => 'تعديل',
+        'delete' => 'حذف',
+        'view' => 'عرض',
+        'back' => 'رجوع',
+        'next' => 'التالي',
+        'previous' => 'السابق',
+        'finish' => 'إنهاء',
+        'continue' => 'متابعة',
+    ],
+
+    // Form Elements
+    'forms' => [
+        'required' => 'مطلوب',
+        'optional' => 'اختياري',
+        'invalid' => 'غير صحيح',
+        'valid' => 'صحيح',
+        'submit' => 'إرسال',
+        'reset' => 'إعادة تعيين',
+        'clear' => 'مسح',
+        'select' => 'اختر',
+        'select_all' => 'اختر الكل',
+        'deselect_all' => 'إلغاء اختيار الكل',
+        'upload' => 'رفع',
+        'browse' => 'تصفح',
+        'choose_file' => 'اختر ملف',
+        'no_file_selected' => 'لم يتم اختيار ملف',
+        'file_selected' => 'تم اختيار ملف',
+        'max_file_size' => 'الحد الأقصى لحجم الملف',
+        'allowed_file_types' => 'أنواع الملفات المسموحة',
+    ],
+
+    // Table and List
+    'table' => [
+        'no_data' => 'لا توجد بيانات للعرض',
+        'loading' => 'جاري تحميل البيانات...',
+        'search' => 'بحث',
+        'filter' => 'تصفية',
+        'sort' => 'ترتيب',
+        'export' => 'تصدير',
+        'import' => 'استيراد',
+        'refresh' => 'تحديث',
+        'select_all' => 'تحديد الكل',
+        'deselect_all' => 'إلغاء تحديد الكل',
+        'selected_items' => 'العناصر المحددة',
+        'bulk_actions' => 'إجراءات جماعية',
+        'per_page' => 'لكل صفحة',
+        'showing' => 'عرض',
+        'to' => 'إلى',
+        'of' => 'من',
+        'results' => 'نتيجة',
+    ],
+
+    // Pagination
+    'pagination' => [
+        'previous' => 'السابق',
+        'next' => 'التالي',
+        'first' => 'الأول',
+        'last' => 'الأخير',
+        'page' => 'صفحة',
+        'pages' => 'صفحات',
+        'go_to_page' => 'انتقل إلى الصفحة',
+        'showing' => 'عرض',
+        'to' => 'إلى',
+        'of' => 'من',
+        'results' => 'نتيجة',
+        'per_page' => 'لكل صفحة',
+    ],
+
+    // Status and States
+    'status' => [
+        'active' => 'نشط',
+        'inactive' => 'غير نشط',
+        'enabled' => 'مفعل',
+        'disabled' => 'معطل',
+        'published' => 'منشور',
+        'draft' => 'مسودة',
+        'archived' => 'مؤرشف',
+        'pending' => 'في الانتظار',
+        'approved' => 'موافق عليه',
+        'rejected' => 'مرفوض',
+        'completed' => 'مكتمل',
+        'in_progress' => 'قيد التنفيذ',
+        'cancelled' => 'ملغي',
+        'expired' => 'منتهي الصلاحية',
+        'valid' => 'صالح',
+        'invalid' => 'غير صالح',
+    ],
+
+    // Time and Date
+    'time' => [
+        'now' => 'الآن',
+        'today' => 'اليوم',
+        'yesterday' => 'أمس',
+        'tomorrow' => 'غداً',
+        'this_week' => 'هذا الأسبوع',
+        'last_week' => 'الأسبوع الماضي',
+        'next_week' => 'الأسبوع القادم',
+        'this_month' => 'هذا الشهر',
+        'last_month' => 'الشهر الماضي',
+        'next_month' => 'الشهر القادم',
+        'this_year' => 'هذا العام',
+        'last_year' => 'العام الماضي',
+        'next_year' => 'العام القادم',
+        'created_at' => 'تاريخ الإنشاء',
+        'updated_at' => 'تاريخ التحديث',
+        'deleted_at' => 'تاريخ الحذف',
+        'expires_at' => 'تاريخ الانتهاء',
+        'starts_at' => 'تاريخ البداية',
+        'ends_at' => 'تاريخ النهاية',
+    ],
+
+    // File and Media
+    'media' => [
+        'file' => 'ملف',
+        'files' => 'ملفات',
+        'image' => 'صورة',
+        'images' => 'صور',
+        'video' => 'فيديو',
+        'videos' => 'فيديوهات',
+        'audio' => 'صوت',
+        'audio_files' => 'ملفات صوتية',
+        'document' => 'مستند',
+        'documents' => 'مستندات',
+        'archive' => 'أرشيف',
+        'archives' => 'أرشيفات',
+        'upload' => 'رفع',
+        'download' => 'تحميل',
+        'delete' => 'حذف',
+        'rename' => 'إعادة تسمية',
+        'move' => 'نقل',
+        'copy' => 'نسخ',
+        'preview' => 'معاينة',
+        'full_size' => 'الحجم الكامل',
+        'thumbnail' => 'صورة مصغرة',
+        'set_as_default' => 'تعيين كافتراضي',
+        'remove_default' => 'إلغاء الافتراضي',
+        'sort_order' => 'ترتيب',
+        'file_size' => 'حجم الملف',
+        'file_type' => 'نوع الملف',
+        'upload_date' => 'تاريخ الرفع',
+    ],
+
+    // Validation Messages
+    'validation' => [
+        'required' => 'هذا الحقل مطلوب',
+        'invalid' => 'القيمة غير صحيحة',
+        'not_found' => 'العنصر غير موجود',
+        'already_exists' => 'هذا العنصر موجود بالفعل',
+        'cannot_delete' => 'لا يمكن حذف هذا العنصر',
+        'permission_denied' => 'ليس لديك صلاحية للقيام بهذا الإجراء',
+        'unauthorized' => 'غير مصرح لك بالوصول',
+        'forbidden' => 'ممنوع الوصول',
+        'validation_failed' => 'فشل التحقق من صحة البيانات',
+        'invalid_format' => 'تنسيق غير صحيح',
+        'too_short' => 'القيمة قصيرة جداً',
+        'too_long' => 'القيمة طويلة جداً',
+        'too_small' => 'القيمة صغيرة جداً',
+        'too_large' => 'القيمة كبيرة جداً',
+        'must_be_unique' => 'يجب أن تكون القيمة فريدة',
+        'must_be_different' => 'يجب أن تكون القيمة مختلفة',
+        'must_match' => 'يجب أن تتطابق القيم',
+        'must_be_after' => 'يجب أن يكون التاريخ بعد',
+        'must_be_before' => 'يجب أن يكون التاريخ قبل',
+        'must_be_between' => 'يجب أن تكون القيمة بين',
+        'must_be_one_of' => 'يجب أن تكون القيمة واحدة من',
+        'must_not_be_one_of' => 'يجب ألا تكون القيمة واحدة من',
+    ],
+];
+
+
+

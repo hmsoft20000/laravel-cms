@@ -1,0 +1,135 @@
+<?php
+
+return [
+    'validation' => [
+        'forgot_password' => [
+            'messages' => [
+                'login_identifier.required' => 'The login identifier field is required.',
+                'login_identifier.string' => 'The login identifier field must be a string.',
+            ],
+            'attributes' => [
+                'login_identifier' => 'Login Identifier',
+            ],
+        ],
+        'login' => [
+            'messages' => [
+                'login_identifier.required' => 'The login identifier field is required.',
+                'login_identifier.string' => 'The login identifier field must be a string.',
+                'password.required' => 'The password field is required.',
+                'password.string' => 'The password field must be a string.',
+            ],
+            'attributes' => [
+                'login_identifier' => 'Login Identifier',
+                'password' => 'Password',
+            ],
+        ],
+        'register' => [
+            'messages' => [
+                'first_name.required' => 'The first name field is required.',
+                'first_name.string' => 'The first name field must be a string.',
+                'first_name.max' => 'The first name field must be less than 255 characters.',
+                'first_name.regex' => 'The first name field must contain only letters.',
+                'last_name.required' => 'The last name field is required.',
+                'last_name.string' => 'The last name field must be a string.',
+                'last_name.max' => 'The last name field must be less than 255 characters.',
+                'last_name.regex' => 'The last name field must contain only letters.',
+                'email.required' => 'The email field is required.',
+                'email.string' => 'The email field must be a string.',
+                'email.email' => 'The email field must be a valid email address.',
+                'email.max' => 'The email field must be less than 255 characters.',
+                'email.unique' => 'The email has already been taken.',
+                'mobile.required' => 'The mobile field is required.',
+                'mobile.string' => 'The mobile field must be a string.',
+                'mobile.unique' => 'The mobile has already been taken.',
+                'password.required' => 'The password field is required.',
+                'password.uncompromised' => 'The password is not secure, please choose a stronger password.',
+                'password_confirmation.required' => 'The password confirmation field is required.',
+                'password_confirmation.same' => 'The password confirmation must match the password.',
+                'agreeTerms.accepted' => 'You must agree to the terms and conditions.',
+            ],
+            'attributes' => [
+                'first_name' => 'First Name',
+                'last_name' => 'Last Name',
+                'email' => 'Email',
+                'mobile' => 'Mobile',
+                'password' => 'Password',
+                'password_confirmation' => 'Password Confirmation',
+                'agreeTerms' => 'Agree to Terms',
+            ],
+        ],
+        'reset_password' => [
+            'messages' => [
+                'email.required' => 'The email field is required.',
+                'email.string' => 'The email field must be a string.',
+                'token.required' => 'The reset token is required.',
+                'password.required' => 'The password field is required.',
+                'password.uncompromised' => 'The password is not secure, please choose a stronger password.',
+                'password_confirmation.required' => 'The password confirmation field is required.',
+                'password_confirmation.same' => 'The password confirmation must match the password.',
+            ],
+            'attributes' => [
+                'email' => 'Email',
+                'token' => 'Reset Token',
+                'password' => 'Password',
+                'password_confirmation' => 'Password Confirmation',
+            ],
+        ],
+        'update_password' => [
+            'messages' => [
+                'old_password.required' => 'The old password field is required.',
+                'old_password.string' => 'The old password field must be a string.',
+                'new_password.required' => 'The new password field is required.',
+                'new_password.confirmed' => 'The new password confirmation is required.',
+                'new_password.different' => 'The new password must be different from the old password.',
+                'new_password.min' => 'The new password must be at least 8 characters.',
+                'new_password.regex' => 'The new password must contain lowercase, uppercase, numbers, and symbols.',
+            ],
+            'attributes' => [
+                'old_password' => 'Old Password',
+                'new_password' => 'New Password',
+            ],
+        ],
+        'update_profile' => [
+            'messages' => [
+                'first_name.string' => 'The first name field must be a string.',
+                'first_name.max' => 'The first name field must be less than 255 characters.',
+                'first_name.regex' => 'The first name field must contain only letters.',
+                'last_name.string' => 'The last name field must be a string.',
+                'last_name.max' => 'The last name field must be less than 255 characters.',
+                'last_name.regex' => 'The last name field must contain only letters.',
+                'mobile.unique' => 'The mobile has already been taken.',
+                'mobile.phone' => 'The mobile number is invalid.',
+                'image.image' => 'The file must be an image.',
+                'image.mimes' => 'The image must be of type jpeg, png, jpg, gif.',
+                'image.max' => 'The image size must be less than 2MB.',
+                'password.uncompromised' => 'The password is not secure.',
+                'password.min' => 'The password must be at least 8 characters.',
+                'password.regex' => 'The password must contain lowercase, uppercase, numbers, and symbols.',
+                'password_confirmation.same' => 'The password confirmation must match the password.',
+                'delete_image.in' => 'The delete image value is invalid.',
+            ],
+            'attributes' => [
+                'first_name' => 'First Name',
+                'last_name' => 'Last Name',
+                'mobile' => 'Mobile',
+                'image' => 'Image',
+                'password' => 'Password',
+                'password_confirmation' => 'Password Confirmation',
+                'delete_image' => 'Delete Image',
+            ],
+        ],
+        'verify_otp' => [
+            'messages' => [
+                'otp.required' => 'The OTP field is required.',
+                'otp.string' => 'The OTP field must be a string.',
+                'login_identifier.required' => 'The login identifier field is required.',
+                'login_identifier.email' => 'The login identifier must be a valid email address.',
+                'login_identifier.exists' => 'The login identifier does not exist.',
+            ],
+            'attributes' => [
+                'otp' => 'OTP',
+                'login_identifier' => 'Login Identifier',
+            ],
+        ],
+    ],
+];

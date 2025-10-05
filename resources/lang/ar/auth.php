@@ -1,0 +1,135 @@
+<?php
+
+return [
+    'validation' => [
+        'forgot_password' => [
+            'messages' => [
+                'login_identifier.required' => 'معرف تسجيل الدخول مطلوب',
+                'login_identifier.string' => 'معرف تسجيل الدخول يجب أن يكون نص',
+            ],
+            'attributes' => [
+                'login_identifier' => 'معرف تسجيل الدخول',
+            ],
+        ],
+        'login' => [
+            'messages' => [
+                'login_identifier.required' => 'معرف تسجيل الدخول مطلوب',
+                'login_identifier.string' => 'معرف تسجيل الدخول يجب أن يكون نص',
+                'password.required' => 'كلمة المرور مطلوبة',
+                'password.string' => 'كلمة المرور يجب أن تكون نص',
+            ],
+            'attributes' => [
+                'login_identifier' => 'معرف تسجيل الدخول',
+                'password' => 'كلمة المرور',
+            ],
+        ],
+        'register' => [
+            'messages' => [
+                'first_name.required' => 'الاسم الأول مطلوب',
+                'first_name.string' => 'الاسم الأول يجب أن يكون نص',
+                'first_name.max' => 'الاسم الأول يجب أن يكون أقل من 255 حرف',
+                'first_name.regex' => 'الاسم الأول يجب أن يحتوي على أحرف فقط',
+                'last_name.required' => 'الاسم الأخير مطلوب',
+                'last_name.string' => 'الاسم الأخير يجب أن يكون نص',
+                'last_name.max' => 'الاسم الأخير يجب أن يكون أقل من 255 حرف',
+                'last_name.regex' => 'الاسم الأخير يجب أن يحتوي على أحرف فقط',
+                'email.required' => 'البريد الإلكتروني مطلوب',
+                'email.string' => 'البريد الإلكتروني يجب أن يكون نص',
+                'email.email' => 'البريد الإلكتروني يجب أن يكون صحيح',
+                'email.max' => 'البريد الإلكتروني يجب أن يكون أقل من 255 حرف',
+                'email.unique' => 'البريد الإلكتروني مستخدم بالفعل',
+                'mobile.required' => 'رقم الهاتف مطلوب',
+                'mobile.string' => 'رقم الهاتف يجب أن يكون نص',
+                'mobile.unique' => 'رقم الهاتف مستخدم بالفعل',
+                'password.required' => 'كلمة المرور مطلوبة',
+                'password.uncompromised' => 'كلمة المرور غير آمنة، يرجى اختيار كلمة مرور أقوى',
+                'password_confirmation.required' => 'تأكيد كلمة المرور مطلوب',
+                'password_confirmation.same' => 'تأكيد كلمة المرور يجب أن يطابق كلمة المرور',
+                'agreeTerms.accepted' => 'يجب الموافقة على الشروط والأحكام',
+            ],
+            'attributes' => [
+                'first_name' => 'الاسم الأول',
+                'last_name' => 'الاسم الأخير',
+                'email' => 'البريد الإلكتروني',
+                'mobile' => 'رقم الهاتف',
+                'password' => 'كلمة المرور',
+                'password_confirmation' => 'تأكيد كلمة المرور',
+                'agreeTerms' => 'الموافقة على الشروط',
+            ],
+        ],
+        'reset_password' => [
+            'messages' => [
+                'email.required' => 'البريد الإلكتروني مطلوب',
+                'email.string' => 'البريد الإلكتروني يجب أن يكون نص',
+                'token.required' => 'رمز إعادة التعيين مطلوب',
+                'password.required' => 'كلمة المرور مطلوبة',
+                'password.uncompromised' => 'كلمة المرور غير آمنة، يرجى اختيار كلمة مرور أقوى',
+                'password_confirmation.required' => 'تأكيد كلمة المرور مطلوب',
+                'password_confirmation.same' => 'تأكيد كلمة المرور يجب أن يطابق كلمة المرور',
+            ],
+            'attributes' => [
+                'email' => 'البريد الإلكتروني',
+                'token' => 'رمز إعادة التعيين',
+                'password' => 'كلمة المرور',
+                'password_confirmation' => 'تأكيد كلمة المرور',
+            ],
+        ],
+        'update_password' => [
+            'messages' => [
+                'old_password.required' => 'كلمة المرور القديمة مطلوبة',
+                'old_password.string' => 'كلمة المرور القديمة يجب أن تكون نص',
+                'new_password.required' => 'كلمة المرور الجديدة مطلوبة',
+                'new_password.confirmed' => 'تأكيد كلمة المرور الجديدة مطلوب',
+                'new_password.different' => 'كلمة المرور الجديدة يجب أن تكون مختلفة عن القديمة',
+                'new_password.min' => 'كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل',
+                'new_password.regex' => 'كلمة المرور الجديدة يجب أن تحتوي على حروف صغيرة وكبيرة وأرقام ورموز',
+            ],
+            'attributes' => [
+                'old_password' => 'كلمة المرور القديمة',
+                'new_password' => 'كلمة المرور الجديدة',
+            ],
+        ],
+        'update_profile' => [
+            'messages' => [
+                'first_name.string' => 'الاسم الأول يجب أن يكون نص',
+                'first_name.max' => 'الاسم الأول يجب أن يكون أقل من 255 حرف',
+                'first_name.regex' => 'الاسم الأول يجب أن يحتوي على أحرف فقط',
+                'last_name.string' => 'الاسم الأخير يجب أن يكون نص',
+                'last_name.max' => 'الاسم الأخير يجب أن يكون أقل من 255 حرف',
+                'last_name.regex' => 'الاسم الأخير يجب أن يحتوي على أحرف فقط',
+                'mobile.unique' => 'رقم الهاتف مستخدم بالفعل',
+                'mobile.phone' => 'رقم الهاتف غير صحيح',
+                'image.image' => 'الملف يجب أن يكون صورة',
+                'image.mimes' => 'الصورة يجب أن تكون من نوع jpeg, png, jpg, gif',
+                'image.max' => 'حجم الصورة يجب أن يكون أقل من 2 ميجابايت',
+                'password.uncompromised' => 'كلمة المرور غير آمنة',
+                'password.min' => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
+                'password.regex' => 'كلمة المرور يجب أن تحتوي على حروف صغيرة وكبيرة وأرقام ورموز',
+                'password_confirmation.same' => 'تأكيد كلمة المرور يجب أن يطابق كلمة المرور',
+                'delete_image.in' => 'قيمة حذف الصورة غير صحيحة',
+            ],
+            'attributes' => [
+                'first_name' => 'الاسم الأول',
+                'last_name' => 'الاسم الأخير',
+                'mobile' => 'رقم الهاتف',
+                'image' => 'الصورة',
+                'password' => 'كلمة المرور',
+                'password_confirmation' => 'تأكيد كلمة المرور',
+                'delete_image' => 'حذف الصورة',
+            ],
+        ],
+        'verify_otp' => [
+            'messages' => [
+                'otp.required' => 'رمز التحقق مطلوب',
+                'otp.string' => 'رمز التحقق يجب أن يكون نص',
+                'login_identifier.required' => 'معرف تسجيل الدخول مطلوب',
+                'login_identifier.email' => 'معرف تسجيل الدخول يجب أن يكون بريد إلكتروني صحيح',
+                'login_identifier.exists' => 'معرف تسجيل الدخول غير موجود',
+            ],
+            'attributes' => [
+                'otp' => 'رمز التحقق',
+                'login_identifier' => 'معرف تسجيل الدخول',
+            ],
+        ],
+    ],
+];

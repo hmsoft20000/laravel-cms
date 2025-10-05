@@ -1,0 +1,102 @@
+<?php
+
+return [
+    'validation' => [
+        'store' => [
+            'messages' => [
+                'value.required' => 'القيمة مطلوبة',
+                'value.string' => 'القيمة يجب أن تكون نص',
+                'value.max' => 'القيمة يجب أن تكون أقل من 255 حرف',
+                'type.required' => 'النوع مطلوب',
+                'type.in' => 'النوع يجب أن يكون number أو percentage أو text',
+                'sort_number.integer' => 'رقم الترتيب يجب أن يكون رقم صحيح',
+                'sort_number.min' => 'رقم الترتيب يجب أن يكون 0 على الأقل',
+                'is_active.boolean' => 'حالة التفعيل يجب أن تكون true أو false',
+                'locales.array' => 'الترجمات يجب أن تكون مصفوفة',
+                'locales.min' => 'يجب إضافة ترجمة واحدة على الأقل',
+                'locales.*.locale.required' => 'رمز اللغة مطلوب',
+                'locales.*.locale.string' => 'رمز اللغة يجب أن يكون نص',
+                'locales.*.title.string' => 'العنوان يجب أن يكون نص',
+                'locales.*.title.max' => 'العنوان يجب أن يكون أقل من 255 حرف',
+            ],
+            'attributes' => [
+                'value' => 'القيمة',
+                'type' => 'النوع',
+                'sort_number' => 'رقم الترتيب',
+                'is_active' => 'حالة التفعيل',
+                'locales' => 'الترجمات',
+                'locales.*.locale' => 'رمز اللغة',
+                'locales.*.title' => 'العنوان',
+            ],
+        ],
+        'update' => [
+            'messages' => [
+                'value.required' => 'القيمة مطلوبة',
+                'value.string' => 'القيمة يجب أن تكون نص',
+                'value.max' => 'القيمة يجب أن تكون أقل من 255 حرف',
+                'type.required' => 'النوع مطلوب',
+                'type.in' => 'النوع يجب أن يكون number أو percentage أو text',
+                'sort_number.integer' => 'رقم الترتيب يجب أن يكون رقم صحيح',
+                'sort_number.min' => 'رقم الترتيب يجب أن يكون 0 على الأقل',
+                'is_active.boolean' => 'حالة التفعيل يجب أن تكون true أو false',
+                'locales.array' => 'الترجمات يجب أن تكون مصفوفة',
+                'locales.min' => 'يجب إضافة ترجمة واحدة على الأقل',
+                'locales.*.locale.required' => 'رمز اللغة مطلوب',
+                'locales.*.locale.string' => 'رمز اللغة يجب أن يكون نص',
+                'locales.*.title.string' => 'العنوان يجب أن يكون نص',
+                'locales.*.title.max' => 'العنوان يجب أن يكون أقل من 255 حرف',
+            ],
+            'attributes' => [
+                'value' => 'القيمة',
+                'type' => 'النوع',
+                'sort_number' => 'رقم الترتيب',
+                'is_active' => 'حالة التفعيل',
+                'locales' => 'الترجمات',
+                'locales.*.locale' => 'رمز اللغة',
+                'locales.*.title' => 'العنوان',
+            ],
+        ],
+        'update_all' => [
+            'messages' => [
+                '*.required' => 'البيانات مطلوبة',
+                '*.array' => 'البيانات يجب أن تكون مصفوفة',
+                '*.id.required' => 'معرف الإحصائية مطلوب',
+                '*.id.integer' => 'معرف الإحصائية يجب أن يكون رقم صحيح',
+                '*.id.exists' => 'الإحصائية المحددة غير موجودة',
+                '*.value.required' => 'القيمة مطلوبة',
+                '*.value.string' => 'القيمة يجب أن تكون نص',
+                '*.value.max' => 'القيمة يجب أن تكون أقل من 255 حرف',
+                '*.type.required' => 'النوع مطلوب',
+                '*.type.in' => 'النوع يجب أن يكون number أو percentage أو text',
+                '*.sort_number.integer' => 'رقم الترتيب يجب أن يكون رقم صحيح',
+                '*.sort_number.min' => 'رقم الترتيب يجب أن يكون 0 على الأقل',
+                '*.is_active.boolean' => 'حالة التفعيل يجب أن تكون true أو false',
+                '*.locales.array' => 'الترجمات يجب أن تكون مصفوفة',
+                '*.locales.min' => 'يجب إضافة ترجمة واحدة على الأقل',
+                '*.locales.*.locale.required' => 'رمز اللغة مطلوب',
+                '*.locales.*.locale.string' => 'رمز اللغة يجب أن يكون نص',
+                '*.locales.*.title.string' => 'العنوان يجب أن يكون نص',
+                '*.locales.*.title.max' => 'العنوان يجب أن يكون أقل من 255 حرف',
+            ],
+            'attributes' => [
+                '*' => 'البيانات',
+                '*.id' => 'معرف الإحصائية',
+                '*.value' => 'القيمة',
+                '*.type' => 'النوع',
+                '*.sort_number' => 'رقم الترتيب',
+                '*.is_active' => 'حالة التفعيل',
+                '*.locales' => 'الترجمات',
+                '*.locales.*.locale' => 'رمز اللغة',
+                '*.locales.*.title' => 'العنوان',
+            ],
+        ],
+        'delete' => [
+            'messages' => [
+                // No specific validation rules for delete
+            ],
+            'attributes' => [
+                // No specific attributes for delete
+            ],
+        ],
+    ],
+];
