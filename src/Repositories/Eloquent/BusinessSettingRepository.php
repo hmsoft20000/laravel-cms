@@ -53,7 +53,7 @@ class BusinessSettingRepository implements BusinessSettingRepositoryInterface
 
         $assetDisk = storageDisk('public');
 
-        $defaultImageFolderUrl = storageDisk('public')->url(DEFAULTS_IMAGE_NAME);
+        $defaultImageFolderUrl = storageDisk('public')->url(cmsImageDir('defaults'));
 
         if (isset($web_config['company_logo'])) {
             $web_config['company_logo_url'] = $assetDisk->url($web_config['company_logo']);
@@ -66,7 +66,7 @@ class BusinessSettingRepository implements BusinessSettingRepositoryInterface
         }
 
         if (isset($web_config['about_us_image'])) {
-            $web_config['about_us_image'] = $assetDisk->url(ABOUT_IMAGE_NAME . '/' . $web_config['about_us_image']);
+            $web_config['about_us_image'] = $assetDisk->url(cmsImageDir('about_us') . '/' . $web_config['about_us_image']);
         }
 
         foreach (static::$defaultImages as $key) {
@@ -183,31 +183,34 @@ class BusinessSettingRepository implements BusinessSettingRepositoryInterface
     {
         $folder = '';
         if (str_starts_with($key, 'default_')) {
-            $folder = DEFAULTS_IMAGE_NAME;
+            $folder = cmsImageDir('defaults');
         } else {
             switch ($key) {
                 case 'company_logo':
                 case 'company_fav_icon':
                 case 'footer_logo':
-                    $folder = IMAGE_NAME;
+                    $folder = cmsContentSetting('image_name');
                     break;
                 case 'about_us_image':
-                    $folder = ABOUT_IMAGE_NAME;
+                    $folder = cmsImageDir('about_us');
+                    break;
                 case 'our_history_image':
-                    $folder = OUR_HISTORY_IMAGE_NAME;
+                    $folder = cmsImageDir('our_history');
+                    break;
                 case 'our_mission_image':
-                    $folder = OUR_MISSION_IMAGE_NAME;
+                    $folder = cmsImageDir('our_mission');
+                    break;
                 case 'our_vision_image':
-                    $folder = OUR_VISION_IMAGE_NAME;
+                    $folder = cmsImageDir('our_vision');
                     break;
                 case 'privacy_policy_image':
-                    $folder = PRIVACY_POLICY_IMAGE_NAME;
+                    $folder = cmsImageDir('privacy_policy');
                     break;
                 case 'terms_of_service_image':
-                    $folder = TERM_OF_SERVICE_IMAGE_NAME;
+                    $folder = cmsImageDir('term_of_service');
                     break;
                 case 'term_and_condition_image':
-                    $folder = TERM_AND_CONDITION_IMAGE_NAME;
+                    $folder = cmsImageDir('term_and_condition');
                     break;
                 default:
                     # code...

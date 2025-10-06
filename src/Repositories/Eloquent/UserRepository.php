@@ -54,7 +54,7 @@ class UserRepository implements UserRepositoryInterface
     public function delete(Model $model): bool
     {
         $model->delete();
-        $filePath = USERS_IMAGE_NAME . '/' . $model->image;
+        $filePath = cmsImageDir('users') . '/' . $model->image;
         $this->deleteFile(filePath: $filePath, disk: 'public');
         return true;
     }
@@ -62,7 +62,7 @@ class UserRepository implements UserRepositoryInterface
     public function destroy(Model $model): bool
     {
         $model->forceDelete();
-        $filePath = USERS_IMAGE_NAME . '/' . $model->image;
+        $filePath = cmsImageDir('users') . '/' . $model->image;
         $this->deleteFile(filePath: $filePath, disk: 'public');
         return true;
     }
@@ -94,7 +94,7 @@ class UserRepository implements UserRepositoryInterface
 
     public function proceedImage($file, string|null $oldFileName = null): bool|string
     {
-        $folderPath = USERS_IMAGE_NAME;
+        $folderPath = cmsImageDir('users');
         if ($oldFileName) {
             $image =  $this->updateFile(dir: $folderPath . '/', oldFile: $oldFileName, file: $file, disk: 'public');
         } else {
@@ -105,7 +105,7 @@ class UserRepository implements UserRepositoryInterface
 
     public function proceedImageDelete($file)
     {
-        $folderPath = USERS_IMAGE_NAME;
+        $folderPath = cmsImageDir('users');
         return  $this->deleteFile(filePath: $folderPath . '/' . $file, disk: 'public');
     }
 }

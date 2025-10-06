@@ -173,7 +173,7 @@ class Slider extends GeneralModel
     {
         $image = $this->image;
         return new Attribute(
-            get: fn() =>  isset($image) ?  storageDisk('public')->url(SLIDER_IMAGE_NAME . "/" . $image) :
+            get: fn() =>  isset($image) ?  storageDisk('public')->url(cmsImageDir('slider') . "/" . $image) :
                 config('app.web_config.default_slider_image'),
         );
     }

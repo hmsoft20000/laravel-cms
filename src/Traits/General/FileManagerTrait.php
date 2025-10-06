@@ -18,7 +18,7 @@ trait FileManagerTrait
      * @param string $disk
      * @return string
      */
-    public function updateFile(string $dir, $oldFile, $file, string $imageFormat = IMAGE_FORMATE, string $disk = "public"): string
+    public function updateFile(string $dir, $oldFile, $file, string|null $imageFormat = null, string $disk = "public"): string
     {
         if (Storage::disk($disk)->exists($dir . $oldFile)) {
             Storage::disk($disk)->delete($dir . $oldFile);
@@ -33,14 +33,14 @@ trait FileManagerTrait
      * @param string $disk
      * @return string
      */
-    public function upload(string $dir, $file, string $imageFormat = IMAGE_FORMATE, string $disk = "public"): string
+    public function upload(string $dir, $file, string|null $imageFormat = null, string $disk = "public"): string
     {
         $path = $dir;
         $fileExtension = $file->extension();
         // $fileExtension = $file->getClientOriginalExtension();
-        $fileFormate =  $fileExtension;
+        $imageFormat = $imageFormat ?? cmsFileSetting('image_format');
 
-        $fileName = Carbon::now()->toDateString() . "-" . uniqid() . "." . $fileFormate;
+        $fileName = Carbon::now()->toDateString() . "-" . uniqid() . "." . $fileExtension;
 
         if (!Storage::disk($disk)->exists($path)) {
             Storage::disk($disk)->makeDirectory($path);

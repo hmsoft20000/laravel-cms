@@ -28,6 +28,56 @@ class Sector extends GeneralModel
 
 
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'publish_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * Get all of the translations for the Sector
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function translations(): HasMany
+    {
+        return $this->hasMany(SectorTranslation::class, foreignKey: 'sector_id', localKey: 'id');
+    }
+
+
+    public function categories(): HasMany
+    {
+        // العلاقة المباشرة مع الفئات
+        return $this->hasMany(Category::class, 'sector_id');
+    }
+
+    public function posts()
+    {
+        return $this->hasManyThrough(
+            Post::class,
+            Category::class,
+            'sector_id',
+            'id',
+            'id',
+            'id'
+        )
+            ->leftJoin('category_post', 'posts.id', '=', 'category_post.post_id')
+            ->whereColumn('categories.id', 'category_post.category_id')
+            ->select('posts.*');
+        // )->join('category_post', 'posts.id', '=', 'category_post.post_id')
+        //     ->whereColumn('categories.id', 'category_post.category_id')
+        //     ->select('posts.*');
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | AutoFilterable Interface Implementation (The New Advanced Way)
@@ -127,55 +177,5 @@ class Sector extends GeneralModel
     public function defineForeignKeyInTranslationTable(): ?string
     {
         return 'sector_id';
-    }
-
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-            'publish_at' => 'datetime',
-        ];
-    }
-
-    /**
-     * Get all of the translations for the Sector
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function translations(): HasMany
-    {
-        return $this->hasMany(SectorTranslation::class, foreignKey: 'sector_id', localKey: 'id');
-    }
-
-
-    public function categories(): HasMany
-    {
-        // العلاقة المباشرة مع الفئات
-        return $this->hasMany(Category::class, 'sector_id');
-    }
-
-    public function posts()
-    {
-        return $this->hasManyThrough(
-            Post::class,
-            Category::class,
-            'sector_id',
-            'id',
-            'id',
-            'id'
-        )
-            ->leftJoin('category_post', 'posts.id', '=', 'category_post.post_id')
-            ->whereColumn('categories.id', 'category_post.category_id')
-            ->select('posts.*');
-        // )->join('category_post', 'posts.id', '=', 'category_post.post_id')
-        //     ->whereColumn('categories.id', 'category_post.category_id')
-        //     ->select('posts.*');
     }
 }

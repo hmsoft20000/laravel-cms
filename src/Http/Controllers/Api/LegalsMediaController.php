@@ -14,40 +14,38 @@ use Illuminate\Http\Response;
 
 class LegalsMediaController extends Controller
 {
+    protected string|null $type = null;
     public function __construct(
         private readonly MediaRepositoryInterface $repository,
-    ) {}
+    ) {
+        $this->type = request()->route('type');
+    }
 
-    /**
-     * Get the legal model instance based on the route type
-     */
+    
     private function getLegalModel(): Model
     {
-        $route = request()->route();
-        $routeName = $route->getName();
-        
-        // Extract the legal type from route name (e.g., 'api.legals.aboutUs.media.index' -> 'aboutUs')
-        preg_match('/api\.legals\.([^.]+)\.media/', $routeName, $matches);
-        $legalType = $matches[1] ?? null;
-        
+        $legalType = $this->type;
+
         if (!$legalType) {
             abort(404, 'Could not determine legal type from route name.');
         }
-        
+
         $modelClass = config("cms.morph_map.{$legalType}");
-        
+
         if (!$modelClass || !class_exists($modelClass)) {
             abort(404, "Model for '{$legalType}' not found in morph_map.");
         }
-        
+
+
         // For legals, we typically have only one instance per type
         // You might need to adjust this logic based on your business requirements
-        $modelInstance = $modelClass::first();
-        
+        $modelInstance = $modelClass::where('type', $legalType)->first();
+
+
         if (!$modelInstance) {
             abort(404, "No {$legalType} record found.");
         }
-        
+
         return $modelInstance;
     }
 
@@ -57,7 +55,7 @@ class LegalsMediaController extends Controller
     public function index(Request $request): JsonResponse
     {
         $owner = $this->getLegalModel();
-        
+
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
             model: new Medium(),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($owner) {
@@ -78,7 +76,7 @@ class LegalsMediaController extends Controller
     public function store(UploadMediaRequest $request): JsonResponse
     {
         $owner = $this->getLegalModel();
-        
+
         $media = $this->repository->store($owner, $request->validated());
 
         return successResponse(
@@ -94,7 +92,7 @@ class LegalsMediaController extends Controller
     public function show(Medium $medium): JsonResponse
     {
         $owner = $this->getLegalModel();
-        
+
         // Check if the media belongs to the correct owner
         if ($medium->owner_type != $owner->getMorphClass() || $medium->owner_id != $owner->id) {
             abort(404);
@@ -112,7 +110,7 @@ class LegalsMediaController extends Controller
     public function update(Request $request, Medium $medium): JsonResponse
     {
         $owner = $this->getLegalModel();
-        
+
         // Check if the media belongs to the correct owner
         if ($medium->owner_type != $owner->getMorphClass() || $medium->owner_id != $owner->id) {
             abort(404);
@@ -132,7 +130,7 @@ class LegalsMediaController extends Controller
     public function destroy(Medium $medium): JsonResponse
     {
         $owner = $this->getLegalModel();
-        
+
         // Check if the media belongs to the correct owner
         if ($medium->owner_type != $owner->getMorphClass() || $medium->owner_id != $owner->id) {
             abort(404);
@@ -151,7 +149,7 @@ class LegalsMediaController extends Controller
     public function reorder(UpdateMediaAllRequest $request): JsonResponse
     {
         $owner = $this->getLegalModel();
-        
+
         $media = $this->repository->updateAll($owner, $request->validated()['media']);
 
         return successResponse(
@@ -166,7 +164,7 @@ class LegalsMediaController extends Controller
     public function updateAll(UpdateMediaAllRequest $request): JsonResponse
     {
         $owner = $this->getLegalModel();
-        
+
         $media = $this->repository->updateAll($owner, $request->validated()['media']);
 
         return successResponse(
