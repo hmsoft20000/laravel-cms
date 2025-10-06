@@ -73,20 +73,20 @@ class SliderRepository implements SliderRepositoryInterface
     public function delete(Model $model): bool
     {
         $model->delete();
-        $this->deleteFile(SLIDER_IMAGE_NAME . '/' . $model->image);
+        $this->deleteFile(cmsImageDir('slider') . '/' . $model->image);
         return true;
     }
 
     public function destroy(Model $model): bool
     {
         $model->forceDelete();
-        $this->deleteFile(SLIDER_IMAGE_NAME . '/' . $model->image);
+        $this->deleteFile(cmsImageDir('slider') . '/' . $model->image);
         return true;
     }
 
     public function proceedImage($file, string|null $oldFileName = null): bool|string
     {
-        $folder = SLIDER_IMAGE_NAME;
+        $folder = cmsImageDir('slider');
         return $oldFileName
             ? $this->updateFile("$folder/", $oldFileName, $file)
             : $this->upload("$folder/", $file);
@@ -94,7 +94,7 @@ class SliderRepository implements SliderRepositoryInterface
 
     public function proceedImageDelete($file)
     {
-        return $this->deleteFile(SLIDER_IMAGE_NAME . '/' . $file);
+        return $this->deleteFile(cmsImageDir('slider') . '/' . $file);
     }
 
 

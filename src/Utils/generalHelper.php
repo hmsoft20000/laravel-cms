@@ -136,11 +136,12 @@ if (!function_exists('myPaginate')) {
 
     function myPaginate(
         $items,
-        $perPage = DEFAULT_DATA_LIMIT,
+        $perPage = null,
         $page = null,
         $baseUrl = null,
         $options = []
     ) {
+        $perPage = $perPage ?? cmsPagination('default_data_limit');
         $items = $items instanceof Collection ?
             $items : Collection::make($items);
 
@@ -171,5 +172,71 @@ if (!function_exists('myStripTags')) {
     function myStripTags($html)
     {
         return  strip_tags(str_replace('&nbsp;', ' ', $html));
+    }
+}
+
+if (!function_exists('cmsConfig')) {
+    /**
+     * Get CMS configuration value with dot notation support.
+     * 
+     * @param string $key The configuration key (e.g., 'pagination.default_data_limit')
+     * @param mixed $default Default value if key doesn't exist
+     * @return mixed
+     */
+    function cmsConfig($key, $default = null)
+    {
+        return config("cms_constants.{$key}", $default);
+    }
+}
+
+if (!function_exists('cmsImageDir')) {
+    /**
+     * Get CMS image directory name for a specific type.
+     * 
+     * @param string $type The image type (e.g., 'users', 'blog', 'portfolio')
+     * @return string
+     */
+    function cmsImageDir($type)
+    {
+        return cmsConfig("image_directories.{$type}", $type);
+    }
+}
+
+if (!function_exists('cmsPagination')) {
+    /**
+     * Get CMS pagination setting.
+     * 
+     * @param string $key The pagination key ('default_data_limit' or 'default_page')
+     * @return mixed
+     */
+    function cmsPagination($key)
+    {
+        return cmsConfig("pagination.{$key}");
+    }
+}
+
+if (!function_exists('cmsFileSetting')) {
+    /**
+     * Get CMS file setting.
+     * 
+     * @param string $key The file setting key
+     * @return mixed
+     */
+    function cmsFileSetting($key)
+    {
+        return cmsConfig("files.{$key}");
+    }
+}
+
+if (!function_exists('cmsContentSetting')) {
+    /**
+     * Get CMS content setting.
+     * 
+     * @param string $key The content setting key
+     * @return mixed
+     */
+    function cmsContentSetting($key)
+    {
+        return cmsConfig("content.{$key}");
     }
 }

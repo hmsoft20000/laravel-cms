@@ -32,11 +32,13 @@ class DynamicFilterData extends Data
         public ?object $advanceFilter = null,
         public array|Collection $sorting = [],
         public string $page = '1',
-        public string $perPage = DEFAULT_DATA_LIMIT,
+        public string|null $perPage = null,
         public  $extraOperation = null,
         public  $beforeOperation = null,
         public  $globaleFilterExtraOperation = null,
         public ?string $fields = null,
         public PaginationFormateEnum $paginationFormate = PaginationFormateEnum::normal
-    ) {}
+    ) {
+        $this->perPage = $this->perPage ?? (string) cmsPagination('default_data_limit');
+    }
 }

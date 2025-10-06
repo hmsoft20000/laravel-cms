@@ -99,11 +99,6 @@ class RepositoryServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
-            \HMsoft\Cms\Repositories\Contracts\Organization\OrganizationsRolesRepositoryInterface::class,
-            \HMsoft\Cms\Repositories\Eloquent\Organization\OrganizationsRolesRepository::class
-        );
-
-        $this->app->bind(
             \HMsoft\Cms\Repositories\Contracts\LegalRepositoryInterface::class,
             \HMsoft\Cms\Repositories\Eloquent\LegalRepository::class
         );

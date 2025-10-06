@@ -51,6 +51,12 @@ class CmsServiceProvider extends ServiceProvider
             'cms_settings_schema'
         );
 
+        // دمج ملف ثوابت الإعدادات
+        $this->mergeConfigFrom(
+            __DIR__ . '/../../config/cms_constants.php',
+            'cms_constants'
+        );
+
         // تسجيل كل الـ Providers المتخصصة
         foreach ($this->providers as $provider) {
             $this->app->register($provider);
@@ -76,6 +82,7 @@ class CmsServiceProvider extends ServiceProvider
         $this->publishes([
             // The source file in your package
             __DIR__ . '/../../config/cms.php' => config_path('cms.php'),
+            __DIR__ . '/../../config/cms_constants.php' => config_path('cms_constants.php'),
         ], 'cms-config'); // <-- The tag must match exactly
 
         $this->publishes([
