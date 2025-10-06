@@ -240,3 +240,122 @@ if (!function_exists('cmsContentSetting')) {
         return cmsConfig("content.{$key}");
     }
 }
+
+if (!function_exists('addCustomRelation')) {
+    /**
+     * Add a custom relationship to a CMS model.
+     * 
+     * @param string $modelClass The model class name
+     * @param string $relationName The relationship name
+     * @param array $config The relationship configuration
+     * @return void
+     */
+    function addCustomRelation(string $modelClass, string $relationName, array $config)
+    {
+        $customRelations = config('cms.custom_relations', []);
+        $customRelations[$modelClass][$relationName] = $config;
+        config(['cms.custom_relations' => $customRelations]);
+        
+        // Add the relation to the model if it's already loaded
+        if (class_exists($modelClass)) {
+            $modelClass::addCustomRelation($relationName, $config);
+        }
+    }
+}
+
+if (!function_exists('hasCustomRelation')) {
+    /**
+     * Check if a model has a custom relationship.
+     * 
+     * @param string $modelClass The model class name
+     * @param string $relationName The relationship name
+     * @return bool
+     */
+    function hasCustomRelation(string $modelClass, string $relationName): bool
+    {
+        $customRelations = config('cms.custom_relations', []);
+        return isset($customRelations[$modelClass][$relationName]);
+    }
+}
+
+if (!function_exists('getCustomRelations')) {
+    /**
+     * Get all custom relationships for a model.
+     * 
+     * @param string $modelClass The model class name
+     * @return array
+     */
+    function getCustomRelations(string $modelClass): array
+    {
+        $customRelations = config('cms.custom_relations', []);
+        return $customRelations[$modelClass] ?? [];
+    }
+}
+
+if (!function_exists('getExtendedModelClass')) {
+    /**
+     * Get the extended model class for a CMS model.
+     * 
+     * @param string $originalModelClass The original CMS model class
+     * @return string|null
+     */
+    function getExtendedModelClass(string $originalModelClass): ?string
+    {
+        $extendedModels = config('cms.extended_models', []);
+        return $extendedModels[$originalModelClass] ?? null;
+    }
+}
+
+if (!function_exists('hasExtendedModel')) {
+    /**
+     * Check if a CMS model has an extended version.
+     * 
+     * @param string $originalModelClass The original CMS model class
+     * @return bool
+     */
+    function hasExtendedModel(string $originalModelClass): bool
+    {
+        return !is_null(getExtendedModelClass($originalModelClass));
+    }
+}
+
+if (!function_exists('getOriginalModelClass')) {
+    /**
+     * Get the original model class from an extended model.
+     * 
+     * @param string $extendedModelClass The extended model class
+     * @return string|null
+     */
+    function getOriginalModelClass(string $extendedModelClass): ?string
+    {
+        $extendedModels = config('cms.extended_models', []);
+        
+        foreach ($extendedModels as $original => $extended) {
+            if ($extended === $extendedModelClass) {
+                return $original;
+            }
+        }
+        
+        return null;
+    }
+}
+
+if (!function_exists('registerExtendedModel')) {
+    /**
+     * Register an extended model for a CMS model.
+     * 
+     * @param string $originalModelClass The original CMS model class
+     * @param string $extendedModelClass The extended model class
+     * @return void
+     */
+    function registerExtendedModel(string $originalModelClass, string $extendedModelClass): void
+    {
+        $extendedModels = config('cms.extended_models', []);
+        $extendedModels[$originalModelClass] = $extendedModelClass;
+        config(['cms.extended_models' => $extendedModels]);
+        
+        // Bind the extended model in the container
+        app()->bind($originalModelClass, $extendedModelClass);
+        app()->bind($extendedModelClass, $extendedModelClass);
+    }
+}

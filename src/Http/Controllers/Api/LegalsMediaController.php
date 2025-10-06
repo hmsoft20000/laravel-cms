@@ -36,9 +36,11 @@ class LegalsMediaController extends Controller
             abort(404, "Model for '{$legalType}' not found in morph_map.");
         }
 
+
         // For legals, we typically have only one instance per type
         // You might need to adjust this logic based on your business requirements
         $modelInstance = $modelClass::where('type', $legalType)->first();
+
 
         if (!$modelInstance) {
             abort(404, "No {$legalType} record found.");

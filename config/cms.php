@@ -9,7 +9,7 @@ return [
 
     // البادئة العامة لكل مسارات الـ API الخاصة بالحزمة.
     // يمكن للمطور تغييرها لتجنب أي تضارب.
-    'api_prefix' => '',
+    'api_prefix' => 'cms-api',
 
     'locales' => [
         'en' => 'English',
@@ -45,15 +45,39 @@ return [
         'ourMission' => \HMsoft\Cms\Models\Legal\Legal::class,
         'ourVision' => \HMsoft\Cms\Models\Legal\Legal::class,
         'ourStory' => \HMsoft\Cms\Models\Legal\Legal::class,
-        'statistics' => \HMsoft\Cms\Models\Statistics\Statistics::class,
-        'sectors' => \HMsoft\Cms\Models\Sector\Sector::class,
 
         // The developer can add their own models like this:
         'products' => \App\Models\Product::class, // Example for Product model
         'product' => \App\Models\Product::class,   // Alias for products
     ],
 
-
+    /**
+     * =================================================================
+     * Owner Field Mapping
+     * =================================================================
+     * Maps content types to their owner field names.
+     * This allows the frontend to send different field names (like portfolio_id, blog_id)
+     * while the backend expects owner_id for polymorphic relationships.
+     */
+    'owner_field_mapping' => [
+        'portfolios' => 'portfolio_id',
+        'blogs' => 'blog_id',
+        'posts' => 'post_id',
+        'services' => 'service_id',
+        'legals' => 'legal_id',
+        'sponsors' => 'sponsor_id',
+        'partners' => 'partner_id',
+        'aboutUs' => 'legal_id',
+        'privacyPolicy' => 'legal_id',
+        'termsOfService' => 'legal_id',
+        'termOfUse' => 'legal_id',
+        'ourValues' => 'legal_id',
+        'ourHistory' => 'legal_id',
+        'ourMission' => 'legal_id',
+        'ourVision' => 'legal_id',
+        'ourStory' => 'legal_id',
+        'products' => 'product_id', // For Product model
+    ],
 
     /**
      * =================================================================
@@ -65,7 +89,6 @@ return [
         'AuthController'             => \HMsoft\Cms\Http\Controllers\Api\AuthController::class,
         'PostController'             => \HMsoft\Cms\Http\Controllers\Api\PostController::class,
         'MediaController'            => \HMsoft\Cms\Http\Controllers\Api\MediaController::class,
-        'LegalsMediaController'      => \HMsoft\Cms\Http\Controllers\Api\LegalsMediaController::class,
         'CategoryController'         => \HMsoft\Cms\Http\Controllers\Api\CategoryController::class,
         'AttributeController'        => \HMsoft\Cms\Http\Controllers\Api\AttributeController::class,
         'FeatureController'          => \HMsoft\Cms\Http\Controllers\Api\FeatureController::class,
@@ -85,7 +108,6 @@ return [
         'TeamController'             => \HMsoft\Cms\Http\Controllers\Api\TeamController::class,
         'StatisticsController'       => \HMsoft\Cms\Http\Controllers\Api\StatisticsController::class,
         'LanguageController'         => \HMsoft\Cms\Http\Controllers\Api\LanguageController::class,
-        'NestedPostController'       => \HMsoft\Cms\Http\Controllers\Api\NestedPostController::class,
     ],
 
     /**
@@ -95,168 +117,132 @@ return [
      * all routes are separated into different files and can be controlled.
      */
     'routes' => [
-
-        /*
-        * =================================================================
-         * Organizations Modules
-         * =================================================================
-         * please note that the prefix is the same as the type
-         * the binding name is the same as the type
-         * the media is the same as the type
-         * the options are the same as the type
-        */
-        'sponsor' => [
+        // auth module
+        'auth' => [
             'enabled' => true,
-            'file' => 'organizations.php',
-            'prefix' => 'sponsors',
+            'file' => 'auth.php',
+            'prefix' => 'auth',
             'middleware' => ['api'],
-            'as' => 'api.sponsors.',
-            'options' => [
-                'type' => 'sponsor',
-                'binding_name' => 'sponsor'
-            ],
+            'as' => 'api.auth.',
         ],
 
-        'partner' => [
-            'enabled' => true,
-            'file' => 'organizations.php',
-            'prefix' => 'partners',
-            'middleware' => ['api'],
-            'as' => 'api.partners.',
-            'options' => [
-                'type' => 'partner',
-                'binding_name' => 'partner'
-            ],
-        ],
-
-
-        /*
-        * =================================================================
-         * Portfolio Modules
-         * =================================================================
-         * please note that the prefix is the same as the type
-         * the binding name is the same as the type
-         * the media is the same as the type
-         * the options are the same as the type
-        */
+        // reusable content modules
         'portfolio' => [
             'enabled' => true,
-            'file' => 'content.php',
+            'file' => 'portfolio.php',
             'prefix' => 'portfolios',
-            'middleware' => ['api'],
+            'middleware' => ['api', 'auth:sanctum'],
             'as' => 'api.portfolios.',
-            'options' => [
-                'type' => 'portfolio',
-                'binding_name' => 'post'
-            ],
+            'options' => ['type' => 'portfolio'],
         ],
         'portfolio-category' => [
             'enabled' => true,
             'file' => 'category.php',
             'prefix' => '',
-            'middleware' => ['api'],
-            'as' => 'api.',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.category-portfolios.',
             'options' => [
                 'type' => 'portfolio',
             ],
         ],
         'portfolio-attributes' => [
             'enabled' => true,
-            'file' => 'attribute.php', // <-- use the general attribute template file
-            'prefix' => '', // <-- empty because the prefix is built dynamically
-            'middleware' => ['api'],
-            'as' => 'api.', // it will be merged with the route name
+            'file' => 'attribute.php',
+            'prefix' => '',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.attributes-portfolios.',
             'options' => [
-                // this is the most important part that defines the scope
                 'type' => 'portfolio',
             ],
         ],
-        'portfolio-plans' => [
-            'enabled' => true,
-            'file' => 'plans.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
 
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'portfolios' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'portfolios' في morph_map.
-             */
-            'as' => 'api.portfolios.plans.', // الـ binding سيقرأ 'portfolios' من هنا
-
-            'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف plans.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /portfolios/{owner}/plans
-                 */
-                'owner_url_name' => 'portfolios',
-            ],
-        ],
+        //start  polymorphic
         'portfolio-features' => [
             'enabled' => true,
-            'file' => 'features.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
-
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'portfolios' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'portfolios' في morph_map.
-             */
-            'as' => 'api.portfolios.features.', // الـ binding سيقرأ 'portfolios' من هنا
-
+            'file' => 'features.php',
+            'prefix' => '',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.features-portfolios.',
             'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف features.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /portfolios/{owner}/features
-                 */
-                'owner_url_name' => 'portfolios',
+                'type' => 'portfolios',
+                'owner_type' => 'post',
+                'owner_url_prefix' => 'portfolio',
+                'owner_url_name' => 'portfolio',
             ],
         ],
-        'portfolio-downloads' => [
+        'blog-features' => [
             'enabled' => true,
-            'file' => 'downloads.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
-
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'portfolios' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'portfolios' في morph_map.
-             */
-            'as' => 'api.portfolios.downloads.', // الـ binding سيقرأ 'portfolios' من هنا
-
+            'file' => 'features.php',
+            'prefix' => '',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.features-blogs.',
             'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف downloads.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /portfolios/{owner}/downloads
-                 */
-                'owner_url_name' => 'portfolios',
+                'type' => 'blogs',
+                'owner_type' => 'post',
+                'owner_url_prefix' => 'blog',
+                'owner_url_name' => 'blog',
             ],
         ],
-        'portfolio-faqs' => [
+        'service-features' => [
             'enabled' => true,
-            'file' => 'faqs.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
-
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'portfolios' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'portfolios' في morph_map.
-             */
-            'as' => 'api.portfolios.faqs.', // الـ binding سيقرأ 'portfolios' من هنا
-
+            'file' => 'features.php',
+            'prefix' => '',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.features-services.',
             'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف faqs.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /portfolios/{owner}/faqs
-                 */
-                'owner_url_name' => 'portfolios',
+                'type' => 'services',
+                'owner_type' => 'post',
+                'owner_url_prefix' => 'service',
+                'owner_url_name' => 'service',
+            ],
+        ],
+        'product-features' => [
+            'enabled' => true,
+            'file' => 'features.php',
+            'prefix' => '',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.features-products.',
+            'options' => [
+                'type' => 'products',
+                'owner_type' => 'product', // Different from 'post'
+                'owner_url_prefix' => 'product',
+                'owner_url_name' => 'product',
+            ],
+        ],
+        'portfolio-download' => [
+            'enabled' => true,
+            'file' => 'download.php',
+            'prefix' => '',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.download-portfolios.',
+            'options' => [
+                'owner_type' => 'portfolio',
+                'owner_url_prefix' => 'portfolio',
+                'owner_url_name' => 'portfolio',
+            ],
+        ],
+        'portfolio-faq' => [
+            'enabled' => true,
+            'file' => 'faq.php',
+            'prefix' => '',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.faq-portfolios.',
+            'options' => [
+                'owner_type' => 'portfolio',
+                'owner_url_prefix' => 'portfolio',
+                'owner_url_name' => 'portfolio',
+            ],
+        ],
+        'portfolio-plan' => [
+            'enabled' => true,
+            'file' => 'plan.php',
+            'prefix' => '',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.plan-portfolios.',
+            'options' => [
+                'owner_type' => 'portfolio',
+                'owner_url_prefix' => 'portfolio',
+                'owner_url_name' => 'portfolio',
             ],
         ],
         'portfolio-media' => [
@@ -264,703 +250,124 @@ return [
             'file' => 'media.php',
             'prefix' => '',
             'middleware' => ['api', 'auth:sanctum'],
-            'as' => 'api.portfolios.media.',
+            'as' => 'api.media-portfolios.',
             'options' => [
-                'owner_url_name' => 'portfolios',
-            ],
-        ],
-        'portfolio-blogs' => [
-            'enabled' => true,
-            'file' => 'nested_content.php',
-            'prefix' => 'portfolios/{owner}/blogs',
-            'middleware' => ['api'],
-            'as' => 'api.portfolios.blogs.',
-            'options' => [
-                'type' => 'blog',
-            ],
-        ],
-        'portfolio-services' => [
-            'enabled' => true,
-            'file' => 'nested_content.php',
-            'prefix' => 'portfolios/{owner}/services',
-            'middleware' => ['api'],
-            'as' => 'api.portfolios.services.',
-            'options' => [
-                'type' => 'service',
+                'owner_type' => 'portfolio',
+                'owner_url_prefix' => 'portfolio',
+                'owner_url_name' => 'portfolio',
             ],
         ],
 
+        'media' => [
+            'enabled' => true,
+            'file' => 'media.php',
+            // The route prefix is polymorphic
+            'prefix' => '',
+            'middleware' => ['api'],
+            'as' => 'api.media.',
+        ],
+        // end polymorphic
 
-        /*
-        * =================================================================
-         * Legal Pages Modules
-         * =================================================================
-         * please note that the prefix is the same as the type
-         * the binding name is the same as the type
-         * the media is the same as the type
-         * the options are the same as the type
-         * **important:** it must match 'aboutUs' with the key in morph_map, 'privacyPolicy' with the key in morph_map, 'termsOfService' with the key in morph_map, 'termOfUse' with the key in morph_map, 'ourMission' with the key in morph_map, 'ourVision' with the key in morph_map, 'ourStory' with the key in morph_map, 'ourHistory' with the key in morph_map, 'ourValues' with the key in morph_map
-        */
-        'legal' => [
-            'enabled' => true,
-            'file' => 'legals.php',
-            'prefix' => 'legals',
-            'middleware' => ['api'],
-            'as' => 'api.legals.',
-            'options' => ['type' => 'legal'],
-        ],
-        // about us
-        'aboutUs' => [
-            'enabled' => true,
-            'file' => 'legals.php',
-            'prefix' => 'legals/aboutUs',
-            'middleware' => ['api'],
-            'as' => 'api.legals.aboutUs.',
-            'options' => [
-                'type' => 'aboutUs'
-            ],
-        ],
-        'aboutUs-media' => [
-            'enabled' => true,
-            'file' => 'media.php', // <-- use the general media template file
-            // 'prefix' => 'legals/aboutUs',
-            'prefix' => 'legals/aboutUs',
-            'middleware' => ['api'],
-            'as' => 'api.legals.aboutUs.media.', // <-- **important:** it must match 'aboutUs' with the key in morph_map
-            'options' => [
-                'type' => 'aboutUs', // <-- to build the path: /api/legals/aboutUs/media
-            ],
-        ],
-        'aboutUs-features' => [
-            'enabled' => true,
-            'file' => 'features.php', // <-- استخدام ملف القالب العام للميزات
-            'prefix' => '/legals',
-            'middleware' => ['api'],
-            'as' => 'api.legals.aboutUs.features.', // <-- للتوافق مع morph_map
-            'options' => [
-                'owner_url_name' => 'aboutUs', // <-- لبناء المسار: /api/about-us/{owner}/features
-            ],
-        ],
-        // privacy policy
-        'privacyPolicy' => [
-            'enabled' => true,
-            'file' => 'legals.php',
-            'prefix' => 'legals/privacyPolicy',
-            'middleware' => ['api'],
-            'as' => 'api.legals.privacyPolicy.',
-            'options' => [
-                'type' => 'privacyPolicy'
-            ],
-        ],
-        'privacyPolicy-media' => [
-            'enabled' => true,
-            'file' => 'media.php', // <-- use the general media template file
-            'prefix' => 'legals/privacyPolicy',
-            'middleware' => ['api'],
-            'as' => 'api.legals.privacyPolicy.media.', // <-- **important:** it must match 'privacyPolicy' with the key in morph_map
-            'options' => [
-                'type' => 'privacyPolicy', // <-- to build the path: /api/legals/privacyPolicy/media
-            ],
-        ],
-        'privacyPolicy-features' => [
-            'enabled' => true,
-            'file' => 'features.php', // <-- استخدام ملف القالب العام للميزات
-            'prefix' => '/legals',
-            'middleware' => ['api'],
-            'as' => 'api.legals.privacyPolicy.features.', // <-- للتوافق مع morph_map
-            'options' => [
-                'owner_url_name' => 'privacyPolicy', // <-- لبناء المسار: /api/privacy-policy/{owner}/features
-            ],
-        ],
-        // terms of service
-        'termsOfService' => [
-            'enabled' => true,
-            'file' => 'legals.php',
-            'prefix' => 'legals/termsOfService',
-            'middleware' => ['api'],
-            'as' => 'api.legals.termsOfService.',
-            'options' => [
-                'type' => 'termsOfService'
-            ],
-        ],
-        'termsOfService-media' => [
-            'enabled' => true,
-            'file' => 'media.php', // <-- use the general media template file
-            'prefix' => 'legals/termsOfService',
-            'middleware' => ['api'],
-            'as' => 'api.legals.termsOfService.media.', // <-- **important:** it must match 'termsOfService' with the key in morph_map
-            'options' => [
-                'type' => 'termsOfService', // <-- to build the path: /api/legals/termsOfService/media
-            ],
-        ],
-        'termsOfService-features' => [
-            'enabled' => true,
-            'file' => 'features.php', // <-- استخدام ملف القالب العام للميزات
-            'prefix' => '/legals',
-            'middleware' => ['api'],
-            'as' => 'api.legals.termsOfService.features.', // <-- للتوافق مع morph_map
-            'options' => [
-                'owner_url_name' => 'termsOfService', // <-- لبناء المسار: /api/terms-of-service/{owner}/features
-            ],
-        ],
-        // term of use
-        'termOfUse' => [
-            'enabled' => true,
-            'file' => 'legals.php',
-            'prefix' => 'legals/termOfUse',
-            'middleware' => ['api'],
-            'as' => 'api.legals.termOfUse.',
-            'options' => [
-                'type' => 'termOfUse'
-            ],
-        ],
-        'termOfUse-media' => [
-            'enabled' => true,
-            'file' => 'media.php', // <-- use the general media template file
-            'prefix' => 'legals/termOfUse',
-            'middleware' => ['api'],
-            'as' => 'api.legals.termOfUse.media.', // <-- **important:** it must match 'termOfUse' with the key in morph_map
-            'options' => [
-                'type' => 'termOfUse', // <-- to build the path: /api/legals/termOfUse/media
-            ],
-        ],
-        'termOfUse-features' => [
-            'enabled' => true,
-            'file' => 'features.php', // <-- استخدام ملف القالب العام للميزات
-            'prefix' => '/legals',
-            'middleware' => ['api'],
-            'as' => 'api.legals.termOfUse.features.', // <-- للتوافق مع morph_map
-            'options' => [
-                'owner_url_name' => 'termOfUse', // <-- لبناء المسار: /api/term-of-use/{owner}/features
-            ],
-        ],
-        // our mission
-        'ourMission' => [
-            'enabled' => true,
-            'file' => 'legals.php',
-            'prefix' => 'legals/ourMission',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourMission.',
-            'options' => [
-                'type' => 'ourMission'
-            ],
-        ],
-        'ourMission-media' => [
-            'enabled' => true,
-            'file' => 'media.php', // <-- use the general media template file
-            'prefix' => 'legals/ourMission',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourMission.media.', // <-- **important:** it must match 'ourMission' with the key in morph_map
-            'options' => [
-                'type' => 'ourMission', // <-- to build the path: /api/legals/ourMission/media
-            ],
-        ],
-        'ourMission-features' => [
-            'enabled' => true,
-            'file' => 'features.php', // <-- استخدام ملف القالب العام للميزات
-            'prefix' => '/legals',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourMission.features.', // <-- للتوافق مع morph_map
-            'options' => [
-                'owner_url_name' => 'ourMission', // <-- لبناء المسار: /api/our-mission/{owner}/features
-            ],
-        ],
-        // our vision
-        'ourVision' => [
-            'enabled' => true,
-            'file' => 'legals.php',
-            'prefix' => 'legals/ourVision',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourVision.',
-            'options' => [
-                'type' => 'ourVision'
-            ],
-        ],
-        'ourVision-media' => [
-            'enabled' => true,
-            'file' => 'media.php', // <-- use the general media template file
-            'prefix' => 'legals/ourVision',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourVision.media.', // <-- **important:** it must match 'ourVision' with the key in morph_map
-            'options' => [
-                'type' => 'ourVision', // <-- to build the path: /api/legals/ourVision/media
-            ],
-        ],
-        'ourVision-features' => [
-            'enabled' => true,
-            'file' => 'features.php', // <-- استخدام ملف القالب العام للميزات
-            'prefix' => '/legals',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourVision.features.', // <-- للتوافق مع morph_map
-            'options' => [
-                'owner_url_name' => 'ourVision', // <-- لبناء المسار: /api/our-vision/{owner}/features
-            ],
-        ],
-        // our story
-        'ourStory' => [
-            'enabled' => true,
-            'file' => 'legals.php',
-            'prefix' => 'legals/ourStory',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourStory.',
-            'options' => [
-                'type' => 'ourStory'
-            ],
-        ],
-        'ourStory-media' => [
-            'enabled' => true,
-            'file' => 'media.php', // <-- use the general media template file
-            'prefix' => 'legals/ourStory',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourStory.media.', // <-- **important:** it must match 'ourStory' with the key in morph_map
-            'options' => [
-                'type' => 'ourStory', // <-- to build the path: /api/legals/ourStory/media
-            ],
-        ],
-        'ourStory-features' => [
-            'enabled' => true,
-            'file' => 'features.php', // <-- استخدام ملف القالب العام للميزات
-            'prefix' => '/legals',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourStory.features.', // <-- للتوافق مع morph_map
-            'options' => [
-                'owner_url_name' => 'ourStory', // <-- لبناء المسار: /api/our-story/{owner}/features
-            ],
-        ],
-        // our history
-        'ourHistory' => [
-            'enabled' => true,
-            'file' => 'legals.php',
-            'prefix' => 'legals/ourHistory',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourHistory.',
-            'options' => [
-                'type' => 'ourHistory'
-            ],
-        ],
-        'ourHistory-media' => [
-            'enabled' => true,
-            'file' => 'media.php', // <-- use the general media template file
-            'prefix' => 'legals/ourHistory',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourHistory.media.', // <-- **important:** it must match 'ourHistory' with the key in morph_map
-            'options' => [
-                'type' => 'ourHistory', // <-- to build the path: /api/legals/ourHistory/media
-            ],
-        ],
-        'ourHistory-features' => [
-            'enabled' => true,
-            'file' => 'features.php', // <-- استخدام ملف القالب العام للميزات
-            'prefix' => '/legals',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourHistory.features.', // <-- للتوافق مع morph_map
-            'options' => [
-                'owner_url_name' => 'ourHistory', // <-- لبناء المسار: /api/our-history/{owner}/features
-            ],
-        ],
-        // our values
-        'ourValues' => [
-            'enabled' => true,
-            'file' => 'legals.php',
-            'prefix' => 'legals/ourValues',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourValues.',
-            'options' => [
-                'type' => 'ourValues'
-            ],
-        ],
-        'ourValues-media' => [
-            'enabled' => true,
-            'file' => 'media.php', // <-- use the general media template file
-            'prefix' => 'legals/ourValues',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourValues.media.', // <-- **important:** it must match 'ourValues' with the key in morph_map
-            'options' => [
-                'type' => 'ourValues', // <-- to build the path: /api/legals/ourValues/media
-            ],
-        ],
-        'ourValues-features' => [
-            'enabled' => true,
-            'file' => 'features.php', // <-- استخدام ملف القالب العام للميزات
-            'prefix' => '/legals',
-            'middleware' => ['api'],
-            'as' => 'api.legals.ourValues.features.', // <-- للتوافق مع morph_map
-            'options' => [
-                'owner_url_name' => 'ourValues', // <-- لبناء المسار: /api/our-values/{owner}/features
-            ],
-        ],
-
-
-
-
-
-
-        /*
-        * =================================================================
-         * Blog Modules
-         * =================================================================
-         * please note that the prefix is the same as the type
-         * the binding name is the same as the type
-         * the media is the same as the type
-         * the options are the same as the type
-        */
         'blog' => [
             'enabled' => true,
             'file' => 'content.php',
             'prefix' => 'blogs',
-            'middleware' => ['api'],
+            'middleware' => ['api', 'auth:sanctum'],
             'as' => 'api.blogs.',
-            'options' => [
-                'type' => 'blog',
-                'binding_name' => 'post'
-            ],
-        ],
-        'blog-category' => [
-            'enabled' => true,
-            'file' => 'category.php',
-            'prefix' => '',
-            'middleware' => ['api'],
-            'as' => 'api.',
-            'options' => [
-                'type' => 'blog',
-            ],
-        ],
-        'blog-attributes' => [
-            'enabled' => true,
-            'file' => 'attribute.php', // <-- use the general attribute template file
-            'prefix' => '', // <-- empty because the prefix is built dynamically
-            'middleware' => ['api'],
-            'as' => 'api.', // it will be merged with the route name
-            'options' => [
-                // this is the most important part that defines the scope
-                'type' => 'blog',
-            ],
-        ],
-        'blog-plans' => [
-            'enabled' => true,
-            'file' => 'plans.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
-
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'blogs' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'blogs' في morph_map.
-             */
-            'as' => 'api.blogs.plans.', // الـ binding سيقرأ 'blogs' من هنا
-
-            'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف plans.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /blogs/{owner}/plans
-                 */
-                'owner_url_name' => 'blogs',
-            ],
-        ],
-        'blog-features' => [
-            'enabled' => true,
-            'file' => 'features.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
-
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'blogs' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'blogs' في morph_map.
-             */
-            'as' => 'api.blogs.features.', // الـ binding سيقرأ 'blogs' من هنا
-
-            'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف features.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /blogs/{owner}/features
-                 */
-                'owner_url_name' => 'blogs',
-            ],
-        ],
-        'blog-downloads' => [
-            'enabled' => true,
-            'file' => 'downloads.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
-
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'blogs' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'blogs' في morph_map.
-             */
-            'as' => 'api.blogs.downloads.', // الـ binding سيقرأ 'blogs' من هنا
-
-            'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف downloads.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /blogs/{owner}/downloads
-                 */
-                'owner_url_name' => 'blogs',
-            ],
-        ],
-        'blog-faqs' => [
-            'enabled' => true,
-            'file' => 'faqs.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
-
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'blogs' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'blogs' في morph_map.
-             */
-            'as' => 'api.blogs.faqs.', // الـ binding سيقرأ 'blogs' من هنا
-
-            'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف faqs.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /blogs/{owner}/faqs
-                 */
-                'owner_url_name' => 'blogs',
-            ],
+            'options' => ['type' => 'blog'],
         ],
         'blog-media' => [
             'enabled' => true,
             'file' => 'media.php',
             'prefix' => '',
             'middleware' => ['api', 'auth:sanctum'],
-            'as' => 'api.blogs.media.',
+            'as' => 'api.media-blogs.',
             'options' => [
-                'owner_url_name' => 'blogs',
+                'owner_type' => 'blogs',
+                'owner_url_prefix' => 'blog',
+                'owner_url_name' => 'blog',
             ],
         ],
-
-
-        // service
         'service' => [
             'enabled' => true,
             'file' => 'content.php',
             'prefix' => 'services',
-            'middleware' => ['api'],
+            'middleware' => ['api', 'auth:sanctum'],
             'as' => 'api.services.',
-            'options' => [
-                'type' => 'service',
-                'binding_name' => 'post'
-            ],
-        ],
-        'service-category' => [
-            'enabled' => true,
-            'file' => 'category.php',
-            'prefix' => '',
-            'middleware' => ['api'],
-            'as' => 'api.',
-            'options' => [
-                'type' => 'service',
-            ],
-        ],
-        'service-attributes' => [
-            'enabled' => true,
-            'file' => 'attribute.php', // <-- use the general attribute template file
-            'prefix' => '', // <-- empty because the prefix is built dynamically
-            'middleware' => ['api'],
-            'as' => 'api.', // it will be merged with the route name
-            'options' => [
-                // this is the most important part that defines the scope
-                'type' => 'service',
-            ],
-        ],
-        'service-features' => [
-            'enabled' => true,
-            'file' => 'features.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
-
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'services' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'services' في morph_map.
-             */
-            'as' => 'api.services.features.', // الـ binding سيقرأ 'services' من هنا
-
-            'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف features.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /services/{owner}/features
-                 */
-                'owner_url_name' => 'services',
-            ],
-        ],
-        'service-downloads' => [
-            'enabled' => true,
-            'file' => 'downloads.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
-
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'services' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'services' في morph_map.
-             */
-            'as' => 'api.services.downloads.', // الـ binding سيقرأ 'services' من هنا
-
-            'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف downloads.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /services/{owner}/downloads
-                 */
-                'owner_url_name' => 'services',
-            ],
-        ],
-        'service-faqs' => [
-            'enabled' => true,
-            'file' => 'faqs.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
-
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'services' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'services' في morph_map.
-             */
-            'as' => 'api.services.faqs.', // الـ binding سيقرأ 'services' من هنا
-
-            'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف faqs.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /services/{owner}/faqs
-                 */
-                'owner_url_name' => 'services',
-            ],
-        ],
-        'service-plans' => [
-            'enabled' => true,
-            'file' => 'plans.php', // نفس ملف القالب العام
-            'prefix' => '', // لا نحتاج بادئة هنا
-            'middleware' => ['api'],
-
-            /**
-             * هذا هو الجزء الأهم الآن.
-             * الـ Route Model Binding الذكي سيقرأ 'services' من هذا الاسم
-             * ليعرف أنه يجب أن يبحث عن نموذج مرتبط بـ 'services' في morph_map.
-             */
-            'as' => 'api.services.plans.', // الـ binding سيقرأ 'services' من هنا
-
-            'options' => [
-                /**
-                 * الخيار الوحيد الذي يحتاجه ملف plans.php الآن
-                 * هو الجزء الأول من عنوان URL.
-                 * سيتم استخدامه لبناء: /services/{owner}/plans
-                 */
-                'owner_url_name' => 'services',
-            ],
+            'options' => ['type' => 'service'],
         ],
         'service-media' => [
             'enabled' => true,
             'file' => 'media.php',
             'prefix' => '',
             'middleware' => ['api', 'auth:sanctum'],
-            'as' => 'api.services.media.',
+            'as' => 'api.media-services.',
             'options' => [
-                'owner_url_name' => 'services',
+                'owner_type' => 'services',
+                'owner_url_prefix' => 'service',
+                'owner_url_name' => 'service',
             ],
         ],
 
-
-        // product
-        'product-features' => [
+        // organizations modules
+        'sponsor' => [
             'enabled' => true,
-            'file' => 'features.php',
-            'prefix' => '',
-            'middleware' => ['api'],
-            'as' => 'api.features-products.',
-            'options' => [
-                'type' => 'products',
-                'owner_type' => 'product',
-                'owner_url_prefix' => 'product',
-                'owner_url_name' => 'product',
-            ],
+            'file' => 'organizations.php',
+            'prefix' => 'sponsors',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.sponsors.',
+            'options' => ['type' => 'sponsor'],
         ],
-        'product-downloads' => [
+        'partner' => [
             'enabled' => true,
-            'file' => 'downloads.php',
-            'prefix' => '',
-            'middleware' => ['api'],
-            'as' => 'api.downloads-products.',
-            'options' => [
-                'type' => 'products',
-                'owner_type' => 'product',
-                'owner_url_prefix' => 'product',
-                'owner_url_name' => 'product',
-            ],
+            'file' => 'organizations.php',
+            'prefix' => 'partners',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.partners.',
+            'options' => ['type' => 'partner'],
         ],
-        'product-faqs' => [
+
+        // legal pages modules
+        'legal' => [
             'enabled' => true,
-            'file' => 'faqs.php',
-            'prefix' => '',
-            'middleware' => ['api'],
-            'as' => 'api.faqs-products.',
-            'options' => [
-                'type' => 'products',
-                'owner_type' => 'product',
-                'owner_url_prefix' => 'product',
-                'owner_url_name' => 'product',
-            ],
+            'file' => 'legals.php',
+            'prefix' => 'legals',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.legals.',
+            'options' => ['type' => 'legal'],
         ],
-        'product-plans' => [
+        'aboutUs' => [
             'enabled' => true,
-            'file' => 'plans.php',
-            'prefix' => '',
-            'middleware' => ['api'],
-            'as' => 'api.plans-products.',
-            'options' => [
-                'type' => 'products',
-                'owner_type' => 'product',
-                'owner_url_prefix' => 'product',
-                'owner_url_name' => 'product',
-            ],
+            'file' => 'legals.php',
+            'prefix' => 'about-us',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.about-us.',
+            'options' => ['type' => 'aboutUs'],
         ],
-
-
-
-
+        'privacyPolicy' => [
+            'enabled' => true,
+            'file' => 'legals.php',
+            'prefix' => 'privacy-policy',
+            'middleware' => ['api', 'auth:sanctum'],
+            'as' => 'api.privacy-policy.',
+            'options' => ['type' => 'privacyPolicy'],
+        ],
+        // ... (you can add other legal pages here)
 
         // authorization and roles module
         'authorization' => [
             'enabled' => true,
             'file' => 'authorization.php',
-            'middleware' => ['api'],
+            'middleware' => ['api', 'auth:sanctum'],
         ],
 
         // miscellaneous routes module
         'others' => [
             'enabled' => true,
             'file' => 'others.php',
-            'middleware' => ['api'],
+            'middleware' => ['api', 'auth:sanctum'],
             'as' => 'api.',
             'prefix' => ''
-        ],
-
-
-        'statistics' => [
-            'enabled' => true,
-            'file' => 'statistics.php',
-            'prefix' => 'statistics',
-            'middleware' => ['api'],
-            'as' => 'api.statistics.',
-            'options' => [],
-        ],
-        'statistics-media' => [
-            'enabled' => true,
-            'file' => 'media.php',
-            'prefix' => '',
-            'middleware' => ['api'],
-            'as' => 'api.statistics.media.', // <-- للتوافق مع morph_map
-            'options' => [
-                'owner_url_name' => 'statistics', // <-- لبناء المسار: /api/statistics/{owner}/media
-            ],
         ],
     ],
 
