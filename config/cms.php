@@ -49,44 +49,10 @@ return [
         'sectors' => \HMsoft\Cms\Models\Sector\Sector::class,
 
         // The developer can add their own models like this:
-        'products' => \App\Models\Product::class, // Example for Product model
-        'product' => \App\Models\Product::class,   // Alias for products
+        // 'products' => \App\Models\Product::class, // Example for Product model
+        // 'product' => \App\Models\Product::class,   // Alias for products
     ],
 
-
-
-    /**
-     * =================================================================
-     * The Customizable Controllers
-     * =================================================================
-     * The developer can change any class here to use their own Controller from their project.
-     */
-    'controllers' => [
-        'AuthController'             => \HMsoft\Cms\Http\Controllers\Api\AuthController::class,
-        'PostController'             => \HMsoft\Cms\Http\Controllers\Api\PostController::class,
-        'MediaController'            => \HMsoft\Cms\Http\Controllers\Api\MediaController::class,
-        'LegalsMediaController'      => \HMsoft\Cms\Http\Controllers\Api\LegalsMediaController::class,
-        'CategoryController'         => \HMsoft\Cms\Http\Controllers\Api\CategoryController::class,
-        'AttributeController'        => \HMsoft\Cms\Http\Controllers\Api\AttributeController::class,
-        'FeatureController'          => \HMsoft\Cms\Http\Controllers\Api\FeatureController::class,
-        'DownloadController'         => \HMsoft\Cms\Http\Controllers\Api\DownloadController::class,
-        'FaqController'              => \HMsoft\Cms\Http\Controllers\Api\FaqController::class,
-        'PlanController'             => \HMsoft\Cms\Http\Controllers\Api\PlanController::class,
-        'ContactUsController'        => \HMsoft\Cms\Http\Controllers\Api\ContactUsController::class,
-        'SectorController'           => \HMsoft\Cms\Http\Controllers\Api\SectorController::class,
-        'OrganizationController'     => \HMsoft\Cms\Http\Controllers\Api\OrganizationController::class,
-        'BusinessSettingController'  => \HMsoft\Cms\Http\Controllers\Api\BusinessSettingController::class,
-        'LegalsController'           => \HMsoft\Cms\Http\Controllers\Api\LegalsController::class,
-        'PagesMetaController'        => \HMsoft\Cms\Http\Controllers\Api\PagesMetaController::class,
-        'PermissionController'       => \HMsoft\Cms\Http\Controllers\Api\PermissionController::class,
-        'RoleController'             => \HMsoft\Cms\Http\Controllers\Api\RoleController::class,
-        'UserPermissionController'   => \HMsoft\Cms\Http\Controllers\Api\UserPermissionController::class,
-        'TestimonialController'      => \HMsoft\Cms\Http\Controllers\Api\TestimonialController::class,
-        'TeamController'             => \HMsoft\Cms\Http\Controllers\Api\TeamController::class,
-        'StatisticsController'       => \HMsoft\Cms\Http\Controllers\Api\StatisticsController::class,
-        'LanguageController'         => \HMsoft\Cms\Http\Controllers\Api\LanguageController::class,
-        'NestedPostController'       => \HMsoft\Cms\Http\Controllers\Api\NestedPostController::class,
-    ],
 
     /**
      * =================================================================
@@ -982,4 +948,62 @@ return [
         //     'enabled' => false, // disable login route
         // ],
     ],
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Extended Models Mapping
+    |--------------------------------------------------------------------------
+    */
+    'extended_models' => [
+        // \HMsoft\Cms\Models\Shared\Category::class => \App\Models\Category::class,
+    ],
+    'allow_full_model_replacement' => false,
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Extended Controllers Mapping
+    |--------------------------------------------------------------------------
+    */
+    'extended_controllers' => [
+        // Example:
+        // \HMsoft\Cms\Http\Controllers\PostController::class => \App\Http\Controllers\CustomPostController::class,
+    ],
+    'allow_full_controller_replacement' => false,
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Extended Resources Mapping
+    |--------------------------------------------------------------------------
+    */
+    'extended_resources' => [
+        // \HMsoft\Cms\Http\Resources\CategoryResource::class => \App\Http\Resources\CustomCategoryResource::class,
+    ],
+    'allow_full_resource_replacement' => false,
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Extended Form Requests Mapping
+    |--------------------------------------------------------------------------
+    */
+    'extended_form_requests' => [
+        // \HMsoft\Cms\Http\Requests\CategoryRequest::class => \App\Http\Requests\CustomCategoryRequest::class,
+    ],
+    'allow_full_form_request_replacement' => false,
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Extended Repositories Mapping
+    |--------------------------------------------------------------------------
+    */
+    'extended_repositories' => [
+        // \HMsoft\Cms\Repositories\Eloquent\PostRepository::class => App\Http\Controllers\Api\TestRepo::class,
+    ],
+    'allow_full_repository_replacement' => false,
+
 ];
