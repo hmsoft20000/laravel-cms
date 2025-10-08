@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 // هذا المتغير $config يأتي من Cms.php وهو يحتوي على 'options'
 $type = $config['options']['type'] ?? $module;
 $bindingName = $config['options']['binding_name'] ?? "";
+$prefix = $config['options']['prefix'] ?? "";
 
 
 
