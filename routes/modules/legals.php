@@ -1,5 +1,6 @@
 <?php
 
+use HMsoft\Cms\Http\Controllers\Api\LegalsController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -7,8 +8,10 @@ use Illuminate\Support\Facades\Route;
 $type = $config['options']['type'] ?? $module;
 
 // تعريف المسارات الأساسية
-Route::get('/', 'index')->name('index')->defaults('type', $type);
-Route::put('/', 'update')->name('update')->defaults('type', $type);
+Route::controller(LegalsController::class)->group(function () use ($type) {
+    Route::get('/', 'index')->name('index')->defaults('type', $type);
+    Route::put('/', 'update')->name('update')->defaults('type', $type);
+});
 
 // تعريف المسارات الفرعية للوسائط (media)
 // Route::prefix('{owner}/media')->name('media.')->group(function () use ($mediaController) {
