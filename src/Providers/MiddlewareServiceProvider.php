@@ -24,8 +24,7 @@ class MiddlewareServiceProvider extends ServiceProvider
 
         // Localization and Config Middleware
         $router->aliasMiddleware('set.locale', \HMsoft\Cms\Http\Middleware\SetLocale::class);
-        $router->aliasMiddleware('set.locale.from.url', \HMsoft\Cms\Http\Middleware\SetLocaleFromUrl::class);
-        $router->aliasMiddleware('set.language', \HMsoft\Cms\Http\Middleware\SetLanguageMiddleware::class);
+        
         $router->aliasMiddleware('set.web_config', \HMsoft\Cms\Http\Middleware\SetWebConfigMiddleware::class);
 
         // // Request Handling Middleware
@@ -37,9 +36,9 @@ class MiddlewareServiceProvider extends ServiceProvider
         $router->aliasMiddleware('custom.sanctum_stateful', \HMsoft\Cms\Http\Middleware\CustomEnsureFrontendRequestsAreStateful::class);
 
         // New isolated auth middleware
-        $router->aliasMiddleware('cms.permission', \HMsoft\Cms\Http\Middleware\CheckPermissionMiddleware::class);
-        $router->aliasMiddleware('cms.role', \HMsoft\Cms\Http\Middleware\CheckRoleMiddleware::class);
-        $router->aliasMiddleware('cms.policy.auth', \HMsoft\Cms\Http\Middleware\PolicyAuthMiddleware::class);
+        // $router->aliasMiddleware('cms.permission', \HMsoft\Cms\Http\Middleware\CheckPermissionMiddleware::class);
+        // $router->aliasMiddleware('cms.role', \HMsoft\Cms\Http\Middleware\CheckRoleMiddleware::class);
+        // $router->aliasMiddleware('cms.policy.auth', \HMsoft\Cms\Http\Middleware\PolicyAuthMiddleware::class);
 
         //        Note: auth:sanctum alias is controlled by the main application
         // to ensure proper decoupling of authentication logic

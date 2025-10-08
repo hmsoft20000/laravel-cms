@@ -1,13 +1,13 @@
 <?php
 
+use HMsoft\Cms\Http\Controllers\Api\FeatureController;
 use Illuminate\Support\Facades\Route;
 
 
-$featureController = cms_controller('FeatureController');
 $ownerUrlName = $config['options']['owner_url_name'];
 
 
-Route::controller($featureController)->group(function () use ($ownerUrlName) {
+Route::controller(FeatureController::class)->group(function () use ($ownerUrlName) {
     Route::get("/{$ownerUrlName}/{owner}/features", 'index')->name('index');
     Route::post("/{$ownerUrlName}/{owner}/features", 'store')->name('store');
     Route::get("/{$ownerUrlName}/{owner}/features/{feature:id}", 'show')->name('show');

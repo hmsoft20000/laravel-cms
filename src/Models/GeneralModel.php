@@ -3,16 +3,14 @@
 namespace HMsoft\Cms\Models;
 
 use HMsoft\Cms\Interfaces\AutoFilterable;
+use HMsoft\Cms\Support\ResolvesExtendedModel;
 use HMsoft\Cms\Traits\General\CURDTrait;
-use HMsoft\Cms\Traits\Relations\CustomRelationsTrait;
-use HMsoft\Cms\Traits\Extendable\ExtendableModelTrait;
 use Illuminate\Database\Eloquent\Model;
 use HMsoft\Cms\Traits\General\IsAutoFilterable;
 
 class GeneralModel extends Model implements AutoFilterable
 {
+    use ResolvesExtendedModel;
     use CURDTrait;
     use IsAutoFilterable;
-    use CustomRelationsTrait;
-    use ExtendableModelTrait;
 }

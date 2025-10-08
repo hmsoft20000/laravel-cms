@@ -4,9 +4,8 @@ namespace HMsoft\Cms\Providers;
 
 use FFI;
 use HMsoft\Cms\Console\Commands\CmsInstallCommand;
-use HMsoft\Cms\Console\Commands\AddCustomRelationCommand;
-use HMsoft\Cms\Console\Commands\MakeExtendedModelCommand;
-use HMsoft\Cms\Services\ModelExtensionService;
+use HMsoft\Cms\Services\BindingService;
+use HMsoft\Cms\Support\ExtensionManager;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -60,17 +59,16 @@ class CmsServiceProvider extends ServiceProvider
             'cms_constants'
         );
 
-        // دمج ملف العلاقات المخصصة
-        $this->mergeConfigFrom(
-            __DIR__ . '/../../config/custom_relations.php',
-            'cms.custom_relations'
-        );
+        // $this->applyModelExtensions();
+        // $this->applyControllerExtensions();
+        // $this->applyResourceExtensions();
 
-        // دمج ملف الـ Extended Models
-        $this->mergeConfigFrom(
-            __DIR__ . '/../../config/extended_models.php',
-            'cms.extended_models'
-        );
+        ExtensionManager::applyAll();
+
+
+        $this->app->singleton('cms.binding-service', BindingService::class);
+        $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+        $loader->alias('BindingService', \HMsoft\Cms\Services\BindingService::class);
 
         // تسجيل كل الـ Providers المتخصصة
         foreach ($this->providers as $provider) {
@@ -81,8 +79,6 @@ class CmsServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 CmsInstallCommand::class,
-                AddCustomRelationCommand::class,
-                MakeExtendedModelCommand::class,
                 // يمكنك إضافة أي أوامر أخرى هنا في المستقبل
             ]);
         }
@@ -100,8 +96,6 @@ class CmsServiceProvider extends ServiceProvider
             // The source file in your package
             __DIR__ . '/../../config/cms.php' => config_path('cms.php'),
             __DIR__ . '/../../config/cms_constants.php' => config_path('cms_constants.php'),
-            __DIR__ . '/../../config/custom_relations.php' => config_path('cms_custom_relations.php'),
-            __DIR__ . '/../../config/extended_models.php' => config_path('cms_extended_models.php'),
         ], 'cms-config'); // <-- The tag must match exactly
 
         $this->publishes([
@@ -132,8 +126,6 @@ class CmsServiceProvider extends ServiceProvider
         // Load the Morph Map from our config file
         // This allows end-developers to define their own models in the config
         Relation::morphMap(config('cms.morph_map', []));
-
-        // Register extended models
-        ModelExtensionService::registerExtendedModels();
     }
+
 }

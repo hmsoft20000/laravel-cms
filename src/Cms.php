@@ -17,12 +17,6 @@ class Cms
         $globalPrefix = config('cms.api_prefix', 'cms-api');
         $routeModules = config('cms.routes', []);
 
-
-        if (!function_exists('cms_controller')) {
-            require __DIR__ . '/helpers.php';
-        }
-
-
         Route::prefix($globalPrefix)->group(function () use ($routeModules, $callback) {
 
             // =================================================================

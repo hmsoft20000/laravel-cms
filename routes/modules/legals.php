@@ -1,17 +1,14 @@
 <?php
-// packages/hmsoft/laravel-cms/routes/modules/legals.php
 
 use Illuminate\Support\Facades\Route;
 
 
 // جلب الإعدادات والمتحكمات
-$legalsController = cms_controller('LegalsController');
-$mediaController = cms_controller('MediaController');
 $type = $config['options']['type'] ?? $module;
 
 // تعريف المسارات الأساسية
-Route::get('/', [$legalsController, 'index'])->name('index')->defaults('type', $type);
-Route::put('/', [$legalsController, 'update'])->name('update')->defaults('type', $type);
+Route::get('/', 'index')->name('index')->defaults('type', $type);
+Route::put('/', 'update')->name('update')->defaults('type', $type);
 
 // تعريف المسارات الفرعية للوسائط (media)
 // Route::prefix('{owner}/media')->name('media.')->group(function () use ($mediaController) {

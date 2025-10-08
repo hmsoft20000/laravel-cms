@@ -4,6 +4,7 @@ namespace HMsoft\Cms\Models\Content;
 
 use HMsoft\Cms\Models\GeneralModel;
 use HMsoft\Cms\Models\Shared\Attribute as CustomAttribute;
+use HMsoft\Cms\Models\Shared\Category;
 use HMsoft\Cms\Traits\Media\HasMedia;
 use HMsoft\Cms\Traits\Categories\Categorizable;
 use HMsoft\Cms\Traits\General\FileManagerTrait;
@@ -77,6 +78,18 @@ class Post extends GeneralModel
     public function getMorphClass()
     {
         return 'post';
+    }
+
+
+    public function categories()
+    {
+        return $this->morphToMany(
+            Category::class,
+            'owner',
+            'categorizables',
+            'owner_id',
+            'category_id'
+        );
     }
 
     // =================================================================

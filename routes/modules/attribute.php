@@ -1,19 +1,12 @@
 <?php
-// packages/hmsoft/laravel-cms/routes/modules/portfolio.php
 
+use HMsoft\Cms\Http\Controllers\Api\AttributeController;
 use Illuminate\Support\Facades\Route;
-
-
-// =================================================================
-// جلب الإعدادات والمتحكمات من ملف config
-// =================================================================
-$attributeController = cms_controller('AttributeController');
 
 $type = $config['options']['type'] ?? $module;
 
-
 // Attributes Routes - مسطحة
-Route::controller($attributeController)->group(function () use ($type) {
+Route::controller(AttributeController::class)->group(function () use ($type) {
     Route::get("/{$type}-attributes", 'index')->name("{$type}.attributes.index")->defaults('scope', $type);
     Route::get("/{$type}-attributes/{attribute}", 'show')->name("{$type}.attributes.show")->defaults('scope', $type);
     Route::post("/{$type}-attributes", 'store')->name("{$type}.attributes.store")->defaults('scope', $type);

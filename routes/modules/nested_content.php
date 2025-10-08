@@ -1,12 +1,10 @@
 
 <?php
 
+use HMsoft\Cms\Http\Controllers\Api\NestedPostController;
 use Illuminate\Support\Facades\Route;
 
-// 1. Get the dedicated controller for nested content
-$nestedPostController = cms_controller('NestedPostController');
-
-// 2. Get the type of child we are creating/managing from the config
+// Get the type of child we are creating/managing from the config
 //    (e.g., 'blog', 'service')
 $type = $config['options']['type'];
 
@@ -19,7 +17,7 @@ $type = $config['options']['type'];
 | For example: /portfolios/{owner}/blogs/{childPost}
 |
 */
-Route::controller($nestedPostController)
+Route::controller(NestedPostController::class)
     ->group(function () use ($type) {
 
         // GET /portfolios/{owner}/blogs

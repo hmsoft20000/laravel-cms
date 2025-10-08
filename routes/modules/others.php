@@ -1,48 +1,66 @@
 <?php
 // packages/hmsoft/laravel-cms/routes/modules/others.php
 
+use HMsoft\Cms\Http\Controllers\Api\{
+    BusinessSettingController,
+    ContactUsController,
+    LanguageController,
+    PagesMetaController,
+    SectorController,
+    TeamController,
+    TestimonialController,
+};
 use Illuminate\Support\Facades\Route;
 
-
-
 // sectors
-Route::put('/sector/update-all', [cms_controller('SectorController'), 'updateAll'])->name('sectors.updateAll');
-Route::apiResource('sector', cms_controller('SectorController'))->names('sectors');
-Route::post('/sector/{sector}/image', [cms_controller('SectorController'), 'updateImage'])->name('sectors.updateImage');
+Route::controller(SectorController::class)->group(function () {
+    Route::put('/sector/update-all', 'updateAll')->name('sectors.updateAll');
+    Route::apiResource('sector', 'sector')->names('sectors');
+    Route::post('/sector/{sector}/image', 'updateImage')->name('sectors.updateImage');
+});
 
 // testimonials
-Route::put('/testimonials/update-all', [cms_controller('TestimonialController'), 'updateAll'])->name('testimonials.updateAll');
-Route::apiResource('testimonials', cms_controller('TestimonialController'))->names('testimonials');
-Route::post('/testimonials/{testimonial}/image', [cms_controller('TestimonialController'), 'updateImage'])->name('testimonials.updateImage');
+Route::controller(TestimonialController::class)->group(function () {
+    Route::put('/testimonials/update-all', 'updateAll')->name('testimonials.updateAll');
+    Route::apiResource('testimonials', 'testimonials')->names('testimonials');
+    Route::post('/testimonials/{testimonial}/image', 'updateImage')->name('testimonials.updateImage');
+});
 
 
 // contact us
-Route::group(['prefix' => 'contact-us', 'as' => 'contact-us.'], function () {
-    Route::post('/', [cms_controller('ContactUsController'), 'store'])->name('store');
-    Route::get('/conversations', [cms_controller('ContactUsController'), 'conversations'])->name('conversations');
-    Route::apiResource('/messages', cms_controller('ContactUsController'))->parameters(['messages' => 'message'])->names('messages');
-    Route::post('/messages-delete-all', [cms_controller('ContactUsController'), 'destroyAll'])->name('messages.destroyAll');
-    Route::post('messages/{message}/reply', [cms_controller('ContactUsController'), 'reply'])->name('messages.reply');
+Route::controller(ContactUsController::class)->group(['prefix' => 'contact-us', 'as' => 'contact-us.'], function () {
+    Route::post('/', 'store')->name('store');
+    Route::get('/conversations', 'conversations')->name('conversations');
+    Route::apiResource('/messages', 'messages')->parameters(['messages' => 'message'])->names('messages');
+    Route::post('/messages-delete-all', 'destroyAll')->name('messages.destroyAll');
+    Route::post('messages/{message}/reply', 'reply')->name('messages.reply');
 });
 
 // settings
-Route::group(['prefix' => 'settings', 'as' => 'settings.'], function () {
-    Route::get("", [cms_controller('BusinessSettingController'), "index"])->name('index');
-    Route::put("", [cms_controller('BusinessSettingController'), "update"])->name('update');
-    Route::get("/schema", [cms_controller('BusinessSettingController'), "schema"])->name('schema');
+Route::controller(BusinessSettingController::class)->group(['prefix' => 'settings', 'as' => 'settings.'], function () {
+    Route::get("", "index")->name('index');
+    Route::put("", "update")->name('update');
+    Route::get("/schema", "schema")->name('schema');
 });
 
 // pages-meta
-Route::apiResource('pages-meta', cms_controller('PagesMetaController'))->parameters(['pages-meta' => 'pageMeta'])->names('pages-meta');
-Route::put("/pages-meta", [cms_controller('PagesMetaController'), "updateAll"])->name('pages-meta.updateAll');
+
+Route::controller(PagesMetaController::class)->group(function () {
+    Route::apiResource('pages-meta', 'pages-meta')->parameters(['pages-meta' => 'pageMeta'])->names('pages-meta');
+    Route::put("/pages-meta", "updateAll")->name('pages-meta.updateAll');
+});
 
 // languages
-Route::apiResource('langs', cms_controller('LanguageController'))->names('langs');
+Route::controller(LanguageController::class)->group(function () {
+    Route::apiResource('langs', 'langs')->names('langs');
+});
 
 
 // teams
-Route::apiResource('teams', cms_controller('TeamController'))->names('teams');
-Route::post('/teams/{team}/image', [cms_controller('TeamController'), 'updateImage'])->name('teams.updateImage');
+Route::controller(TeamController::class)->group(function () {
+    Route::apiResource('teams', 'teams')->names('teams');
+    Route::post('/teams/{team}/image', 'updateImage')->name('teams.updateImage');
+});
 
 // Get guest permissions
 Route::get('/guest/permissions', function () {

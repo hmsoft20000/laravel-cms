@@ -7,6 +7,7 @@ use HMsoft\Cms\Routing\CustomUrlGenerator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
+use HMsoft\Cms\Services\BindingService;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -34,68 +35,62 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
+        
         // load the API routes
         $this->loadApiRoutes();
 
 
         Route::macro('localized', function ($callback) {
-            Route::group(['prefix' => '{locale?}', 'middleware' => ['set.web_config', 'set.locale']], function () use ($callback) {
+            Route::group(['prefix' => '{locale?}', 'middleware' => ['set.web_config']], function () use ($callback) {
                 $callback();
             });
         });
 
-        Route::bind('post', function ($value) {
-            // get the 'type' from the current route (e.g., 'portfolio', 'blog')
+
+        // Default logic for 'post' models (portfolios, blogs, etc.)
+        BindingService::resolver('post', function ($value) {
             $type = request()->route('type');
-
             $query = \HMsoft\Cms\Models\Content\Post::where('id', $value);
-
-            // make sure the element is of the correct type as defined in the path
             if ($type) {
                 $query->where('type', $type);
             }
-
             return $query->firstOrFail();
         });
 
-        Route::bind('category', function ($value) {
-            $type = request()->route('type');
 
-            $category = \HMsoft\Cms\Models\Shared\Category::where('id', $value)
+        // Default logic for 'category' models
+        BindingService::resolver('category', function ($value) {
+            $type = request()->route('type');
+            return \HMsoft\Cms\Models\Shared\Category::where('id', $value)
                 ->where('type', $type)
                 ->firstOrFail();
-
-            return $category;
         });
 
-        Route::bind('attribute', function ($value) {
-            // get the 'scope' from the current route (e.g., 'portfolio', 'product')
-            $scope = request()->route('scope');
 
-            // find the attribute by the ID and make sure it is from the correct scope
-            $attribute = \HMsoft\Cms\Models\Shared\Attribute::where('id', $value)
+        // Default logic for 'attribute' models
+        BindingService::resolver('attribute', function ($value) {
+            $scope = request()->route('scope');
+            return \HMsoft\Cms\Models\Shared\Attribute::where('id', $value)
                 ->where('scope', $scope)
                 ->firstOrFail();
-
-            return $attribute;
         });
 
-        Route::bind('sponsor', function ($value) {
+
+        BindingService::resolver('sponsor', function ($value) {
 
             $query = \HMsoft\Cms\Models\Organizations\Organization::query();
             $query->where('id', $value)->where('type', 'sponsor');
             return $query->firstOrFail();
         });
 
-        Route::bind('partner', function ($value) {
+        BindingService::resolver('partner', function ($value) {
 
             $query = \HMsoft\Cms\Models\Organizations\Organization::query();
             $query->where('id', $value)->where('type', 'partner');
             return $query->firstOrFail();
         });
 
-        Route::bind('owner', function ($value) {
+        BindingService::resolver('owner', function ($value) {
             // Get the current route to determine the context
             $route = app('router')->current();
 
@@ -125,9 +120,13 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         // Explicit binding for medium parameter to ensure it resolves to Medium model
-        Route::bind('medium', function ($value) {
+        BindingService::resolver('medium', function ($value) {
             return \HMsoft\Cms\Models\Shared\Medium::findOrFail($value);
         });
+
+        // This applies all resolvers (including any developer overrides)
+        // to the Laravel router.
+        // BindingService::boot();
     }
 
     /**

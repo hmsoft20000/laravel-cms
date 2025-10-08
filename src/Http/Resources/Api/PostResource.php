@@ -19,6 +19,7 @@ class PostResource extends BaseJsonResource
         $type = $this->type;
         $defaultImageFromConfig = config("app.web_config.default_{$type}_image");
 
+        // info(['defaultImageFromConfig' => $defaultImageFromConfig]);
         return [
             'id' => $this->id,
             'type' => $this->type, // Added for clarity, can be removed if not needed by frontend
@@ -38,19 +39,20 @@ class PostResource extends BaseJsonResource
                 return $this->translations;
             }),
             // Single default image URL
-            'image_url' => $this->whenLoaded('media', function () use ($defaultImageFromConfig) {
-                $defaultImage = collect($this->media)->where('is_default', true)->first();
-                if ($defaultImage) {
-                    return $defaultImage->file_url;
-                }
+            'image_url' => $defaultImageFromConfig,
+            // 'image_url' => $this->whenLoaded('media', function () use ($defaultImageFromConfig) {
+            //     $defaultImage = collect($this->media)->where('is_default', true)->first();
+            //     if ($defaultImage) {
+            //         return $defaultImage->file_url;
+            //     }
 
-                $firstImage = collect($this->media)->sortBy('sort_number')->first();
-                if ($firstImage) {
-                    return $firstImage->file_url;
-                }
+            //     $firstImage = collect($this->media)->sortBy('sort_number')->first();
+            //     if ($firstImage) {
+            //         return $firstImage->file_url;
+            //     }
 
-                return $defaultImageFromConfig;
-            }),
+            //     return $defaultImageFromConfig;
+            // },$defaultImageFromConfig),
             // Array of all image URLs sorted
             'images_urls' => $this->whenLoaded('media', function () {
                 return collect($this->media)
@@ -83,8 +85,8 @@ class PostResource extends BaseJsonResource
                 return collect($this->keywords)->pluck('keyword')->all();
             }),
 
-            'categories' => $this->whenLoaded('categories', function () {
-                return  CategoryResource::collection($this->categories);
+            'categories' => $this->whenLoaded('categories', function () use ($request) {
+                return  CategoryResource::collection($this->categories)->toArray($request);
             }),
             'features' => $this->whenLoaded('features', function () use ($request) {
                 return  FeatureResource::collection($this->features)->toArray($request);

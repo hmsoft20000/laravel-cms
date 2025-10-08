@@ -1,10 +1,9 @@
 <?php
 
+use HMsoft\Cms\Http\Controllers\Api\MediaController;
+use HMsoft\Cms\Http\Controllers\Api\LegalsMediaController;
 use Illuminate\Support\Facades\Route;
 
-
-$mediaController = cms_controller('MediaController');
-$legalsMediaController = cms_controller('LegalsMediaController');
 
 // Check if we have owner_url_name (for regular content) or type (for legals)
 $type = $config['options']['type'] ?? $module;
@@ -13,7 +12,7 @@ if (isset($config['options']['owner_url_name'])) {
     // Regular content with owner parameter
     $ownerUrlName = $config['options']['owner_url_name'];
 
-    Route::controller($mediaController)->group(function () use ($ownerUrlName) {
+    Route::controller(MediaController::class)->group(function () use ($ownerUrlName) {
         Route::get("/{$ownerUrlName}/{owner}/media", 'index')->name('index');
         Route::post("/{$ownerUrlName}/{owner}/media", 'store')->name('store');
         Route::get("/{$ownerUrlName}/{owner}/media/{medium}", 'show')->name('show');
@@ -24,7 +23,7 @@ if (isset($config['options']['owner_url_name'])) {
     });
 } else {
     // Legals without owner parameter - use LegalsMediaController
-    Route::controller($legalsMediaController)->group(function () use ($type) {
+    Route::controller(LegalsMediaController::class)->group(function () use ($type) {
         Route::get('/media', 'index')->name('index')->defaults('type', $type);
         Route::post('/media', 'store')->name('store')->defaults('type', $type);
         Route::get('/media/{medium}', 'show')->name('show')->defaults('type', $type);

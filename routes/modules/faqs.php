@@ -1,13 +1,13 @@
 <?php
 
+use HMsoft\Cms\Http\Controllers\Api\FaqController;
 use Illuminate\Support\Facades\Route;
 
 
-$faqController = cms_controller('FaqController');
 $ownerUrlName = $config['options']['owner_url_name'];
 
 
-Route::controller($faqController)->group(function () use ($ownerUrlName) {
+Route::controller(FaqController::class)->group(function () use ($ownerUrlName) {
     Route::get("/{$ownerUrlName}/{owner}/faqs", 'index')->name('index');
     Route::post("/{$ownerUrlName}/{owner}/faqs", 'store')->name('store');
     Route::get("/{$ownerUrlName}/{owner}/faqs/{faq:id}", 'show')->name('show');
