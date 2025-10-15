@@ -24,6 +24,7 @@ trait PlanValidationRules
         $rules = [
             'price'         => ['sometimes', 'numeric', 'min:0'],
             'image'         => ['sometimes', 'nullable', 'image', 'max:2048'],
+            'currency_code' => ['sometimes', 'string', 'max:3'],
 
             // قواعد الترجمات
             'locales.*.locale'      => ['required', 'string'],
