@@ -1,22 +1,23 @@
 <?php
 
 use HMsoft\Cms\Http\Controllers\Api\LegalsController;
-use Illuminate\Support\Facades\Route;
+use HMsoft\Cms\Routing\RouteRegistrar;
 
+return [
+    /**
+     * The controller for legal page actions.
+     */
+    'controller' => LegalsController::class,
 
-// جلب الإعدادات والمتحكمات
-$type = $config['options']['type'] ?? $module;
-
-// تعريف المسارات الأساسية
-Route::controller(LegalsController::class)->group(function () use ($type) {
-    Route::get('/', 'index')->name('index')->defaults('type', $type);
-    Route::put('/', 'update')->name('update')->defaults('type', $type);
-});
-
-// تعريف المسارات الفرعية للوسائط (media)
-// Route::prefix('{owner}/media')->name('media.')->group(function () use ($mediaController) {
-//     Route::get('/', [$mediaController, 'index'])->name('index')->defaults('type', 'legal');
-//     Route::post('/', [$mediaController, 'upload'])->name('upload')->defaults('type', 'legal');
-//     Route::post('/reorder', [$mediaController, 'reorder'])->name('reorder')->defaults('type', 'legal');
-//     Route::delete('/{medium}', [$mediaController, 'delete'])->name('delete')->defaults('type', 'legal');
-// });
+    /**
+     * The routes for a single legal page.
+     * It uses the 'type' option passed by the CmsRouteManager to identify the page.
+     */
+    'routes' => function (RouteRegistrar $registrar, array $config) {
+        // We still need the 'type' to tell the controller which legal page to fetch.
+        // CmsRouteManager makes the original $config array available for such cases.
+        $type = $config['options']['type'];
+        $registrar->get('/', 'index')->name('index')->defaults('type', $type);
+        $registrar->put('/', 'update')->name('update')->defaults('type', 'index');
+    }
+];

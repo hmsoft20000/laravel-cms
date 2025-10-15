@@ -13,8 +13,18 @@ class RepositoryServiceProvider extends ServiceProvider
     {
 
         $this->app->bind(
-            \HMsoft\Cms\Repositories\Contracts\PostRepositoryInterface::class,
-            \HMsoft\Cms\Repositories\Eloquent\PostRepository::class
+            \HMsoft\Cms\Repositories\Contracts\PortfolioRepositoryInterface::class,
+            \HMsoft\Cms\Repositories\Eloquent\PortfolioRepository::class
+        );
+
+        $this->app->bind(
+            \HMsoft\Cms\Repositories\Contracts\BlogRepositoryInterface::class,
+            \HMsoft\Cms\Repositories\Eloquent\BlogRepository::class
+        );
+
+        $this->app->bind(
+            \HMsoft\Cms\Repositories\Contracts\ServiceRepositoryInterface::class,
+            \HMsoft\Cms\Repositories\Eloquent\ServiceRepository::class
         );
 
         // Bind the scoped Category Repository
@@ -117,6 +127,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             \HMsoft\Cms\Repositories\Contracts\LangRepositoryInterface::class,
             \HMsoft\Cms\Repositories\Eloquent\LangRepository::class
+        );
+
+        $this->app->bind(
+            \HMsoft\Cms\Repositories\Contracts\OurValueRepositoryInterface::class,
+            \HMsoft\Cms\Repositories\Eloquent\OurValueRepository::class
         );
     }
 

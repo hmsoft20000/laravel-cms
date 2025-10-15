@@ -83,7 +83,6 @@ class SectorController extends Controller
             if (isset($sectorData['id'])) {
                 $sector = Sector::findOrFail($sectorData['id']);
                 // $this->authorize('update', $sector);
-                info($sectorData);
                 $updatedSectors[] = $this->repo->update($sector, $sectorData);
             }
         }

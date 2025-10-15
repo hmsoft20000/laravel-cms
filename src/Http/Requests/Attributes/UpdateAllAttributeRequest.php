@@ -22,7 +22,7 @@ class UpdateAllAttributeRequest extends MyRequest
     protected function prepareForValidation(): void
     {
         $data = $this->all();
-        $scope = $this->route('scope');
+        $scope = $this->route('type');
         
         foreach ($data as $index => $item) {
             $booleanFields = ['is_active', 'delete_image'];
@@ -46,7 +46,7 @@ class UpdateAllAttributeRequest extends MyRequest
     public function rules(): array
     {
         // 2. Get the scope from the URL to ensure all operations are secure
-        $scope = $this->route('scope');
+        $scope = $this->route('type');
 
         // 3. Get the base rules for a single attribute in the 'update' context
         $singleAttributeRules = $this->getAttributeRules($scope, 'update');

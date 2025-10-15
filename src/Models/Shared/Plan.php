@@ -72,4 +72,58 @@ class Plan extends GeneralModel
     {
         return $this->hasMany(PlanFeature::class, 'plan_id');
     }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AutoFilterable Interface Implementation (The New Advanced Way)
+    |--------------------------------------------------------------------------
+    */
+
+    public function defineRelationships(): array
+    {
+        return [
+            'translations' => 'translations',
+            'features' => 'features',
+        ];
+    }
+
+    public function defineFieldSelectionMap(): array
+    {
+        $defaultMap = parent::defineFieldSelectionMap();
+        return array_merge($defaultMap);
+    }
+
+    public function defineFilterableAttributes(): array
+    {
+        $baseColumns = parent::defineFilterableAttributes();
+
+        $relatedAttributes = [
+            'translations.name',
+            'translations.description',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineSortableAttributes(): array
+    {
+        $baseColumns = parent::defineSortableAttributes();
+
+        $relatedAttributes = [
+            'translations.name',
+            'translations.description',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineGlobalSearchRelatedAttributes(): array
+    {
+        return [
+            'translations' => ['name', 'description'],
+            'features' => ['name', 'description'],
+        ];
+    }
 }

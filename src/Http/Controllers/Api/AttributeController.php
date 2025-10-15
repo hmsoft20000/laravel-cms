@@ -27,7 +27,7 @@ class AttributeController extends Controller
     public function index(Request $request): JsonResponse
     {
 
-        $scope = request()->route('scope');
+        $scope = request()->route('type');
 
 
         // This logic is preserved from your preferred pattern
@@ -54,7 +54,8 @@ class AttributeController extends Controller
      */
     public function store(StoreAttributeRequest $request): JsonResponse
     {
-        $attribute = $this->repository->store($request->validated());
+        $validated = $request->validated();
+        $attribute = $this->repository->store($validated);
         return successResponse(
             message: translate('cms::messages.added_successfully'),
             data: new AttributeResource($this->repository->show($attribute)),

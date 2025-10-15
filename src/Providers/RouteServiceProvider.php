@@ -4,7 +4,6 @@ namespace HMsoft\Cms\Providers;
 
 
 use HMsoft\Cms\Routing\CustomUrlGenerator;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
 use HMsoft\Cms\Services\BindingService;
@@ -35,10 +34,6 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        
-        // load the API routes
-        $this->loadApiRoutes();
-
 
         Route::macro('localized', function ($callback) {
             Route::group(['prefix' => '{locale?}', 'middleware' => ['set.web_config']], function () use ($callback) {
@@ -47,16 +42,23 @@ class RouteServiceProvider extends ServiceProvider
         });
 
 
-        // Default logic for 'post' models (portfolios, blogs, etc.)
-        BindingService::resolver('post', function ($value) {
-            $type = request()->route('type');
-            $query = \HMsoft\Cms\Models\Content\Post::where('id', $value);
-            if ($type) {
-                $query->where('type', $type);
-            }
+        // Default logic for 'portfolio' models (portfolios, blogs, etc.)
+        BindingService::resolver('portfolio', function ($value) {
+            $query = \HMsoft\Cms\Models\Content\Portfolio::where('id', $value);
             return $query->firstOrFail();
         });
 
+        // Default logic for 'blog' models (portfolios, blogs, etc.)
+        BindingService::resolver('blog', function ($value) {
+            $query = \HMsoft\Cms\Models\Content\Blog::where('id', $value);
+            return $query->firstOrFail();
+        });
+
+        // Default logic for 'service' models (portfolios, blogs, etc.)
+        BindingService::resolver('service', function ($value) {
+            $query = \HMsoft\Cms\Models\Content\Service::where('id', $value);
+            return $query->firstOrFail();
+        });
 
         // Default logic for 'category' models
         BindingService::resolver('category', function ($value) {
@@ -69,7 +71,7 @@ class RouteServiceProvider extends ServiceProvider
 
         // Default logic for 'attribute' models
         BindingService::resolver('attribute', function ($value) {
-            $scope = request()->route('scope');
+            $scope = request()->route('type');
             return \HMsoft\Cms\Models\Shared\Attribute::where('id', $value)
                 ->where('scope', $scope)
                 ->firstOrFail();
@@ -90,33 +92,64 @@ class RouteServiceProvider extends ServiceProvider
             return $query->firstOrFail();
         });
 
-        BindingService::resolver('owner', function ($value) {
-            // Get the current route to determine the context
-            $route = app('router')->current();
+        BindingService::resolver('feature', function ($value) {
+            return \HMsoft\Cms\Models\Shared\Feature::findOrFail($value);
+        });
 
-            if (!$route) {
+        // BindingService::resolver('owner', function ($value) {
+        //     // Get the current route to determine the context
+        //     $route = app('router')->current();
+
+        //     if (!$route) {
+        //         abort(404);
+        //     }
+
+        //     $routeName = $route->getName();
+        //     preg_match('/^api\.([\w-]+)\./', $routeName, $matches);
+        //     $ownerTypeName = $matches[1] ?? null;
+
+        //     if (!$ownerTypeName) {
+        //         abort(404, 'Could not determine owner type from route name.');
+        //     }
+
+        //     $modelClass = config("cms.morph_map.{$ownerTypeName}");
+
+        //     if (!$modelClass || !class_exists($modelClass)) {
+        //         abort(404, "Model for '{$ownerTypeName}' not found in morph_map.");
+        //     }
+        //     $modelInstance = $modelClass::where('id', $value)
+        //         // You might want to try finding by slug as a fallback too
+        //         // ->orWhereHas('translations', fn($q) => $q->where('slug', $value))
+        //         ->firstOrFail();
+
+        //     return $modelInstance;
+        // });
+
+
+        BindingService::resolver('legal_type', function ($value) {
+            // $value will be the string from the URL, e.g., "aboutUs"
+            return \HMsoft\Cms\Models\Legal\Legal::where('type', $value)->firstOrFail();
+        });
+
+        BindingService::resolver('owner', function ($value, \Illuminate\Routing\Route $route) {
+            // get the owner binding key from the route
+            $ownerKey = $route->parameter('_owner_binding_key');
+            if (!$ownerKey) {
+                // This happens if ownerBinding() was not used, fallback to default behavior or abort
+                // return null; // or abort
                 abort(404);
             }
 
-            $routeName = $route->getName();
-            preg_match('/^api\.([\w-]+)\./', $routeName, $matches);
-            $ownerTypeName = $matches[1] ?? null;
 
-            if (!$ownerTypeName) {
-                abort(404, 'Could not determine owner type from route name.');
-            }
+            // get the owner model from the route
+            $ownerModel = $route->parameter($ownerKey);
 
-            $modelClass = config("cms.morph_map.{$ownerTypeName}");
-
-            if (!$modelClass || !class_exists($modelClass)) {
-                abort(404, "Model for '{$ownerTypeName}' not found in morph_map.");
-            }
-            $modelInstance = $modelClass::where('id', $value)
-                // You might want to try finding by slug as a fallback too
-                // ->orWhereHas('translations', fn($q) => $q->where('slug', $value))
-                ->firstOrFail();
-
-            return $modelInstance;
+            info([
+                'resolver ownerModel' => $ownerModel,
+                'resolver ownerKey' => $ownerKey,
+                'resolver rsoute' => $route
+            ]);
+            return $ownerModel;
         });
 
         // Explicit binding for medium parameter to ensure it resolves to Medium model
@@ -127,26 +160,5 @@ class RouteServiceProvider extends ServiceProvider
         // This applies all resolvers (including any developer overrides)
         // to the Laravel router.
         // BindingService::boot();
-    }
-
-    /**
-     * تحميل مسارات الـ API من نظام الـ modules
-     */
-    private function loadApiRoutes(): void
-    {
-        // تحقق من أن التطبيق يعمل في وضع web أو api
-        if ($this->app->runningInConsole()) {
-            return;
-        }
-
-        // تحميل مسارات الـ API باستخدام نظام الـ modules
-        try {
-
-            \HMsoft\Cms\Cms::apiRoutes();
-        } catch (\Exception $e) {
-
-            // Log error for debugging
-            Log::error('CMS Routes loading error: ' . $e->getMessage());
-        }
     }
 }

@@ -32,83 +32,6 @@ class PageMeta extends GeneralModel
      */
     protected $guarded = ['id'];
 
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of columns that can be filtered by the front-end.
-     * This includes columns from the main table and the translation table.
-     */
-    public function defineFilterableAttributes(): array
-    {
-        return [
-            // Columns from the  table
-            'id',
-
-            // --- From 'translations' table ---
-            'title',
-            'description',
-            'keywords',
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of columns that can be used for sorting.
-     */
-    public function defineSortableAttributes(): array
-    {
-        return [
-            // Columns from the  table
-            'id',
-
-            // --- From 'translations' table ---
-            'title',
-            'description',
-            'keywords',
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines the columns from the main table to be included in the global search.
-     */
-    public function defineGlobalSearchBaseAttributes(): array
-    {
-        return [];
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines the columns from the 'translations' table to be included in the global search.
-     */
-    public function defineGlobalSearchTranslationAttributes(): array
-    {
-        return [
-            'title',
-            'description',
-            'keywords',
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * This method is required by the interface to specify the translation table name.
-     */
-    public function defineTranslationTableName(): ?string
-    {
-        // Provide the exact name of your translation table.
-        return 'pages_meta_translations';
-    }
-
-    /**
-     * {@inheritdoc}
-     * This method is required by the interface to specify the foreign key in the translation table.
-     */
-    public function defineForeignKeyInTranslationTable(): ?string
-    {
-        // This is the column in 'translations' that links back to the 'type' table.
-        return 'pages_meta_id';
-    }
-
 
     /**
      * Get the attributes that should be cast.
@@ -123,9 +46,67 @@ class PageMeta extends GeneralModel
         ];
     }
 
+    // =================================================================
+    // RELATIONS
+    // =================================================================
 
     public function translations(): HasMany
     {
         return $this->hasMany(PageMetaTranslation::class, foreignKey: 'pages_meta_id', localKey: 'id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | AutoFilterable Interface Implementation (The New Advanced Way)
+    |--------------------------------------------------------------------------
+    */
+
+    public function defineRelationships(): array
+    {
+        return [
+            // 'Public API Name' => 'eloquentMethodName'
+            'translations' => 'translations',
+        ];
+    }
+
+    public function defineFilterableAttributes(): array
+    {
+
+        $baseColumns = parent::defineFilterableAttributes();
+
+        $relatedAttributes = [
+            'translations.title',
+            'translations.description',
+            'translations.keywords',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineSortableAttributes(): array
+    {
+
+        $baseColumns = parent::defineSortableAttributes();
+
+        $relatedAttributes = [
+            'translations.title',
+            'translations.description',
+            'translations.keywords',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineGlobalSearchBaseAttributes(): array
+    {
+        return [];
+    }
+
+    public function defineGlobalSearchRelatedAttributes(): array
+    {
+        return [
+            // Search in the 'title' and 'content' columns of the 'translations' relation
+            'translations' => ['title', 'content', 'keywords'],
+        ];
     }
 }

@@ -1,35 +1,26 @@
 <?php
 
 use HMsoft\Cms\Http\Controllers\Api\MediaController;
-use HMsoft\Cms\Http\Controllers\Api\LegalsMediaController;
-use Illuminate\Support\Facades\Route;
+use HMsoft\Cms\Routing\RouteRegistrar;
 
+return [
+    /**
+     * Controller for standard polymorphic media resources.
+     */
+    'controller' => MediaController::class,
 
-// Check if we have owner_url_name (for regular content) or type (for legals)
-$type = $config['options']['type'] ?? $module;
-
-if (isset($config['options']['owner_url_name'])) {
-    // Regular content with owner parameter
-    $ownerUrlName = $config['options']['owner_url_name'];
-
-    Route::controller(MediaController::class)->group(function () use ($ownerUrlName) {
-        Route::get("/{$ownerUrlName}/{owner}/media", 'index')->name('index');
-        Route::post("/{$ownerUrlName}/{owner}/media", 'store')->name('store');
-        Route::get("/{$ownerUrlName}/{owner}/media/{medium}", 'show')->name('show');
-        Route::put("/{$ownerUrlName}/{owner}/media/update-all", 'updateAll')->name('updateAll');
-        Route::put("/{$ownerUrlName}/{owner}/media/reorder", 'reorder')->name('reorder');
-        Route::put("/{$ownerUrlName}/{owner}/media/{medium}", 'update')->name('update');
-        Route::delete("/{$ownerUrlName}/{owner}/media/{medium}", 'destroy')->name('destroy');
-    });
-} else {
-    // Legals without owner parameter - use LegalsMediaController
-    Route::controller(LegalsMediaController::class)->group(function () use ($type) {
-        Route::get('/media', 'index')->name('index')->defaults('type', $type);
-        Route::post('/media', 'store')->name('store')->defaults('type', $type);
-        Route::get('/media/{medium}', 'show')->name('show')->defaults('type', $type);
-        Route::put('/media/update-all', 'updateAll')->name('updateAll')->defaults('type', $type);
-        Route::put('/media/reorder', 'reorder')->name('reorder')->defaults('type', $type);
-        Route::put('/media/{medium}', 'update')->name('update')->defaults('type', $type);
-        Route::delete('/media/{medium}', 'destroy')->name('destroy')->defaults('type', $type);
-    });
-}
+    /**
+     * Routes for media attached to a parent model (e.g., a portfolio or blog).
+     * The prefix (e.g., 'portfolios/{owner}/media') is applied by the CmsRouteManager.
+     */
+    'routes' => function (RouteRegistrar $registrar) {
+        $registrar->get('/', 'index')->name('index');
+        $registrar->post('/', 'store')->name('store');
+        $registrar->post('/bulk-upload-files', 'bulkUpload')->name('bulk-upload-files');
+        $registrar->put('/update-all', 'updateAll')->name('updateAll');
+        $registrar->get('/{medium}', 'show')->name('show');
+        $registrar->put('/reorder', 'reorder')->name('reorder');
+        $registrar->put('/{medium}', 'update')->name('update');
+        $registrar->delete('/{medium}', 'destroy')->name('destroy');
+    }
+];

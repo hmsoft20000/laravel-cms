@@ -24,7 +24,7 @@ class MiddlewareServiceProvider extends ServiceProvider
 
         // Localization and Config Middleware
         $router->aliasMiddleware('set.locale', \HMsoft\Cms\Http\Middleware\SetLocale::class);
-        
+
         $router->aliasMiddleware('set.web_config', \HMsoft\Cms\Http\Middleware\SetWebConfigMiddleware::class);
 
         // // Request Handling Middleware
@@ -34,6 +34,9 @@ class MiddlewareServiceProvider extends ServiceProvider
         // Authentication Middleware
         // Note: OptionalSanctumAuth has been moved to the main project
         $router->aliasMiddleware('custom.sanctum_stateful', \HMsoft\Cms\Http\Middleware\CustomEnsureFrontendRequestsAreStateful::class);
+
+        $router->aliasMiddleware('inject.singleton.legal.owner', \HMsoft\Cms\Http\Middleware\InjectSingletonLegalOwner::class);
+
 
         // New isolated auth middleware
         // $router->aliasMiddleware('cms.permission', \HMsoft\Cms\Http\Middleware\CheckPermissionMiddleware::class);

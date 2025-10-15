@@ -14,20 +14,20 @@ trait HandlesAttributeSyncing
      * @param array $valuesData The attribute values to sync.
      * @return void
      */
-    protected function syncAttributeValues(Model $model, ?array $valuesData = null  ): void
+    protected function syncAttributeValues(Model $model, ?array $valuesData = null): void
     {
         if (!method_exists($model, 'attributeValues')) return;
 
-        $model->attributeValues()->delete();
         if ($valuesData === null) return;
 
-        // Assuming the model has a 'type' or 'scope' property
-        $scope = $model->type ?? $model->scope ?? null;
-        if (!$scope) return;
+        $type = $model->getMorphClass();
+        if (!$type) return;
+
+        $model->attributeValues()->delete();
 
         $attributeIds = collect($valuesData)->pluck('attribute_id')->unique()->all();
         $attributes = Attribute::whereIn('id', $attributeIds)
-            ->where('scope', $scope)
+            ->where('scope', $type)
             ->get()->keyBy('id');
 
         foreach ($valuesData as $data) {

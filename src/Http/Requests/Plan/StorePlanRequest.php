@@ -4,7 +4,6 @@ namespace HMsoft\Cms\Http\Requests\Plan;
 
 use HMsoft\Cms\Http\Requests\MyRequest;
 use HMsoft\Cms\Traits\Plans\PlanValidationRules;
-use Illuminate\Database\Eloquent\Model;
 
 class StorePlanRequest extends MyRequest
 {
@@ -15,20 +14,9 @@ class StorePlanRequest extends MyRequest
         return true;
     }
 
-    /**
-     * Prepare the data for validation.
-     * We will automatically add the owner_type and map owner field here.
-     */
+
     protected function prepareForValidation(): void
     {
-
-        $owner = $this->route('owner');
-        if ($owner instanceof Model) {
-            $this->merge([
-                'owner_type' => $owner->getMorphClass(),
-                'owner_id' => $owner->id,
-            ]);
-        }
 
         foreach (['is_active', 'is_featured'] as $key) {
             if (isset($this->{$key})) {
@@ -43,8 +31,7 @@ class StorePlanRequest extends MyRequest
     {
 
         $rules = $this->getPlanRules('create');
-        $rules['owner_id'] = ['required', 'integer'];
-        $rules['owner_type'] = ['required', 'string'];
+
         return $rules;
 
         // $rules = [

@@ -32,7 +32,7 @@ class FeatureRepository implements FeatureRepositoryInterface
 
             $feature = $this->model->create(Arr::except($data, ['locales']));
 
-            $this->syncSingleImage($ownerType::findOrFail($data['owner_id']), $data, $this->mediaRepository);
+            $this->syncSingleImage($feature, $data, $this->mediaRepository);
             $this->syncTranslations($feature, $data['locales'] ?? null);
 
             return $this->show($feature);
@@ -46,7 +46,7 @@ class FeatureRepository implements FeatureRepositoryInterface
             // Update the model with the main data, excluding image and locale fields
             $feature->update(Arr::except($data, ['locales', 'image', 'delete_image']));
 
-            $this->syncSingleImage($feature->owner, $data, $this->mediaRepository);
+            $this->syncSingleImage($feature, $data, $this->mediaRepository);
 
             $this->syncTranslations($feature, $data['locales'] ?? null);
 

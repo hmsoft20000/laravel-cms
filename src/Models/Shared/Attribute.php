@@ -41,105 +41,7 @@ class Attribute extends GeneralModel
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | AutoFilterable Interface Implementation (The New Advanced Way)
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * {@inheritdoc}
-     * This is the most important new method. It tells the JoinManager which
-     * relationships are available for joining. The key is the API-friendly name,
-     * and the value is the actual Eloquent method name on this model.
-     */
-    public function defineRelationships(): array
-    {
-        return [
-            // 'Public API Name' => 'eloquentMethodName'
-            'translations' => 'translations',
-            'categories' => 'categories',
-            'options' => 'options',
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * The field selection map is now much simpler.
-     * It just maps an API field name to either a base table column or a
-     * 'relationship.column' string. The service handles the rest.
-     */
-    public function defineFieldSelectionMap(): array
-    {
-        $defaultMap = parent::defineFieldSelectionMap();
-
-        $customMap = [
-            // 'Public API Name' => 'relationship_name.column_name' OR 'base_column'
-            'name' => 'translations.name',
-            'description' => 'translations.description',
-            'image_url' => 'image', // The image_url accessor depends on the 'image' DB column.
-        ];
-
-        return array_merge($defaultMap, $customMap);
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of attributes that can be specifically filtered.
-     */
-    public function defineFilterableAttributes(): array
-    {
-        return parent::defineFilterableAttributes();
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of attributes that can be sorted.
-     */
-    public function defineSortableAttributes(): array
-    {
-        return parent::defineSortableAttributes();
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines columns from the main table for the global search.
-     */
-    public function defineGlobalSearchBaseAttributes(): array
-    {
-        return [];
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines columns from the translation table for the global search.
-     */
-    public function defineGlobalSearchTranslationAttributes(): array
-    {
-        return [
-            'name',
-            'description'
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * Specifies the name of the translation table.
-     */
-    public function defineTranslationTableName(): ?string
-    {
-        return (new AttributeTranslation())->getTable();
-    }
-
-    /**
-     * {@inheritdoc}
-     * Specifies the foreign key in the translation table.
-     */
-    public function defineForeignKeyInTranslationTable(): ?string
-    {
-        return 'attribute_id';
-    }
-
+    
     // =================================================================
     // RELATIONS
     // =================================================================
@@ -179,4 +81,67 @@ class Attribute extends GeneralModel
     {
         $query->where('scope', $scope);
     }
+    
+    /*
+    |--------------------------------------------------------------------------
+    | AutoFilterable Interface Implementation (The New Advanced Way)
+    |--------------------------------------------------------------------------
+    */
+
+    public function defineRelationships(): array
+    {
+        return [
+            // 'Public API Name' => 'eloquentMethodName'
+            'translations' => 'translations',
+            'categories' => 'categories',
+            'options' => 'options',
+        ];
+    }
+
+    public function defineFieldSelectionMap(): array
+    {
+        $defaultMap = parent::defineFieldSelectionMap();
+
+        $customMap = [
+            // 'Public API Name' => 'relationship_name.column_name' OR 'base_column'
+            'name' => 'translations.name',
+            'description' => 'translations.description',
+            'image_url' => 'image', // The image_url accessor depends on the 'image' DB column.
+        ];
+
+        return array_merge($defaultMap, $customMap);
+    }
+
+    public function defineFilterableAttributes(): array
+    {
+        $baseColumns = parent::defineFilterableAttributes();
+
+        $relatedAttributes = [
+            'translations.name',
+            'translations.description',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+
+    public function defineSortableAttributes(): array
+    {
+        $baseColumns = parent::defineSortableAttributes();
+
+        $relatedAttributes = [
+            'translations.name',
+            'translations.description',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineGlobalSearchRelatedAttributes(): array
+    {
+        return [
+            'translations' => ['name', 'description'],
+        ];
+    }
+
 }

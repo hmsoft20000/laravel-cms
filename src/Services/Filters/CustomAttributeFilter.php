@@ -4,108 +4,89 @@ namespace HMsoft\Cms\Services\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use HMsoft\Cms\Data\ColumnFilterData;
-use HMsoft\Cms\Enums\FilterFnsEnum;
 use HMsoft\Cms\Interfaces\AutoFilterable;
-
 use HMsoft\Cms\Models\Shared\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class CustomAttributeFilter
 {
-    /**
-     * @var string The prefix used to identify custom attribute filters.
-     */
     public const ATTRIBUTE_PREFIX = 'attribute_';
 
     /**
-     * Applies a filter for custom attributes to the query builder.
-     *
-     * @param Builder $query The query builder instance.
-     * @param ColumnFilterData $filter The filter data object.
-     * @param AutoFilterable|Model $model The model instance implementing AutoFilterable.
+     * Applies a filter for custom attributes using a WHERE EXISTS subquery.
      */
-    public static function apply(Builder $query, ColumnFilterData $filter, AutoFilterable|Model $model): void
+    public static function apply(Builder $query, Attribute $attribute, ColumnFilterData $filter, AutoFilterable|Model $model): void
     {
-        $attributeId = (int) str_replace(self::ATTRIBUTE_PREFIX, '', $filter->id);
-        $attribute = Attribute::find($attributeId);
 
-        if (!$attribute) {
-            return;
-        }
+        $avTable = (new \HMsoft\Cms\Models\Shared\AttributeValue)->getTable();
 
-        // Generate a unique alias for the join to avoid conflicts
-        $alias = "av_attribute_{$attributeId}";
+        $mainTable = $model->getTable();
+        $mainKey = $model->getKeyName();
+        $mainMorphClass = $model->getMorphClass();
 
-        // Add the join to the attribute_values table
-        $query->join("attribute_values as {$alias}", function ($join) use ($alias, $model, $attributeId) {
-            $join->on("{$alias}.owner_id", '=', "{$model->getTable()}.{$model->getKeyName()}")
-                ->where("{$alias}.owner_type", $model->getMorphClass())
-                ->where("{$alias}.attribute_id", $attributeId);
+        // Add a subquery for this attribute filter
+        $query->whereExists(function (Builder $subQuery) use ($mainTable, $mainKey, $mainMorphClass, $attribute, $filter, $avTable) {
+
+            $subQuery->select(DB::raw(1))
+                ->from("{$avTable} as av")
+                ->whereColumn('av.owner_id', "{$mainTable}.{$mainKey}")
+                ->where('av.owner_type', $mainMorphClass)
+                ->where('av.attribute_id', $attribute->id);
+
+            switch ($attribute->type) {
+                case 'text':
+                case 'number':
+                case 'date':
+                case 'textarea':
+                    self::applySingleValueFilter($subQuery, $filter);
+                    break;
+
+                case 'select':
+                case 'radio':
+                case 'checkbox':
+                case 'multi-select':
+                    self::applyMultiValueFilter($subQuery, $filter);
+                    break;
+            }
         });
-
-        switch ($attribute->type) {
-            case 'text':
-            case 'number':
-            case 'date':
-            case 'textarea':
-                self::applySingleValueFilter($query, $alias, $filter);
-                break;
-            case 'select':
-            case 'radio':
-            case 'checkbox':
-            case 'multi-select':
-                self::applyMultiValueFilter($query, $alias, $attribute, $filter);
-                break;
-            default:
-                break;
-        }
     }
 
     /**
-     * Applies a filter for single-value attributes using the joined table.
+     * Applies a single-value condition inside the EXISTS subquery.
      */
-    protected static function applySingleValueFilter(Builder $query, string $alias, ColumnFilterData $filter): void
+    protected static function applySingleValueFilter(Builder $subQuery, ColumnFilterData $filter): void
     {
-        $column = "{$alias}.value";
-        switch ($filter->filterFns) {
-            case FilterFnsEnum::equals:
-                $query->where($column, $filter->value);
-                break;
-            case FilterFnsEnum::between:
-                $values = is_array($filter->value) ? $filter->value : explode(',', $filter->value);
-                if (count($values) === 2) {
-                    $query->whereBetween($column, [$values[0], $values[1]]);
-                }
-                break;
-            case FilterFnsEnum::in:
-                $values = is_array($filter->value) ? $filter->value : explode(',', $filter->value);
-                $query->whereIn($column, $values);
-                break;
-            case FilterFnsEnum::contains:
-                $query->where($column, 'LIKE', '%' . $filter->value . '%');
-                break;
-        }
+
+        // Create a new DTO instance with the correct aliased column name.
+        $tempFilterData = new ColumnFilterData(
+            id: 'av.value', // The column inside the subquery
+            value: $filter->value,
+            filterFns: $filter->filterFns
+        );
+
+        // Let the DTO apply its own filtering logic to the subquery.
+        $tempFilterData->buildQuery($subQuery);
     }
 
     /**
-     * Applies a filter for multi-value attributes using the joined table.
+     * Applies a multi-value condition (e.g., select, checkbox, multi-select) inside the EXISTS subquery.
      */
-    protected static function applyMultiValueFilter(Builder $query, string $alias, Attribute $attribute, ColumnFilterData $filter): void
+    protected static function applyMultiValueFilter(Builder $subQuery, ColumnFilterData $filter): void
     {
-        $selectedOptionIds = is_array($filter->value) ? $filter->value : explode(',', $filter->value);
-        $optionsAlias = "aso_attribute_{$attribute->id}";
+        $asoTable = (new \HMsoft\Cms\Models\Shared\AttributeSelectedOption)->getTable();
 
-        $query->join("attribute_selected_options as {$optionsAlias}", function ($join) use ($alias, $optionsAlias) {
-            $join->on("{$optionsAlias}.attribute_value_id", '=', "{$alias}.id");
-        });
+        $selectedOptionIds = is_array($filter->value)
+            ? $filter->value
+            : explode(',', $filter->value);
 
-        $query->whereIn("{$optionsAlias}.attribute_option_id", $selectedOptionIds);
+        // Encapsulated join — affects only the subquery
+        $subQuery->join("{$asoTable} as aso", 'aso.attribute_value_id', '=', 'av.id')
+            ->whereIn('aso.attribute_option_id', $selectedOptionIds);
     }
 
     /**
-     * Determines if a filter is for a custom attribute.
-     * @param ColumnFilterData $filter The filter data object.
-     * @return bool
+     * Detect if the filter is for a custom attribute.
      */
     public static function isCustomAttribute(ColumnFilterData $filter): bool
     {

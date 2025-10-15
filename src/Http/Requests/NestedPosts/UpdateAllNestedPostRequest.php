@@ -9,12 +9,10 @@ use HMsoft\Cms\Traits\Features\FeatureValidationRules;
 use HMsoft\Cms\Traits\Downloads\DownloadValidationRules;
 use HMsoft\Cms\Traits\Categories\CategoryValidationRules;
 use HMsoft\Cms\Traits\Organizations\OrganizationValidationRules;
-use Illuminate\Database\Eloquent\Model;
 
 class UpdateAllNestedPostRequest extends MyRequest
 {
-    use PostValidationRules,
-        ValidatesCustomAttributes,
+    use ValidatesCustomAttributes,
         FeatureValidationRules,
         DownloadValidationRules,
         CategoryValidationRules,
@@ -25,20 +23,8 @@ class UpdateAllNestedPostRequest extends MyRequest
         return true;
     }
 
-    /**
-     * Prepare the data for validation.
-     * We will automatically add the owner_type and map owner field here.
-     */
     protected function prepareForValidation(): void
     {
-        $owner = $this->route('owner');
-        if ($owner instanceof Model) {
-            $this->merge([
-                'owner_type' => $owner->getMorphClass(),
-                'owner_id' => $owner->id,
-            ]);
-        }
-
         // Convert boolean fields for all posts
         $booleanFields = ['show_in_footer', 'show_in_header', 'is_active'];
         foreach ($this->all() as $index => $postData) {

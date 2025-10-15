@@ -3,6 +3,7 @@
 namespace HMsoft\Cms\Http\Controllers\Api;
 
 use HMsoft\Cms\Http\Controllers\Controller;
+use HMsoft\Cms\Http\Requests\Media\BulkUploadMediaRequest;
 use HMsoft\Cms\Http\Requests\Media\{UploadMediaRequest, UpdateMediaAllRequest};
 use HMsoft\Cms\Models\Shared\Medium;
 use HMsoft\Cms\Repositories\Contracts\MediaRepositoryInterface;
@@ -52,7 +53,33 @@ class MediaController extends Controller
     {
         // $this->authorize('create', Medium::class);
 
-        $media = $this->repository->store($owner, $request->validated());
+        $validated = $request->validated();
+        $ownerData = [
+            'owner_id' => $owner->id,
+            'owner_type' => $owner->getMorphClass(),
+        ];
+        $validated = array_merge($validated, $ownerData);
+        $media = $this->repository->store($owner, $validated);
+
+        return successResponse(
+            message: translate('cms::messages.added_successfully'),
+            data: $media,
+            code: Response::HTTP_CREATED
+        );
+    }
+
+    /**
+     * Store a newly created resource in storage and attach it to the owner model.
+     * @param BulkUploadMediaRequest $request
+     * @param Model $owner
+     * @return JsonResponse
+     */
+    public function bulkUpload(BulkUploadMediaRequest $request, Model $owner): JsonResponse
+    {
+        // $this->authorize('create', Medium::class);
+
+        $validated = $request->validated();
+        $media = $this->repository->store($owner, $validated);
 
         return successResponse(
             message: translate('cms::messages.added_successfully'),

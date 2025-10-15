@@ -31,7 +31,10 @@ trait HandlesSingleMedia
 
             $mediaRepository->store($model, [
                 'media' => [
-                    ['file' => $data['image']]
+                    [
+                        'file' => $data['image'],
+                        'is_default' => true
+                    ]
                 ]
             ]);
         }

@@ -28,132 +28,6 @@ class Organization extends GeneralModel
     protected $guarded = ['id'];
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | AutoFilterable Interface Implementation (The New Advanced Way)
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * {@inheritdoc}
-     * This is the most important new method. It tells the JoinManager which
-     * relationships are available for joining. The key is the API-friendly name,
-     * and the value is the actual Eloquent method name on this model.
-     * 
-     */
-    public function defineRelationships(): array
-    {
-        return [
-            // 'Public API Name' => 'eloquentMethodName'
-            'translations' => 'translations',
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * The field selection map is now much simpler.
-     * It just maps an API field name to either a base table column or a
-     * 'relationship.column' string. The service handles the rest.
-     */
-    public function defineFieldSelectionMap(): array
-    {
-        $defaultMap = parent::defineFieldSelectionMap();
-
-        $customMap = [
-            // 'Public API Name' => 'relationship_name.column_name' OR 'base_column'
-            'name'             => 'translations.name',
-            'content'          => 'translations.content',
-            'short_content'    => 'translations.short_content',
-            'image_url'        => 'image',
-        ];
-
-        return array_merge($defaultMap, $customMap);
-    }
-
-
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of attributes that can be specifically filtered.
-     * The logic here remains the same, but it's now more powerful because the
-     * service can handle `translations.name` style filters automatically.
-     */
-    public function defineFilterableAttributes(): array
-    {
-        return parent::defineFilterableAttributes();
-    }
-
-
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of attributes that can be sorted.
-     */
-    public function defineSortableAttributes(): array
-    {
-        return parent::defineSortableAttributes();
-    }
-
-
-    /**
-     * {@inheritdoc}
-     * Defines columns from the main table for the global search.
-     */
-    public function defineGlobalSearchBaseAttributes(): array
-    {
-        return [];
-    }
-
-
-    /**
-     * {@inheritdoc}
-     * Defines columns from the translation table for the global search.
-     */
-    public function defineGlobalSearchTranslationAttributes(): array
-    {
-        return  [
-            'name',
-            'content',
-            'short_content'
-        ];
-    }
-
-
-    /**
-     * {@inheritdoc}
-     * Specifies the name of the translation table.
-     */
-    public function defineTranslationTableName(): ?string
-    {
-        return (new OrganizationTranslation())->getTable();
-    }
-
-
-    /**
-     * {@inheritdoc}
-     * Specifies the foreign key in the translation table.
-     */
-    public function defineForeignKeyInTranslationTable(): ?string
-    {
-        return 'organization_id';
-    }
-
-
-
-    /**
-     * Get all of the translations for the Organization
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function translations(): HasMany
-    {
-        return $this->hasMany(OrganizationTranslation::class, foreignKey: 'organization_id', localKey: 'id');
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Model Relationships & Accessors
-    |--------------------------------------------------------------------------
-    */
 
     /**
      * Get the attributes that should be cast.
@@ -173,5 +47,75 @@ class Organization extends GeneralModel
     public function scopeOfType($query, $type)
     {
         return $query->where('type', $type);
+    }
+
+
+    // =================================================================
+    // RELATIONS
+    // =================================================================
+
+    /**
+     * Get all of the translations for the Organization 
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function translations(): HasMany
+    {
+        return $this->hasMany(OrganizationTranslation::class, foreignKey: 'organization_id', localKey: 'id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | AutoFilterable Interface Implementation (The New Advanced Way)
+    |--------------------------------------------------------------------------
+    */
+
+    public function defineRelationships(): array
+    {
+        return [
+            // 'Public API Name' => 'eloquentMethodName'
+            'translations' => 'translations',
+        ];
+    }
+
+    public function defineFieldSelectionMap(): array
+    {
+        $defaultMap = parent::defineFieldSelectionMap();
+
+        $customMap = [
+            // 'Public API Name' => 'relationship_name.column_name' OR 'base_column'
+            'name'             => 'translations.name',
+            'content'          => 'translations.content',
+            'short_content'    => 'translations.short_content',
+            'image_url'        => 'image',
+        ];
+
+        return array_merge($defaultMap, $customMap);
+    }
+
+    public function defineFilterableAttributes(): array
+    {
+        $baseColumns = parent::defineFilterableAttributes();
+
+        $relatedAttributes = [
+            'translations.name',
+            'translations.content',
+            'translations.short_content',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineGlobalSearchBaseAttributes(): array
+    {
+        return [];
+    }
+
+    public function defineGlobalSearchRelatedAttributes(): array
+    {
+        return [
+            // Search in the 'title' and 'content' columns of the 'translations' relation
+            'translations' => ['name', 'content', 'short_content'],
+        ];
     }
 }

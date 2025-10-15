@@ -2,10 +2,9 @@
 
 namespace HMsoft\Cms\Providers;
 
-use FFI;
 use HMsoft\Cms\Console\Commands\CmsInstallCommand;
+use HMsoft\Cms\Routing\CmsRouteManager;
 use HMsoft\Cms\Services\BindingService;
-use HMsoft\Cms\Support\ExtensionManager;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,7 +20,6 @@ class CmsServiceProvider extends ServiceProvider
         RepositoryServiceProvider::class,
         // AuthServiceProvider::class, // DISABLED: Authorization logic commented out
         // AuthorizationServiceProvider::class, // DISABLED: Authorization logic commented out
-        BroadcastServiceProvider::class,
         RouteServiceProvider::class,
         MiddlewareServiceProvider::class,
         UtilsServiceProvider::class,
@@ -59,11 +57,16 @@ class CmsServiceProvider extends ServiceProvider
             'cms_constants'
         );
 
-        // $this->applyModelExtensions();
-        // $this->applyControllerExtensions();
-        // $this->applyResourceExtensions();
+        $this->app->singleton(Cms::class, function () {
+            return new Cms();
+        });
 
-        ExtensionManager::applyAll();
+        $this->app->singleton('cms.route-manager', function () {
+            return new CmsRouteManager();
+        });
+
+        // يمكنك أيضًا تسجيل الـ Facade هنا إذا لم تكن تستخدم auto-discovery
+        $this->app->alias('CmsRoute', \HMsoft\Cms\Facades\CmsRoute::class);
 
 
         $this->app->singleton('cms.binding-service', BindingService::class);
@@ -127,5 +130,4 @@ class CmsServiceProvider extends ServiceProvider
         // This allows end-developers to define their own models in the config
         Relation::morphMap(config('cms.morph_map', []));
     }
-
 }

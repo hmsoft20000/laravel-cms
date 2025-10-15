@@ -43,110 +43,6 @@ class Statistics extends GeneralModel
 
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | AutoFilterable Interface Implementation (The New Advanced Way)
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * {@inheritdoc}
-     * This is the most important new method. It tells the JoinManager which
-     * relationships are available for joining. The key is the API-friendly name,
-     * and the value is the actual Eloquent method name on this model.
-     */
-    public function defineRelationships(): array
-    {
-        return [
-            // 'Public API Name' => 'eloquentMethodName'
-            'translations' => 'translations',
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * The field selection map is now much simpler.
-     * It just maps an API field name to either a base table column or a
-     * 'relationship.column' string. The service handles the rest.
-     */
-    public function defineFieldSelectionMap(): array
-    {
-        $defaultMap = parent::defineFieldSelectionMap();
-
-        $customMap = [
-            // 'Public API Name' => 'relationship_name.column_name' OR 'base_column'
-            'title' => 'translations.title',
-            'value' => 'translations.value',
-            'icon' => 'icon',
-            'type' => 'type',
-        ];
-
-        return array_merge($defaultMap, $customMap);
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of attributes that can be specifically filtered.
-     */
-    public function defineFilterableAttributes(): array
-    {
-        return parent::defineFilterableAttributes();
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of attributes that can be sorted.
-     */
-    public function defineSortableAttributes(): array
-    {
-        return [
-            'sort_number',
-            'created_at',
-            'updated_at',
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines columns from the main table for the global search.
-     */
-    public function defineGlobalSearchBaseAttributes(): array
-    {
-        return [
-            'title',
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines columns from the translation table for the global search.
-     */
-    public function defineGlobalSearchTranslationAttributes(): array
-    {
-        return [
-            'title',
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * Specifies the name of the translation table.
-     */
-    public function defineTranslationTableName(): ?string
-    {
-        return (new StatisticsTranslation())->getTable();
-    }
-
-    /**
-     * {@inheritdoc}
-     * Specifies the foreign key in the translation table.
-     */
-    public function defineForeignKeyInTranslationTable(): ?string
-    {
-        return 'statistics_id';
-    }
-
-
     /**
      * Get the attributes that should be cast.
      *
@@ -169,5 +65,71 @@ class Statistics extends GeneralModel
     public function translations(): HasMany
     {
         return $this->hasMany(StatisticsTranslation::class, 'statistics_id');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AutoFilterable Interface Implementation (The New Advanced Way)
+    |--------------------------------------------------------------------------
+    */
+
+    public function defineRelationships(): array
+    {
+        return [
+            // 'Public API Name' => 'eloquentMethodName'
+            'translations' => 'translations',
+        ];
+    }
+
+    public function defineFieldSelectionMap(): array
+    {
+        $defaultMap = parent::defineFieldSelectionMap();
+
+        $customMap = [
+            // 'Public API Name' => 'relationship_name.column_name' OR 'base_column'
+            'title' => 'translations.title',
+            'value' => 'translations.value',
+            'icon' => 'icon',
+            'type' => 'type',
+        ];
+
+        return array_merge($defaultMap, $customMap);
+    }
+
+    public function defineFilterableAttributes(): array
+    {
+        $baseColums = parent::defineFilterableAttributes();
+
+        $relatedAttributes = [
+            'translations.title',
+            'translations.value',
+        ];
+
+        return array_merge($baseColums, $relatedAttributes);
+    }
+
+    public function defineSortableAttributes(): array
+    {
+        $baseColums = parent::defineSortableAttributes();
+
+        $relatedAttributes = [
+            'translations.title',
+            'translations.value',
+        ];
+
+        return array_merge($baseColums, $relatedAttributes);
+    }
+
+    public function defineGlobalSearchBaseAttributes(): array
+    {
+        return [];
+    }
+
+    public function defineGlobalSearchRelatedAttributes(): array
+    {
+        return [
+            'translations' => ['title', 'value'],
+        ];
     }
 }

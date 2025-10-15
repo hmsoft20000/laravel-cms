@@ -46,7 +46,7 @@ class StatisticsRepository implements StatisticsRepositoryInterface
 
             $this->syncSingleImage($model, $data, $this->mediaRepository);
 
-            return $model->refresh();
+            return $this->show($model->refresh());
         });
     }
 

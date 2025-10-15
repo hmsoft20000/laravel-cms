@@ -2,61 +2,194 @@
 
 namespace HMsoft\Cms\Models\Content;
 
+use HMsoft\Cms\Models\GeneralModel;
+use HMsoft\Cms\Models\Shared\Attribute as CustomAttribute;
+use HMsoft\Cms\Models\Shared\Category;
+use HMsoft\Cms\Traits\Attributes\HasAttributeValues;
+use HMsoft\Cms\Traits\Categories\Categorizable;
+use HMsoft\Cms\Traits\Blogs\HasNestedBlogs;
+use HMsoft\Cms\Traits\Downloads\HasDownloads;
+use HMsoft\Cms\Traits\Faqs\HasFaqs;
+use HMsoft\Cms\Traits\Features\HasFeatures;
+use HMsoft\Cms\Traits\General\FileManagerTrait;
+use HMsoft\Cms\Traits\General\Linkable;
+use HMsoft\Cms\Traits\Keywords\HasKeywords;
+use HMsoft\Cms\Traits\Media\DeletesAllMedia;
+use HMsoft\Cms\Traits\Media\HasMedia;
+use HMsoft\Cms\Traits\Plans\HasPlans;
+use HMsoft\Cms\Traits\Services\HasNestedServices;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Builder;
-use HMsoft\Cms\Traits\Blogs\HasBlogs;
 
-/**
- * Portfolio Model.
- *
- * Extends the base Post model and automatically applies a global scope
- * to only query for posts of type 'portfolio'.
- */
-class Portfolio extends Post
+class Portfolio extends GeneralModel
 {
-    use  HasBlogs;
+    use
+        FileManagerTrait,
+        Categorizable,
+        HasFeatures,
+        Linkable,
+        HasMedia,
+        HasFaqs,
+        HasDownloads,
+        HasPlans,
+        DeletesAllMedia,
+        HasKeywords,
+        HasAttributeValues,
+        HasNestedBlogs,
+        HasNestedServices;
 
-    /**
-     * The value for the 'type' column in the 'posts' table.
-     * Used for scoping and creating new models.
-     */
-    const POST_TYPE = 'portfolio';
+    protected $table = 'portfolios';
 
-    /**
-     * The table associated with the model.
-     * It's the same as the parent Post model table.
-     *
-     * @var string
-     */
-    protected $table = 'posts';
+    protected $guarded = ['id'];
 
-    /**
-     * The "booted" method of the model.
-     *
-     * This method automatically applies a global scope to all queries
-     * for this model, ensuring only 'portfolio' type posts are returned.
-     */
-    protected static function booted(): void
+
+    protected function casts(): array
     {
-        parent::booted(); // This is important to not override parent boot methods
+        return [
+            'is_active' => 'boolean',
+            'show_in_footer' => 'boolean',
+            'show_in_header' => 'boolean',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'parent_id' => 'integer',
+            'owner_id' => 'integer',
+        ];
+    }
 
-        static::addGlobalScope('type', function (Builder $builder) {
-            $builder->where('type', 'portfolio');
-        });
+    public function getMorphClass()
+    {
+        return 'portfolio';
+    }
+
+    // =================================================================
+    // RELATIONS
+    // =================================================================
+
+    public function categories()
+    {
+        return $this->morphToMany(
+            Category::class,
+            'owner',
+            'categorizables',
+            'owner_id',
+            'category_id'
+        );
     }
 
     /**
-     * Overrides the default newInstance method to set the type attribute automatically.
-     * This ensures that when you do `new Portfolio()`, the 'type' is pre-filled.
+     * Get the parent owner model (e.g., Product, User).
      */
-    public function newInstance($attributes = [], $exists = false)
+    public function owner(): MorphTo
     {
-        $model = parent::newInstance($attributes, $exists);
+        return $this->morphTo('owner');
+    }
 
-        // Only set the type for new, non-existing models
-        if (!$exists) {
-            $model->setAttribute('type', self::POST_TYPE);
-        }
+    /**
+     * Get all translations for the Post.
+     */
+    public function translations(): HasMany
+    {
+        return $this->hasMany(PortfolioTranslation::class);
+    }
 
-        return $model;
+    /**
+     * Scope a query to only include attributes of a given type.
+     */
+    public function scopeOfType(Builder $query, string $type): void
+    {
+        $query->where('owner_type', $type);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | AutoFilterable Interface Implementation (The New Advanced Way)
+    |--------------------------------------------------------------------------
+    */
+
+    public function defineRelationships(): array
+    {
+        return [
+            // 'Public API Name' => 'eloquentMethodName'
+            'translations' => 'translations',
+            'categories' => 'categories',
+            'organizations' => 'organizations',
+            'partners' => 'partners',
+            'sponsors' => 'sponsors',
+            'media' => 'media',
+            'keywords' => 'keywords',
+            'features' => 'features',
+            'downloads' => 'downloads',
+            'plans' => 'plans',
+            'faqs' => 'faqs',
+            'attributeValues' => 'attributeValues',
+        ];
+    }
+
+    public function defineFieldSelectionMap(): array
+    {
+        $defaultMap = parent::defineFieldSelectionMap();
+
+        $customMap = [
+            // 'Public API Name' => 'relationship_name.column_name' OR 'base_column'
+            'title' => 'translations.title',
+            'content' => 'translations.content',
+            'short_content' => 'translations.short_content',
+        ];
+
+        return array_merge($defaultMap, $customMap);
+    }
+
+    public function defineFilterableAttributes(): array
+    {
+
+        $baseColumns = parent::defineFilterableAttributes();
+
+        $relatedAttributes = [
+            'translations.title', // <-- Allow filtering by the translated title
+            'categories.id',      // <-- Allow filtering by category ID
+        ];
+
+        // Logic for custom attributes remains the same
+        $customAttributeIds = CustomAttribute::ofScope('portfolio')->where('is_filterable', true)
+            ->pluck('id')
+            ->toArray();
+
+        $customAttributeFilters = array_map(fn($id) => 'attribute_' . $id, $customAttributeIds);
+
+        return array_merge($baseColumns, $relatedAttributes, $customAttributeFilters);
+    }
+
+    public function defineSortableAttributes(): array
+    {
+        $baseColumns = parent::defineSortableAttributes();
+
+        $relatedAttributes = [
+            'translations.title', // <-- Allow sorting by the translated title
+        ];
+
+        // Logic for custom attributes remains the same
+        $customAttributeIds = CustomAttribute::ofScope('portfolio')->where('is_filterable', true)
+            ->pluck('id')
+            ->toArray();
+
+        $customAttributeFilters = array_map(fn($id) => 'attribute_' . $id, $customAttributeIds);
+
+        return array_merge($baseColumns, $customAttributeFilters, $relatedAttributes);
+    }
+    public function defineGlobalSearchBaseAttributes(): array
+    {
+        return [];
+    }
+
+    public function defineGlobalSearchRelatedAttributes(): array
+    {
+        return [
+            // Search in the 'title' and 'content' columns of the 'translations' relation
+            'translations' => ['title', 'content', 'short_content'],
+
+            // You could even search in deeply nested relations
+            // 'categories.translations' => ['name', 'description']
+        ];
     }
 }

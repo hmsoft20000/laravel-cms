@@ -1,14 +1,26 @@
 <?php
 
 use HMsoft\Cms\Http\Controllers\Api\StatisticsController;
-use Illuminate\Support\Facades\Route;
+use HMsoft\Cms\Routing\RouteRegistrar;
 
-Route::controller(StatisticsController::class)->group(function () {
-    Route::get('/', 'index')->name('index');
-    Route::post('/', 'store')->name('store');
-    Route::put('/update-all', 'updateAll')->name('updateAll');
-    Route::get('/{statistics}', 'show')->name('show');
-    Route::put('/{statistics}', 'update')->name('update');
-    Route::delete('/{statistics}', 'destroy')->name('destroy');
-    Route::post('/{statistics}/image', 'updateImage')->name('updateImage');
-});
+return [
+    /**
+     * Define the default controller for this route module.
+     * This can be overridden by the ->controller() method in the Blueprint.
+     */
+    'controller' => StatisticsController::class,
+
+    /**
+     * Define the routes for this module.
+     * The routes will be automatically wrapped in a group with the correct controller.
+     */
+    'routes' => function (RouteRegistrar $registrar) {
+        $registrar->get('/', 'index')->name('index');
+        $registrar->post('/', 'store')->name('store');
+        $registrar->put('/update-all', 'updateAll')->name('updateAll');
+        $registrar->get('/{statistics}', 'show')->name('show');
+        $registrar->put('/{statistics}', 'update')->name('update');
+        $registrar->delete('/{statistics}', 'destroy')->name('destroy');
+        $registrar->post('/{statistics}/image', 'updateImage')->name('updateImage');
+    }
+];

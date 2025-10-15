@@ -38,7 +38,6 @@ class LangPolicy
      */
     public function view($user, Lang $lang): bool
     {
-        info("sssss");
         // Allow guest users to view langs
         if (!$user || $this->authService->isAuthenticated() === false) {
             return true;

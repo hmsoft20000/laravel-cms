@@ -1,0 +1,24 @@
+<?php
+
+use HMsoft\Cms\Http\Controllers\Api\PortfolioController;
+use HMsoft\Cms\Routing\RouteRegistrar;
+
+return [
+    /**
+     * Define the default controller for this route module.
+     * This can be overridden by the ->controller() method in the Blueprint.
+     */
+    'controller' => PortfolioController::class,
+
+    /**
+     * Define the routes for this module.
+     * The routes will be automatically wrapped in a group with the correct controller.
+     */
+    'routes' => function (RouteRegistrar $registrar) {
+        $registrar->get('/', 'index')->name('index');
+        $registrar->post('/', 'store')->name('store');
+        $registrar->get('/{portfolio}', 'show')->name('show');
+        $registrar->post('/{portfolio}', 'update')->name('update');
+        $registrar->delete('/{portfolio}', 'destroy')->name('destroy');
+    }
+];

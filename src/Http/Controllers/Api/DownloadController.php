@@ -61,7 +61,13 @@ class DownloadController extends Controller
     public function store(StoreDownloadRequest $request, Model $owner): JsonResponse
     {
         // $this->authorize('create', Download::class);
-        $download = $this->repository->store($request->validated());
+        $validated = $request->validated();
+        $ownerData = [
+            'owner_id' => $owner->id,
+            'owner_type' => $owner->getMorphClass(),
+        ];
+        $validated = array_merge($validated, $ownerData);
+        $download = $this->repository->store($validated);
         return successResponse(
             message: translate('cms::messages.added_successfully'),
             data: new DownloadResource($download),

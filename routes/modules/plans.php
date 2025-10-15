@@ -1,22 +1,24 @@
 <?php
 
 use HMsoft\Cms\Http\Controllers\Api\PlanController;
-use Illuminate\Support\Facades\Route;
+use HMsoft\Cms\Routing\RouteRegistrar;
 
-$ownerUrlName = $config['options']['owner_url_name'];
+return [
+    /**
+     * Controller for this module's routes.
+     */
+    'controller' => PlanController::class,
 
-
-Route::controller(PlanController::class)->group(function () use ($ownerUrlName) {
-
-    Route::get("/{$ownerUrlName}/{owner}/plans", 'index')->name("index");
-
-    Route::post("/{$ownerUrlName}/{owner}/plans", 'store')->name("store");
-
-    Route::get("/{$ownerUrlName}/{owner}/plans/{plan:id}", 'show')->name("show");
-
-    Route::put("/{$ownerUrlName}/{owner}/plans/{plan:id}", 'update')->name("update");
-
-    Route::delete("/{$ownerUrlName}/{owner}/plans/{plan:id}", 'destroy')->name("destroy");
-
-    Route::put("/{$ownerUrlName}/{owner}/plans/update-all", 'updateAll')->name('updateAll');
-});
+    /**
+     * Routes for this module.
+     * The prefix (e.g., 'portfolios/{owner}/plans') is applied by the CmsRouteManager.
+     */
+    'routes' => function (RouteRegistrar $registrar) {
+        $registrar->get('/', 'index')->name('index');
+        $registrar->post('/', 'store')->name('store');
+        $registrar->put('/update-all', 'updateAll')->name('updateAll');
+        $registrar->get('/{plan}', 'show')->name('show');
+        $registrar->put('/{plan}', 'update')->name('update');
+        $registrar->delete('/{plan}', 'destroy')->name('destroy');
+    }
+];

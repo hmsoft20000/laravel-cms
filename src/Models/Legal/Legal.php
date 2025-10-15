@@ -27,26 +27,6 @@ class Legal extends GeneralModel
     protected $guarded = ['id'];
 
 
-    /**
-     * {@inheritdoc}
-     * This method is required by the interface to specify the translation table name.
-     */
-    public function defineTranslationTableName(): ?string
-    {
-        // Provide the exact name of your translation table.
-        return 'legal_translations';
-    }
-
-    /**
-     * {@inheritdoc}
-     * This method is required by the interface to specify the foreign key in the translation table.
-     */
-    public function defineForeignKeyInTranslationTable(): ?string
-    {
-        // This is the column in 'translations' that links back to the 'type' table.
-        return 'legal_id';
-    }
-
 
     /**
      * Get the attributes that should be cast.

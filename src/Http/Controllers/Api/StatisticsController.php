@@ -44,7 +44,8 @@ class StatisticsController extends Controller
     {
         // $this->authorize('view', $statistics);
 
-        $statistics->load(['translations', 'image']);
+        $statistics = $this->repo->show($statistics);
+
         return  successResponse(
             data: (new StatisticsResource($statistics))->withFields(request()->get('fields'))
         );
@@ -87,6 +88,7 @@ class StatisticsController extends Controller
         // $this->authorize('updateAny', Statistics::class);
 
         $updatedStatistics = [];
+        
         foreach ($request->all() as $featureData) {
             if (isset($featureData['id'])) {
                 $statistics = Statistics::findOrFail($featureData['id']);

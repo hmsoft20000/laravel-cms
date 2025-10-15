@@ -24,7 +24,7 @@ class StoreAttributeRequest extends MyRequest
         }
         
         // Add scope from route to the request data
-        $scope = $this->route('scope');
+        $scope = $this->route('type');
         if ($scope) {
             $this->merge(['scope' => $scope]);
         }
@@ -32,7 +32,7 @@ class StoreAttributeRequest extends MyRequest
 
     public function rules(): array
     {
-        $scope = $this->route('scope');
+        $scope = $this->route('type');
         return $this->getAttributeRules($scope, 'create');
     }
 }

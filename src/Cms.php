@@ -2,115 +2,55 @@
 
 namespace HMsoft\Cms;
 
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\App;
 use Closure;
 
+/**
+ * The core class for managing CMS extensions and configurations.
+ *
+ * الكلاس الأساسي لإدارة توسعات وإعدادات نظام إدارة المحتوى.
+ */
 class Cms
 {
     /**
-     * يقوم بتسجيل كل مسارات الـ API الخاصة بالحزمة بناءً على ملف الإعدادات.
-     * يقبل دالة callback اختيارية للسماح للمطور بإضافة مساراته المخصصة.
+     * Stores all registered extension mappings.
+     * @var array
      */
-    public static function apiRoutes(?Closure $callback = null): void
+    protected static array $extensions = [];
+
+    /**
+     * The main method for developers to register their extensions.
+     * الدالة الرئيسية للمطورين لتسجيل توسعاتهم.
+     *
+     * @param Closure $callback A closure that receives this Cms instance.
+     */
+    public static function extend(Closure $callback): void
     {
-
-        $globalPrefix = config('cms.api_prefix', 'cms-api');
-        $routeModules = config('cms.routes', []);
-
-        Route::prefix($globalPrefix)->group(function () use ($routeModules, $callback) {
-
-            // =================================================================
-            // الخطوة 1: تسجيل كل المسارات من الملفات
-            // =================================================================
-
-
-            foreach ($routeModules as $module => $config) {
-                // تحقق إذا كانت الوحدة مفعلة في الإعدادات
-                if (isset($config['enabled']) && $config['enabled'] === true) {
-
-                    Route::group([
-                        'prefix' => $config['prefix'] ?? $module,
-                        'middleware' => $config['middleware'] ?? 'api',
-                        'as' => $config['as'] ?? "api.{$module}.",
-                    ], function () use ($config, $module) {
-                        // المتغيرات $config و $module ستكون متاحة داخل ملف المسار
-                        if (isset($config['file'])) {
-                            $filePath = $config['file'];
-                            // ======================================================
-                            // المنطق الذكي الجديد هنا
-                            // ======================================================
-                            // التحقق مما إذا كان المسار المقدم ليس مسارًا مطلقًا
-                            // المسار المطلق يبدأ بـ "/" أو "C:\" (للـ Windows)
-                            if (!str_starts_with($filePath, '/') && !preg_match('/^[a-zA-Z]:\\\\/', $filePath)) {
-                                // إذا لم يكن مطلقًا، قم ببناء المسار الافتراضي من داخل الحزمة
-                                $filePath = __DIR__ . '/../routes/modules/' . $filePath;
-                            }
-
-                            if (file_exists($filePath)) {
-                                require $filePath;
-                            }
-                        }
-                    });
-                }
-            }
-
-            // =================================================================
-            // الخطوة 2: تطبيق التجاوزات (Overrides) من ملف الإعدادات
-            // =================================================================
-            self::applyRouteOverrides();
-
-            // =================================================================
-            // الخطوة 3: تنفيذ أي مسارات مخصصة من المطور
-            // =================================================================
-            if ($callback) {
-                $callback();
-            }
-        });
+        $callback(app(static::class));
     }
 
     /**
-     * يقرأ مصفوفة 'overrides' من الإعدادات ويطبقها على المسارات المسجلة.
-     * هذا هو الجزء الذي يمنح المطورين التحكم الدقيق.
+     * Replaces a core package class with a custom class.
+     * استبدال كلاس أساسي من الحزمة بكلاس مخصص.
+     *
+     * @param string $original The original class from the package.
+     * @param string $extended The developer's custom class.
      */
-    private static function applyRouteOverrides(): void
+    public function replace(string $original, string $extended): void
     {
-        $overrides = config('cms.overrides', []);
-        $routes = Route::getRoutes();
+        static::$extensions[$original] = $extended;
+        App::bind($original, $extended);
+    }
 
-        foreach ($overrides as $routeName => $config) {
-            /** @var \Illuminate\Routing\Route|null $route */
-            $route = $routes->getByName($routeName);
-
-            // تجاهل إذا كان اسم المسار غير موجود
-            if (!$route) {
-                continue;
-            }
-
-            // الخيار 1: تعطيل المسار
-            if (isset($config['enabled']) && $config['enabled'] === false) {
-                // الطريقة الأسهل لـ "تعطيل" مسار هي جعله يرجع خطأ 404
-                $route->setAction(['uses' => function () {
-                    abort(404);
-                }]);
-                continue; // انتقل للمسار التالي
-            }
-
-            // الخيار 2: تغيير الـ URI
-            if (isset($config['uri'])) {
-                // نأخذ البادئة من المسار الأصلي ونضيف الـ URI الجديد
-                $route->setUri(trim($route->getPrefix(), '/') . '/' . trim($config['uri'], '/'));
-            }
-
-            // الخيار 3: استبدال أو إضافة Middleware
-            if (isset($config['middleware'])) {
-                // setMiddleware سيقوم باستبدال كل الـ middleware القديم
-                $route->middleware($config['middleware']);
-            }
-
-            // الخيار 4: تغيير الـ Controller@method (الفعل)
-            if (isset($config['action'])) {
-                $route->uses($config['action']);
-            }
-        }
+    /**
+     * Get the extended class for a given original class, if it exists.
+     * جلب الكلاس الموسع لكلاس أصلي معين، إذا كان موجودًا.
+     *
+     * @param string $original
+     * @return string|null
+     */
+    public static function getExtendedFor(string $original): ?string
+    {
+        return static::$extensions[$original] ?? null;
     }
 }

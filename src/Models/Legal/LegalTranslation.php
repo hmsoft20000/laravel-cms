@@ -46,10 +46,4 @@ class LegalTranslation extends GeneralModel
         return $this->belongsTo(Legal::class, foreignKey: 'legal_id', ownerKey: 'id');
     }
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function (Model $model) {});
-    }
 }

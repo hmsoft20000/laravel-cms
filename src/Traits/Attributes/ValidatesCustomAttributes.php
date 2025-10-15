@@ -12,17 +12,16 @@ trait ValidatesCustomAttributes
      *
      * @return array
      */
-    protected function getAttributeValidationRules(): array
+    protected function getAttributeValidationRules(string $type, string $prefix = null): array
     {
         $rules = [];
-        $postType = $this->input('type'); // Assumes 'type' is present
 
         // Validate the top-level attribute_values array
         $rules['attribute_values'] = ['sometimes', 'array'];
         $rules['attribute_values.*.attribute_id'] = [
             'required',
             'integer',
-            Rule::exists('attributes', 'id')->where('scope', $postType)
+            Rule::exists('attributes', 'id')->where('scope', $type)
         ];
         $rules['attribute_values.*.locale'] = ['nullable', 'string'];
         $rules['attribute_values.*.value'] = ['nullable'];
@@ -34,7 +33,7 @@ trait ValidatesCustomAttributes
             return $rules;
         }
 
-        $attributes = Attribute::whereIn('id', $attributeIds)->where('scope', $postType)->get()->keyBy('id');
+        $attributes = Attribute::whereIn('id', $attributeIds)->where('scope', $type)->get()->keyBy('id');
 
         foreach ($this->attribute_values ?? [] as $index => $attrValue) {
             if (isset($attributes[$attrValue['attribute_id']])) {

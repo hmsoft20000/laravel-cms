@@ -61,7 +61,13 @@ class FaqController extends Controller
     public function store(StoreFaqRequest $request, Model $owner): JsonResponse
     {
         // $this->authorize('create', Feature::class);
-        $faq = $this->repository->store($request->validated());
+        $validated = $request->validated();
+        $ownerData = [
+            'owner_id' => $owner->id,
+            'owner_type' => $owner->getMorphClass(),
+        ];
+        $validated = array_merge($validated, $ownerData);
+        $faq = $this->repository->store($validated);
         return successResponse(
             message: translate('cms::messages.added_successfully'),
             data: new FaqResource($faq),

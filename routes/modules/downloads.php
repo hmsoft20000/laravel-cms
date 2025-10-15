@@ -1,19 +1,24 @@
 <?php
 
 use HMsoft\Cms\Http\Controllers\Api\DownloadController;
-use Illuminate\Support\Facades\Route;
+use HMsoft\Cms\Routing\RouteRegistrar;
 
+return [
+    /**
+     * Controller for this module's routes.
+     */
+    'controller' => DownloadController::class,
 
-$ownerUrlName = $config['options']['owner_url_name'];
-
-
-Route::controller(DownloadController::class)->group(function () use ($ownerUrlName) {
-    Route::get("/{$ownerUrlName}/{owner}/downloads", 'index')->name('index');
-    Route::post("/{$ownerUrlName}/{owner}/downloads", 'store')->name('store');
-    Route::get("/{$ownerUrlName}/{owner}/downloads/{download:id}", 'show')->name('show');
-    Route::put("/{$ownerUrlName}/{owner}/downloads/{download:id}", 'update')->name('update');
-    Route::delete("/{$ownerUrlName}/{owner}/downloads/{download:id}", 'destroy')->name('destroy');
-
-    Route::post("/{$ownerUrlName}/{owner}/downloads/update-all", 'updateAll')->name('updateAll');
-    Route::post("/{$ownerUrlName}/{owner}/downloads/{download:id}/image", 'updateImage')->name('updateImage');
-});
+    /**
+     * Routes for this module.
+     * The prefix (e.g., 'portfolios/{owner}/downloads') is applied by the CmsRouteManager.
+     */
+    'routes' => function (RouteRegistrar $registrar) {
+        $registrar->get('/', 'index')->name('index');
+        $registrar->post('/', 'store')->name('store');
+        $registrar->put('/update-all', 'updateAll')->name('updateAll');
+        $registrar->get('/{download}', 'show')->name('show');
+        $registrar->put('/{download}', 'update')->name('update');
+        $registrar->delete('/{download}', 'destroy')->name('destroy');
+    }
+];

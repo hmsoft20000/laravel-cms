@@ -5,38 +5,38 @@ namespace HMsoft\Cms\Enums;
 use ArchTech\Enums\Names;
 use ArchTech\Enums\From;
 
-enum FilterFnsEnum
+enum FilterFnsEnum: string
 {
     use From, Names;
 
-    case between;
-    case betweenInclusive;
-    case contains;
-    case empty;
-    case endsWith;
-    case equals;
-    case fuzzy;
-    case greaterThan;
-    case greaterThanOrEqualTo;
-    case lessThan;
-    case lessThanOrEqualTo;
-    case notEmpty;
-    case notEquals;
-    case startsWith;
-    case includesString;
-    case includesStringSensitive;
-    case equalsString;
-    case arrIncludes;
-    case arrIncludesAll;
-    case arrIncludesSome;
-    case weakEquals;
-    case inNumberRange;
+    case between = 'between';
+    case betweenInclusive = 'betweenInclusive';
+    case contains = 'contains';
+    case empty = 'empty';
+    case endsWith = 'endsWith';
+    case equals = 'equals';
+    case fuzzy = 'fuzzy';
+    case greaterThan = 'greaterThan';
+    case greaterThanOrEqualTo = 'greaterThanOrEqualTo';
+    case lessThan = 'lessThan';
+    case lessThanOrEqualTo = 'lessThanOrEqualTo';
+    case notEmpty = 'notEmpty';
+    case notEquals = 'notEquals';
+    case startsWith = 'startsWith';
+    case includesString = 'includesString';
+    case includesStringSensitive = 'includesStringSensitive';
+    case equalsString = 'equalsString';
+    case arrIncludes = 'arrIncludes';
+    case arrIncludesAll = 'arrIncludesAll';
+    case arrIncludesSome = 'arrIncludesSome';
+    case weakEquals = 'weakEquals';
+    case inNumberRange = 'inNumberRange';
 
-    case dayEquals;
+    case dayEquals = 'dayEquals';
 
-    case in;
-    case notIn;
-    case notContains;
-    case notStartsWith;
-    case notEndsWith;
+    case in = 'in';
+    case notIn = 'notIn';
+    case notContains = 'notContains';
+    case notStartsWith = 'notStartsWith';
+    case notEndsWith = 'notEndsWith';
 }

@@ -33,6 +33,9 @@ class AuthServiceProvider extends ServiceProvider
 
         // Content Models
         // \HMsoft\Cms\Models\Content\Post::class => \HMsoft\Cms\Policies\PostPolicy::class,
+        // \HMsoft\Cms\Models\Content\Portfolio::class => \HMsoft\Cms\Policies\PortfolioPolicy::class,
+        // \HMsoft\Cms\Models\Content\Blog::class => \HMsoft\Cms\Policies\BlogPolicy::class,
+        // \HMsoft\Cms\Models\Content\Service::class => \HMsoft\Cms\Policies\ServicePolicy::class,
 
         // Legal Models
         // \HMsoft\Cms\Models\Legal\Legal::class => \HMsoft\Cms\Policies\LegalPolicy::class,

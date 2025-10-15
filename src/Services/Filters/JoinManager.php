@@ -3,10 +3,12 @@
 namespace HMsoft\Cms\Services\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 
@@ -14,86 +16,117 @@ class JoinManager
 {
     private array $aliases = [];
     private Builder $query;
+    private Model $mainModel;
     private string $mainTableAlias;
 
     public function __construct(Builder $query, string $mainTableAlias)
     {
         $this->query = $query;
+        $this->mainModel = $query->getModel();
         $this->mainTableAlias = $mainTableAlias;
-    }
-
-    public function ensureJoin(string $relationName): string
-    {
-        if (isset($this->aliases[$relationName])) {
-            return $this->aliases[$relationName];
-        }
-
-        $model = $this->query->getModel();
-        $relationMethod = Str::camel($relationName);
-
-        if (!method_exists($model, $relationMethod)) {
-            throw new \Exception("Relation '{$relationName}' does not exist on model " . get_class($model));
-        }
-
-        /** @var Relation $relationObject */
-        $relationObject = $model->$relationMethod();
-        $relatedTable = $relationObject->getRelated()->getTable();
-        $alias = 't_' . Str::snake($relationName);
-
-        // ## LOGIC FOR ALL RELATIONSHIP TYPES ##
-
-        if ($relationObject instanceof HasOne || $relationObject instanceof HasMany) {
-            // Handles both HasOne and HasMany relationships.
-            // Example: A Post `hasOne` FeaturedImage or `hasMany` Comments.
-            // JOIN `comments` ON `t_main`.`id` = `t_comments`.`post_id`
-            $this->query->leftJoin(
-                "{$relatedTable} as {$alias}",
-                "{$this->mainTableAlias}." . $relationObject->getLocalKeyName(),
-                '=',
-                "{$alias}." . $relationObject->getForeignKeyName()
-            );
-        } elseif ($relationObject instanceof BelongsTo) {
-            // Handles BelongsTo relationships.
-            // Example: A Post `belongsTo` an Author.
-            // JOIN `users` ON `t_main`.`user_id` = `t_author`.`id`
-            $this->query->leftJoin(
-                "{$relatedTable} as {$alias}",
-                "{$this->mainTableAlias}." . $relationObject->getForeignKeyName(),
-                '=',
-                "{$alias}." . $relationObject->getOwnerKeyName()
-            );
-        } elseif ($relationObject instanceof BelongsToMany) {
-            // Handles BelongsToMany relationships.
-            // This requires joining the intermediate "pivot" table first.
-            // Example: A Post `belongsToMany` Tags, via the `post_tag` pivot table.
-
-            $pivotTable = $relationObject->getTable(); // e.g., 'post_tag'
-            $pivotAlias = 'pivot_' . Str::snake($relationName); // e.g., 'pivot_tags'
-
-            // 1. Join the PIVOT table to the MAIN table
-            $this->query->leftJoin(
-                "{$pivotTable} as {$pivotAlias}",
-                "{$this->mainTableAlias}." . $relationObject->getParentKeyName(),
-                '=',
-                "{$pivotAlias}." . $relationObject->getForeignPivotKeyName()
-            );
-
-            // 2. Join the RELATED table to the PIVOT table
-            $this->query->leftJoin(
-                "{$relatedTable} as {$alias}",
-                "{$pivotAlias}." . $relationObject->getRelatedPivotKeyName(),
-                '=',
-                "{$alias}." . $relationObject->getRelatedKeyName()
-            );
-        } else {
-            throw new \Exception("Unsupported relationship type for JoinManager: " . get_class($relationObject));
-        }
-
-        return $this->aliases[$relationName] = $alias;
     }
 
     public function getMainTableAlias(): string
     {
         return $this->mainTableAlias;
+    }
+
+    /**
+     * Ensures that all relationships in a given path are joined to the query.
+     * It handles nested relationships by joining them sequentially.
+     * Example: 'categories.sector.translations'
+     *
+     * @param string $relationPath The dot-notation path of relationships.
+     * @return string The final alias for the last table in the path.
+     * @throws \Exception
+     */
+    public function ensureJoin(string $relationPath): string
+    {
+        if (isset($this->aliases[$relationPath])) {
+            return $this->aliases[$relationPath];
+        }
+
+        $currentModel = $this->mainModel;
+        $parentAlias = $this->mainTableAlias;
+        $pathSegments = explode('.', $relationPath);
+        $currentPath = '';
+
+        foreach ($pathSegments as $relationName) {
+            $currentPath = $currentPath ? "{$currentPath}.{$relationName}" : $relationName;
+
+            if (isset($this->aliases[$currentPath])) {
+                $parentAlias = $this->aliases[$currentPath];
+                $eloquentMethod = Str::camel($relationName);
+                $currentModel = $currentModel->$eloquentMethod()->getRelated();
+                continue;
+            }
+
+            $alias = 't_' . Str::snake(str_replace('.', '_', $currentPath));
+
+            $eloquentMethod = Str::camel($relationName);
+            if (!method_exists($currentModel, $eloquentMethod)) {
+                throw new \Exception("Relation '{$eloquentMethod}' does not exist on model " . get_class($currentModel));
+            }
+
+            /** @var Relation $relationObject */
+            $relationObject = $currentModel->$eloquentMethod();
+            $relatedTable = $relationObject->getRelated()->getTable();
+
+            $this->performJoin($relationObject, $relatedTable, $alias, $parentAlias);
+
+            $currentModel = $relationObject->getRelated();
+            $parentAlias = $alias;
+            $this->aliases[$currentPath] = $alias;
+        }
+
+        return $parentAlias;
+    }
+
+    /**
+     * Performs the appropriate database join based on the Eloquent relation type.
+     */
+    private function performJoin(Relation $relation, string $relatedTable, string $alias, string $parentAlias): void
+    {
+        if ($relation instanceof HasOne || $relation instanceof HasMany) {
+            $this->query->leftJoin(
+                "{$relatedTable} as {$alias}",
+                "{$parentAlias}." . $relation->getLocalKeyName(),
+                '=',
+                "{$alias}." . $relation->getForeignKeyName()
+            );
+        } elseif ($relation instanceof BelongsTo) {
+            $this->query->leftJoin(
+                "{$parentAlias}." . $relation->getForeignKeyName(),
+                '=',
+                "{$alias}." . $relation->getOwnerKeyName()
+            );
+        } elseif ($relation instanceof BelongsToMany) {
+            $pivotTable = $relation->getTable();
+            $pivotAlias = 'pivot_' . Str::snake(str_replace('.', '_', $alias));
+
+            $this->query->leftJoin(
+                "{$pivotTable} as {$pivotAlias}",
+                function ($join) use ($relation, $parentAlias, $pivotAlias) {
+                    $join->on(
+                        "{$parentAlias}." . $relation->getParentKeyName(),
+                        '=',
+                        "{$pivotAlias}." . $relation->getForeignPivotKeyName()
+                    );
+
+                    if ($relation instanceof MorphToMany) {
+                        $join->where("{$pivotAlias}." . $relation->getMorphType(), $relation->getMorphClass());
+                    }
+                }
+            );
+
+            $this->query->leftJoin(
+                "{$relatedTable} as {$alias}",
+                "{$pivotAlias}." . $relation->getRelatedPivotKeyName(),
+                '=',
+                "{$alias}." . $relation->getRelatedKeyName()
+            );
+        } else {
+            throw new \Exception("Unsupported relationship type for JoinManager: " . get_class($relation));
+        }
     }
 }

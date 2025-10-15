@@ -64,4 +64,51 @@ class Faq extends GeneralModel
         $query->where('owner_type', $type);
     }
 
+    public function defineRelationships(): array
+    {
+        return [
+            'translations' => 'translations',
+        ];
+    }
+
+    public function defineFieldSelectionMap(): array
+    {
+        $defaultMap = parent::defineFieldSelectionMap();
+
+        $customMap = [
+            'question' => 'translations.question',
+        ];
+
+        return array_merge($defaultMap, $customMap);
+    }
+
+    public function defineFilterableAttributes(): array
+    {
+        $baseColumns = parent::defineFilterableAttributes();
+
+        $relatedAttributes = [
+            'translations.question',
+            'translations.answer',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineSortableAttributes(): array
+    {
+        $baseColumns = parent::defineSortableAttributes();
+
+        $relatedAttributes = [
+            'translations.question',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineGlobalSearchRelatedAttributes(): array
+    {
+        return [
+            'translations' => ['question', 'answer'],
+        ];
+    }
 }

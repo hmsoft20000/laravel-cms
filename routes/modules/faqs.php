@@ -1,18 +1,24 @@
 <?php
 
 use HMsoft\Cms\Http\Controllers\Api\FaqController;
-use Illuminate\Support\Facades\Route;
+use HMsoft\Cms\Routing\RouteRegistrar;
 
+return [
+    /**
+     * Controller for this module's routes.
+     */
+    'controller' => FaqController::class,
 
-$ownerUrlName = $config['options']['owner_url_name'];
-
-
-Route::controller(FaqController::class)->group(function () use ($ownerUrlName) {
-    Route::get("/{$ownerUrlName}/{owner}/faqs", 'index')->name('index');
-    Route::post("/{$ownerUrlName}/{owner}/faqs", 'store')->name('store');
-    Route::get("/{$ownerUrlName}/{owner}/faqs/{faq:id}", 'show')->name('show');
-    Route::put("/{$ownerUrlName}/{owner}/faqs/{faq:id}", 'update')->name('update');
-    Route::delete("/{$ownerUrlName}/{owner}/faqs/{faq:id}", 'destroy')->name('destroy');
-
-    Route::post("/{$ownerUrlName}/{owner}/faqs/update-all", 'updateAll')->name('updateAll');
-});
+    /**
+     * Routes for this module.
+     * The prefix (e.g., 'portfolios/{owner}/faqs') is applied by the CmsRouteManager.
+     */
+    'routes' => function (RouteRegistrar $registrar) {
+        $registrar->get('/', 'index')->name('index');
+        $registrar->post('/', 'store')->name('store');
+        $registrar->put('/update-all', 'updateAll')->name('updateAll');
+        $registrar->get('/{faq}', 'show')->name('show');
+        $registrar->put('/{faq}', 'update')->name('update');
+        $registrar->delete('/{faq}', 'destroy')->name('destroy');
+    }
+];

@@ -12,10 +12,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use HMsoft\Cms\Traits\General\ResolvesRouteOwner;
 
 class FeatureController extends Controller
 {
 
+    use ResolvesRouteOwner;
 
     public function __construct(
         private readonly FeatureRepositoryInterface $repository
@@ -25,12 +27,15 @@ class FeatureController extends Controller
     /**
      * Display a listing of the resource, scoped by the owner type from the route.
      * @param Request $request
-     * @param Model $owner The magic happens here. This will be an instance of Post OR Product.
      * @return JsonResponse
      */
-    public function index(Request $request, Model $owner): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+
         // $this->authorize('viewAny', [Feature::class, $owner]);
+
+        /** @var Model $owner */
+        $owner = $this->resolveOwner($request);
 
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
             model: new Feature(),
@@ -39,6 +44,8 @@ class FeatureController extends Controller
                 $query->where('owner_id', $owner->id);
                 $query->with([
                     'translations',
+                    'image',
+                    'media',
                 ]);
             },
         );
@@ -56,13 +63,23 @@ class FeatureController extends Controller
     /**
      * Store a newly created resource in storage and attach it to the owner model.
      * @param StoreFeatureRequest $request
-     * @param Model $owner
      * @return JsonResponse
      */
-    public function store(StoreFeatureRequest $request, Model $owner): JsonResponse
+    public function store(StoreFeatureRequest $request): JsonResponse
     {
         // $this->authorize('create', Feature::class);
-        $feature = $this->repository->store($request->validated());
+
+
+        /** @var Model $owner */
+        $owner = $this->resolveOwner($request);
+
+        $validated = $request->validated();
+        $ownerData = [
+            'owner_id' => $owner->id,
+            'owner_type' => $owner->getMorphClass(),
+        ];
+        $validated = array_merge($validated, $ownerData);
+        $feature = $this->repository->store($validated);
         return successResponse(
             message: translate('cms::messages.added_successfully'),
             data: new FeatureResource($feature),
@@ -72,13 +89,19 @@ class FeatureController extends Controller
 
     /**
      * Display the specified resource and check if it belongs to the owner model.
-     * @param Model $owner
-     * @param Feature $feature
+     * @param Request $request
      * @return JsonResponse
      */
-    public function show(Model $owner, Feature $feature): JsonResponse
+    public function show(Request $request): JsonResponse
     {
+
         // $this->authorize('view', $feature);
+
+
+        $owner = $this->resolveOwner($request);
+
+        /** @var Feature $feature */
+        $feature = $this->resolveRouteParameter($request, 'feature');
 
         // Optional: Add a check to ensure the plan belongs to the correct type
         if ($feature->owner_type != $owner->getMorphClass() || $feature->owner_id != $owner->id) {
@@ -91,13 +114,16 @@ class FeatureController extends Controller
      * Update the specified resource in storage and check if it belongs to the owner model.
      *
      * @param UpdateFeatureRequest $request
-     * @param Model $owner
-     * @param Feature $feature
      * @return JsonResponse
      */
-    public function update(UpdateFeatureRequest $request, Model $owner, Feature $feature): JsonResponse
+    public function update(UpdateFeatureRequest $request): JsonResponse
     {
         // $this->authorize('update', $feature);
+
+        $owner = $this->resolveOwner($request);
+
+        /** @var Feature $feature */
+        $feature = $this->resolveRouteParameter($request, 'feature');
 
         // Optional: Add a check to ensure the feature belongs to the correct type
         if ($feature->owner_type != $owner->getMorphClass() || $feature->owner_id != $owner->id) {
@@ -113,12 +139,20 @@ class FeatureController extends Controller
     /**
      * Remove the specified resource from storage and check if it belongs to the owner model.
      *
-     * @param Model $owner
-     * @param Feature $feature
+     * @param Request $request
      * @return JsonResponse
      */
-    public function destroy(Model $owner, Feature $feature): JsonResponse
+    public function destroy(Request $request): JsonResponse
     {
+
+        /** @var Model $owner */
+        $owner = $this->resolveOwner($request);
+
+        /** @var Feature $feature */
+        $feature = $this->resolveRouteParameter($request, 'feature');
+
+
+
         // $this->authorize('delete', $feature);
 
         // Optional: Add a check to ensure the feature belongs to the correct type
@@ -133,11 +167,13 @@ class FeatureController extends Controller
      * Update all the features for the owner model.
      *
      * @param UpdateAllFeatureRequest $request
-     * @param Model $owner
      * @return JsonResponse
      */
-    public function updateAll(UpdateAllFeatureRequest $request, Model $owner): JsonResponse
+    public function updateAll(UpdateAllFeatureRequest $request): JsonResponse
     {
+
+        $owner = $this->resolveOwner($request);
+
         // $this->authorize('bulkUpdate', Feature::class);
 
         $updatedFeatures = [];
@@ -161,18 +197,23 @@ class FeatureController extends Controller
      * Update the image of the specified resource and check if it belongs to the owner model.
      *
      * @param Request $request
-     * @param Model $owner
      * @param Feature $feature
      * @return JsonResponse
      */
-    public function updateImage(Request $request, Model $owner, Feature $feature): JsonResponse
+    public function updateImage(Request $request): JsonResponse
     {
+
+        $owner = $this->resolveOwner($request);
+
+        /** @var Feature $feature */
+        $feature = $this->resolveRouteParameter($request, 'feature');
+
+
         // $this->authorize('manageMedia', $feature);
 
         if ($feature->owner_type != $owner->getMorphClass() || $feature->owner_id != $owner->id) {
             abort(404);
         }
-
         $validated = $request->validate([
             'image' => ['sometimes', 'image', 'max:2048'],
             'delete_image' => ['sometimes'],

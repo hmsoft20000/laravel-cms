@@ -3,10 +3,8 @@
 namespace HMsoft\Cms\Models\Shared;
 
 use HMsoft\Cms\Models\GeneralModel;
-use Illuminate\Database\Eloquent\Casts\Attribute as EloquentAttribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * PlanFeature Model.
@@ -58,4 +56,57 @@ class PlanFeature extends GeneralModel
         return $this->hasMany(PlanFeatureTranslation::class, 'plan_feature_id');
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | AutoFilterable Interface Implementation (The New Advanced Way)
+    |--------------------------------------------------------------------------
+    */
+
+    public function defineRelationships(): array
+    {
+        return [
+            'translations' => 'translations',
+        ];
+    }
+
+    public function defineFieldSelectionMap(): array
+    {
+        $defaultMap = parent::defineFieldSelectionMap();
+
+        $relatedAttributes = [
+            'translations.name',
+        ];
+
+        return array_merge($defaultMap, $relatedAttributes);
+    }
+
+    public function defineFilterableAttributes(): array
+    {
+        $baseColumns = parent::defineFilterableAttributes();
+
+        $relatedAttributes = [
+            'translations.name',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineSortableAttributes(): array
+    {
+        $baseColumns = parent::defineSortableAttributes();
+
+        $relatedAttributes = [
+            'translations.name',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineGlobalSearchRelatedAttributes(): array
+    {
+        return [
+            'translations' => ['name'],
+        ];
+    }
 }

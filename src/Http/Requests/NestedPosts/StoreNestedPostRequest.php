@@ -25,20 +25,10 @@ class StoreNestedPostRequest extends MyRequest
         return true;
     }
 
-    /**
-     * Prepare the data for validation.
-     * We will automatically add the owner_type and map owner field here.
-     */
+
     protected function prepareForValidation(): void
     {
-        $owner = $this->route('owner');
-        if ($owner instanceof Model) {
-            $this->merge([
-                'owner_type' => $owner->getMorphClass(),
-                'owner_id' => $owner->id,
-            ]);
-        }
-
+      
         // Set the post type from route parameter
         $this->merge([
             'type' => $this->route('type'),
@@ -71,10 +61,6 @@ class StoreNestedPostRequest extends MyRequest
 
         $rules = $this->getPostRules('create');
         
-        // Add owner validation rules
-        $rules['owner_id'] = ['required', 'integer'];
-        $rules['owner_type'] = ['required', 'string'];
-
         // Add category, organization, feature, download, and attribute rules
         $categoryRules = $this->getCategoryIdsValidationRules($postType, 'category_ids');
         $partnerRules = $this->getOrganizationIdsValidationRules('partner', 'partner_ids');

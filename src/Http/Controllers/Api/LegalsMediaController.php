@@ -21,7 +21,7 @@ class LegalsMediaController extends Controller
         $this->type = request()->route('type');
     }
 
-    
+
     private function getLegalModel(): Model
     {
         $legalType = $this->type;

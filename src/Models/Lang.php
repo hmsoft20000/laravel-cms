@@ -36,61 +36,17 @@ class Lang extends GeneralModel
     protected $guarded = [];
 
 
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of columns that can be filtered by the front-end.
-     * This includes columns from the main table and the translation table.
-     */
-    public function defineFilterableAttributes(): array
+    public function scopeActive(Builder $query)
     {
-        return [
-            'id',
-            'locale',
-            'name',
-            'direction',
-            'is_active',
-            'created_at',
-            'updated_at',
-            'created_by',
-            'updated_by',
-        ];
+        $query->where('is_active', true);
     }
 
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of columns that can be used for sorting.
-     */
-    public function defineSortableAttributes(): array
-    {
-        return [
-            'id',
-            'locale',
-            'name',
-            'direction',
-            'is_active',
-            'created_at',
-            'updated_at',
-            'created_by',
-            'updated_by',
-        ];
-    }
-    
-    
-    /**
-     * {@inheritdoc}
-     * Defines the columns from the main table to be included in the global search.
-     */
+
     public function defineGlobalSearchBaseAttributes(): array
     {
         return [
             'name',
             'locale',
         ];
-    }
-
-
-    public function scopeActive(Builder $query)
-    {
-        $query->where('is_active', true);
     }
 }

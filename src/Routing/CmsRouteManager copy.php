@@ -1,0 +1,659 @@
+<?php
+
+namespace HMsoft\Cms\Routing;
+
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+use Closure;
+use BadMethodCallException;
+
+
+/**
+ * The main engine for fluently registering CMS routes.
+ * This class is the implementation behind the CmsRoute facade. It uses CmsRouteBlueprint
+ * objects to provide a powerful and customizable routing API.
+ *
+ * المحرك الرئيسي لتسجيل مسارات نظام إدارة المحتوى بسلاسة.
+ * هذا الكلاس هو التنفيذ الفعلي لواجهة CmsRoute. يستخدم كائنات CmsRouteBlueprint
+ * لتوفير واجهة برمجية قوية وقابلة للتخصيص للمسارات.
+ *
+ * @see \HMsoft\Cms\Facades\CmsRoute
+ * @see \HMsoft\Cms\Routing\CmsRouteBlueprint
+ * @see \HMsoft\Cms\Routing\RouteRegistrar
+ */
+class CmsRouteManager
+{
+    /**
+     * Storage for user-defined macros.
+     * لتخزين الـ macros المعرفة من قبل المطور.
+     * @var array
+     */
+    protected static array $macros = [];
+    //======================================================================
+    //== Developer-facing Helper Methods
+    //======================================================================
+
+    /**
+     * Registers the core blog resource routes.
+     * يقوم بتسجيل مسارات المورد الأساسية للمدونة.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function blogs(?Closure $callback = null): void
+    {
+        $this->resource('blog', 'blogs', $callback);
+    }
+
+    /**
+     * Registers the core portfolio resource routes.
+     * يقوم بتسجيل مسارات المورد الأساسية للمشاريع.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function portfolios(?Closure $callback = null): void
+    {
+        $this->resource('portfolio', 'portfolios', $callback);
+    }
+
+    /**
+     * Registers the core service resource routes.
+     * يقوم بتسجيل مسارات المورد الأساسية للخدمات.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function services(?Closure $callback = null): void
+    {
+        $this->resource('service', 'services', $callback);
+    }
+
+    /**
+     * Registers the core sponsor resource routes.
+     * يقوم بتسجيل مسارات المورد الأساسية للرعاة.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function sponsors(?Closure $callback = null): void
+    {
+        $this->resource('organizations', 'sponsors', $callback);
+    }
+
+    /**
+     * Registers the core partner resource routes.
+     * يقوم بتسجيل مسارات المورد الأساسية للشركاء.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function partners(?Closure $callback = null): void
+    {
+        $this->resource('organizations', 'partners', $callback);
+    }
+
+    /**
+     * Registers the core statistics resource routes.
+     * يقوم بتسجيل مسارات المورد الأساسية للإحصائيات.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function statistics(?Closure $callback = null): void
+    {
+        $this->resource('statistics', 'statistics', $callback);
+    }
+    /**
+     * Registers the core sector resource routes.
+     * يقوم بتسجيل مسارات المورد الأساسية للقطاعات.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function sectors(?Closure $callback = null): void
+    {
+        $this->resource('sector', 'sectors', $callback);
+    }
+    /**
+     * Registers the core testimonial resource routes.
+     * يقوم بتسجيل مسارات المورد الأساسية لآراء العملاء.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function testimonials(?Closure $callback = null): void
+    {
+        $this->resource('testimonial', 'testimonials', $callback);
+    }
+    /**
+     * Registers the core team resource routes.
+     * يقوم بتسجيل مسارات المورد الأساسية لفرق العمل.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function teams(?Closure $callback = null): void
+    {
+        $this->resource('team', 'teams', $callback);
+    }
+    /**
+     * Registers the core language resource routes.
+     * يقوم بتسجيل مسارات المورد الأساسية للغات.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function languages(?Closure $callback = null): void
+    {
+        $this->resource('language', 'langs', $callback);
+    }
+
+    /**
+     * Registers nested blog routes for a parent resource.
+     * يقوم بتسجيل مسارات المدونات المتداخلة لمورد أب.
+     * @param string $parent The plural name of the parent resource. | اسم الجمع للمورد الأب.
+     * @param string $parentBindingName The url binding  name of the parent resource..
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function nestedBlogs(string $parent, string $parentBindingName = 'owner', ?Closure $callback = null): void
+    {
+        $defaults = [
+            'file' => 'nested_blog.php',
+            'prefix' => "{$parent}/{{$parentBindingName}}/blogs",
+            'as' => "api.{$parent}.blogs.",
+            'middleware' => ['api']
+        ];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers nested service routes for a parent resource.
+     * يقوم بتسجيل مسارات الخدمات المتداخلة لمورد أب.
+     * @param string $parent The plural name of the parent resource. | اسم الجمع للمورد الأب.
+     * @param string $parentBindingName The url binding  name of the parent resource..
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function nestedServices(string $parent, string  $parentBindingName = 'owner', ?Closure $callback = null): void
+    {
+        $defaults = [
+            'file' => 'nested_service.php',
+            'prefix' => "{$parent}/{{$parentBindingName}}/services",
+            'as' => "api.{$parent}.services.",
+            'middleware' => ['api']
+        ];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers nested feature routes for a parent resource.
+     * يقوم بتسجيل مسارات الميزات المتداخلة لمورد أب.
+     * @param string $parent The plural name of the parent resource. | اسم الجمع للمورد الأب.
+     * @param string $parentBindingName The url binding  name of the parent resource..
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function features(string $parent, string $parentBindingName = "owner", ?Closure $callback = null): void
+    {
+        $this->nestedResource('feature', $parent, $parentBindingName, $callback);
+    }
+
+    /**
+     * Registers nested download routes for a parent resource.
+     * يقوم بتسجيل مسارات التحميلات المتداخلة لمورد أب.
+     * @param string $parent The plural name of the parent resource. | اسم الجمع للمورد الأب.
+     * @param string $parentBindingName The url binding  name of the parent resource..
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function downloads(string $parent, string $parentBindingName = "owner", ?Closure $callback = null): void
+    {
+        $this->nestedResource('download', $parent, $parentBindingName, $callback);
+    }
+
+    /**
+     * Registers nested FAQ routes for a parent resource.
+     * يقوم بتسجيل مسارات الأسئلة الشائعة المتداخلة لمورد أب.
+     * @param string $parent The plural name of the parent resource. | اسم الجمع للمورد الأب.
+     * @param string $parentBindingName The url binding  name of the parent resource..
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function faqs(string $parent, string $parentBindingName = "owner", ?Closure $callback = null): void
+    {
+        $this->nestedResource('faq', $parent, $parentBindingName, $callback);
+    }
+
+    /**
+     * Registers nested Plan routes for a parent resource.
+     * يقوم بتسجيل مسارات الخطط المتداخلة لمورد أب.
+     * @param string $parent The plural name of the parent resource. | اسم الجمع للمورد الأب.
+     * @param string $parentBindingName The url binding  name of the parent resource..
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function plans(string $parent, string $parentBindingName = "owner", ?Closure $callback = null): void
+    {
+        $this->nestedResource('plan', $parent, $parentBindingName, $callback);
+    }
+
+    /**
+     * Registers nested media routes for a parent resource.
+     * يقوم بتسجيل مسارات الوسائط المتداخلة لمورد أب.
+     * @param string $parent The plural name of the parent resource. | اسم الجمع للمورد الأب.
+     * @param string $parentBindingName The url binding  name of the parent resource..
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function media(string $parent, string $parentBindingName = "owner", ?Closure $callback = null): void
+    {
+        $this->nestedResource('media', $parent, $parentBindingName, $callback);
+    }
+
+    /**
+     * Registers category routes for a specific type.
+     * يقوم بتسجيل مسارات الأصناف لنوع معين.
+     * @param string $type The type of the parent resource (e.g., 'blog', 'portfolio'). | نوع المورد الأب.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function category(string $type, ?Closure $callback = null): void
+    {
+        $defaults = [
+            'file' => 'category.php',
+            'prefix' => "{$type}-categories",
+            'as' => "api.{$type}.categories.",
+            'middleware' => ['api'],
+            'options' => ['type' => $type]
+        ];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers attribute routes for a specific type.
+     * يقوم بتسجيل مسارات السمات لنوع معين.
+     * @param string $type The type of the parent resource (e.g., 'blog', 'portfolio'). | نوع المورد الأب.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function attribute(string $type, ?Closure $callback = null): void
+    {
+        $defaults = ['file' => 'attribute.php', 'prefix' => "{$type}-attributes", 'as' => "api.{$type}.attributes.", 'middleware' => ['api'], 'options' => ['type' => $type]];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers a legal page resource route.
+     * يقوم بتسجيل مسار مورد لصفحة قانونية.
+     * @param string $type The type of the legal page (e.g., 'aboutUs'). | نوع الصفحة القانونية.
+     * @param string $prefix The full URI prefix for the page. | البادئة الكاملة للمسار.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function legal(string $type, string $prefix, ?Closure $callback = null): void
+    {
+        $defaults = ['file' => 'legals.php', 'prefix' => $prefix, 'as' => "api.legals.{$type}.", 'middleware' => ['api'], 'options' => ['type' => $type]];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers media routes for a singleton legal page.
+     * يقوم بتسجيل مسارات الوسائط لصفحة قانونية فردية.
+     *
+     * @param string $pageType The type of the legal page (e.g., 'aboutUs'). | نوع الصفحة القانونية.
+     * @param string $prefix The full URI prefix for the page's media. | البادئة الكاملة لمسار الوسائط.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function legalMedia(string $pageType, string $prefix, ?Closure $callback = null): void
+    {
+        $defaults = [
+            'file' => 'legal_media.php',
+            'prefix' => $prefix,
+            'as' => "api.legals.{$pageType}.media.",
+            'middleware' => ['api'],
+            'options' => ['type' => $pageType]
+        ];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers the business settings routes.
+     * يقوم بتسجيل مسارات إعدادات النظام.
+     *
+     * @param \Closure|null $callback An optional closure for customization. | دالة اختيارية للتخصيص.
+     * @return void
+     */
+    public function settings(?Closure $callback = null): void
+    {
+        $defaults = ['file' => 'settings.php', 'prefix' => 'settings', 'as' => 'api.settings.', 'middleware' => ['api']];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers the contact-us message routes.
+     * يقوم بتسجيل مسارات رسائل تواصل معنا.
+     *
+     * @param \Closure|null $callback An optional closure for customization. | دالة اختيارية للتخصيص.
+     * @return void
+     */
+    public function contactUs(?Closure $callback = null): void
+    {
+        $defaults = ['file' => 'contact_us.php', 'prefix' => 'contact-us', 'as' => 'api.contact-us.', 'middleware' => ['api']];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers the pages' meta-information routes.
+     * يقوم بتسجيل مسارات البيانات الوصفية للصفحات.
+     *
+     * @param \Closure|null $callback An optional closure for customization. | دالة اختيارية للتخصيص.
+     * @return void
+     */
+    public function pagesMeta(?Closure $callback = null): void
+    {
+        $defaults = ['file' => 'pages_meta.php', 'prefix' => 'pages-meta', 'as' => 'api.pages-meta.', 'middleware' => ['api']];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers miscellaneous standalone routes.
+     * يقوم بتسجيل مسارات متنوعة ومستقلة.
+     *
+     * @param \Closure|null $callback An optional closure for customization. | دالة اختيارية للتخصيص.
+     * @return void
+     */
+    public function misc(?Closure $callback = null): void
+    {
+        $defaults = [
+            'file' => 'misc.php',
+            'prefix' => '',
+            'as' => 'api.',
+            'middleware' => ['api']
+        ];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+
+    /**
+     * Registers permission management routes.
+     * يقوم بتسجيل مسارات إدارة الصلاحيات.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function permissions(?Closure $callback = null): void
+    {
+        $defaults = ['file' => 'permissions.php', 'prefix' => 'permissions', 'as' => 'api.permissions.', 'middleware' => ['api']];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers role management routes.
+     * يقوم بتسجيل مسارات إدارة الأدوار.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function roles(?Closure $callback = null): void
+    {
+        $defaults = [
+            'file' => 'roles.php',
+            'prefix' => 'roles',
+            'as' => 'api.roles.',
+            'middleware' => ['api']
+        ];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers nested authorization routes for a user resource.
+     * يقوم بتسجيل مسارات الصلاحيات المتداخلة لمورد مستخدم.
+     * @param string $parent The plural name of the parent user resource (e.g., 'users').
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function userAuthorizations(string $parent, ?Closure $callback = null): void
+    {
+        $defaults = [
+            'file' => 'user_authorizations.php',
+            'prefix' => "{$parent}/{user}",
+            'as' => "api.{$parent}.authorizations.",
+            'middleware' => ['api']
+        ];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+
+    //======================================================================
+    //== Advanced Feature Implementations
+    //======================================================================
+
+    /**
+     * Group routes within a specific API version.
+     * تجميع المسارات ضمن إصدار API محدد.
+     * @param string $version The version prefix (e.g., 'v1'). | بادئة الإصدار.
+     * @param \Closure $routes The closure defining the routes for this version. | الـ Closure التي تعرف المسارات.
+     * @return void
+     */
+    public function version(string $version, Closure $routes): void
+    {
+        Route::prefix($version)->group($routes);
+    }
+
+    /**
+     * Register a custom macro.
+     * تسجيل macro مخصص.
+     * @param string $name The name of the macro. | اسم الماكرو.
+     * @param object|callable $macro The macro callable. | الـ Macro.
+     * @return void
+     */
+    public static function macro(string $name, object|callable $macro): void
+    {
+        static::$macros[$name] = $macro;
+    }
+
+    //======================================================================
+    //== Core Registration Logic
+    //======================================================================
+
+
+    /**
+     * The generic group registration logic that orchestrates the entire process.
+     * It reads route definitions, applies all blueprint customizations (filtering, overrides,
+     * permissions, docs), and registers the final routes.
+     *
+     * المنطق العام لتسجيل مجموعة المسارات الذي ينسق العملية بأكملها.
+     * يقوم بقراءة تعريفات المسارات، تطبيق كل تخصيصات الـ Blueprint (الفلترة، التجاوزات،
+     * الصلاحيات، التوثيق)، ومن ثم تسجيل المسارات النهائية.
+     *
+     * @param array $defaults Default configuration for the route group. | الإعدادات الافتراضية لمجموعة المسار.
+     * @param \Closure|null $callback The developer's customization closure. | دالة التخصيص الخاصة بالمطور.
+     * @return void
+     */
+    protected function registerRouteGroup(array $defaults, ?Closure $callback = null): void
+    {
+        // 1. إنشاء الـ Blueprint وتطبيق تخصيصات المطور
+        $blueprint = new CmsRouteBlueprint($defaults);
+        if ($callback) {
+            $callback($blueprint);
+        }
+
+        // التوقف إذا كانت المجموعة معطلة
+        if (!$blueprint->enabled) {
+            return;
+        }
+
+
+        // 2. تحميل تعريف المسار من الملف
+        $routeDefinition = $this->loadRouteDefinition($blueprint->config['file']);
+        if (!$routeDefinition || !is_callable($routeDefinition['routes'])) {
+            return; // التوقف إذا لم يتم العثور على الملف أو كان لا يحتوي على مسارات
+        }
+
+        // 3. تحديد المتحكم النهائي (تخصيص المطور له الأولوية)
+        $controller = $blueprint->controller ?? $routeDefinition['controller'] ?? null;
+
+
+        // 4. استخلاص إعدادات المجموعة النهائية
+        $groupOptions = $blueprint->config;
+        $groupDocs = $groupOptions['docs'] ?? [];
+        unset($groupOptions['docs']); // إزالة بيانات التوثيق من خيارات المجموعة لتجنب الأخطاء
+
+        // 5. بدء تسجيل مجموعة المسارات الرئيسية
+        Route::group($groupOptions, function () use ($blueprint, $controller, $routeDefinition, $groupDocs) {
+
+            // 6. جمع تعريفات المسارات الأولية دون تسجيلها فعليًا
+            $registrar = new RouteRegistrar();
+            ($routeDefinition['routes'])($registrar, $blueprint->config);
+            $definedRoutes = $registrar->getRoutes();
+
+            // 7. تطبيق فلاتر 'only' و 'except'
+            $routesToRegister = $this->filterRoutes($definedRoutes, $blueprint->getOnly(), $blueprint->getExcept());
+
+            // 8. إنشاء مجموعة المتحكم
+            $controllerGroup = Route::controller($controller);
+
+            // 9. تسجيل المسارات النهائية بعد فلترتها وتخصيصها
+            foreach ($routesToRegister as $routeData) {
+                $routeName = $routeData['name'];
+
+                // 10. تحديد الفعل، الاسم، والـ middleware النهائي من الـ Blueprint
+                $action = $blueprint->getRouteAction($routeName) ?? $routeData['action'];
+                $finalName = $blueprint->getRouteName($routeName) ?? $routeName;
+                $middlewareConfig = $blueprint->getRouteMiddleware($routeName);
+                $permission = $blueprint->getRoutePermission($routeName);
+                $routeDocs = $blueprint->getRouteDocs($routeName);
+                $route = $controllerGroup->{$routeData['method']}($routeData['uri'], [$controller, $action])->name($finalName);
+
+                // ==> الجزء الجديد والمهم <==
+                // 11. إعادة تنفيذ الدوال المتسلسلة التي تم التقاطها (مثل ->defaults())
+                if (!empty($routeData['chained'])) {
+                    foreach ($routeData['chained'] as $call) {
+                        $route->{$call['method']}(...$call['parameters']);
+                    }
+                }
+
+                // تطبيق تعديلات الـ middleware
+                if (!empty($middlewareConfig['replace'])) $route->middleware($middlewareConfig['replace']);
+                if (!empty($middlewareConfig['add'])) $route->middleware($middlewareConfig['add']);
+                if (!empty($middlewareConfig['remove'])) $route->withoutMiddleware($middlewareConfig['remove']);
+
+                // تطبيق الصلاحية (Permission)
+                if ($permission) {
+                    $route->middleware("can:{$permission}");
+                }
+
+                // إرفاق بيانات التوثيق الوصفية بالمسار
+                if (!empty($routeDocs)) {
+                    $route->defaults('_docs', $routeDocs);
+                }
+            }
+
+            // 12. تسجيل المسارات المضافة بشكل إضافي عبر ->addRoute()
+            foreach ($blueprint->addedRoutes as $route) {
+                $addedRoute = Route::{$route['method']}($route['uri'], $route['action'])->name($route['name']);
+                // ربط الفعل بالمتحكم الرئيسي إذا كان الفعل عبارة عن نص فقط
+                if ($controller && is_string($route['action'])) {
+                    $addedRoute->uses([$controller, $route['action']]);
+                }
+            }
+
+            // 13. تطبيق التعديلات المتقدمة النهائية عبر ->tap()
+            foreach ($blueprint->taps as $routeName => $cb) {
+                // يجب التأكد من الحصول على الاسم النهائي للمسار بعد التعديل عبر ->nameFor()
+                $finalRouteName = $blueprint->getRouteName($routeName) ?? $routeName;
+                $fullRouteName = $blueprint->config['as'] . $finalRouteName;
+
+                $routeObject = Route::getRoutes()->getByName($fullRouteName);
+                if ($routeObject) {
+                    $cb($routeObject);
+                }
+            }
+        });
+    }
+
+    /**
+     * Registers a primary resource group (e.g., blogs, portfolios).
+     * يقوم بتسجيل مجموعة موارد أساسية (مثل المدونات، المشاريع).
+     */
+    public function resource(string $name, string $pluralName, ?Closure $callback = null): void
+    {
+        $defaults = [
+            'file' => "{$name}.php",
+            'prefix' => $pluralName,
+            'as' => "api.{$pluralName}.",
+            'middleware' => ['api'],
+        ];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Registers a nested resource group (e.g., features, downloads).
+     * يقوم بتسجيل مجموعة موارد متداخلة (مثل الميزات، التحميلات).
+     */
+    public function nestedResource(string $childName, string $parentPluralName, string $parentBindingName, ?Closure $callback = null): void
+    {
+        $childPluralName = Str::plural($childName);
+        $defaults = [
+            'file' => "{$childPluralName}.php",
+            'prefix' => "{$parentPluralName}/{{$parentBindingName}}/{$childPluralName}",
+            'as' => "api.{$parentPluralName}.{$childPluralName}.",
+            'middleware' => ['api'],
+            'options' => [
+                'owner_url_name' => $parentPluralName
+            ]
+        ];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
+     * Loads and returns the route definition array from a module file.
+     * يقوم بتحميل وإرجاع مصفوفة تعريف المسار من ملف الوحدة.
+     * @param string $fileName
+     * @return array|null
+     */
+    protected function loadRouteDefinition(string $fileName): ?array
+    {
+        $filePath = __DIR__ . '/../../routes/modules/' . $fileName;
+        if (file_exists($filePath)) {
+            return require $filePath;
+        }
+        return null;
+    }
+
+    /**
+     * Filters a list of route definitions based on 'only' and 'except' rules.
+     * يقوم بفلترة قائمة تعريفات المسارات بناءً على قواعد 'only' و 'except'.
+     */
+    protected function filterRoutes(array $routes, array $only, array $except): array
+    {
+        if (!empty($only)) {
+            return array_filter($routes, fn($route) => in_array($route['name'], $only));
+        }
+
+        if (!empty($except)) {
+            return array_filter($routes, fn($route) => !in_array($route['name'], $except));
+        }
+
+        return $routes;
+    }
+
+    //======================================================================
+    //== Macro Handling
+    //======================================================================
+
+    public function __call(string $method, array $parameters): mixed
+    {
+        if (! static::hasMacro($method)) {
+            throw new BadMethodCallException(sprintf(
+                'Method %s::%s does not exist.',
+                static::class,
+                $method
+            ));
+        }
+
+        $macro = static::$macros[$method];
+
+        if ($macro instanceof Closure) {
+            return $macro->call($this, ...$parameters);
+        }
+
+        return $macro(...$parameters);
+    }
+
+    public static function hasMacro(string $name): bool
+    {
+        return isset(static::$macros[$name]);
+    }
+}

@@ -26,110 +26,6 @@ class Sector extends GeneralModel
      */
     protected $guarded = ['id'];
 
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | AutoFilterable Interface Implementation (The New Advanced Way)
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * {@inheritdoc}
-     * This is the most important new method. It tells the JoinManager which
-     * relationships are available for joining. The key is the API-friendly name,
-     * and the value is the actual Eloquent method name on this model.
-     */
-    public function defineRelationships(): array
-    {
-        return [
-            // 'Public API Name' => 'eloquentMethodName'
-            'translations' => 'translations',
-            'categories' => 'categories',
-            'posts' => 'posts',
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * The field selection map is now much simpler.
-     * It just maps an API field name to either a base table column or a
-     * 'relationship.column' string. The service handles the rest.
-     */
-    public function defineFieldSelectionMap(): array
-    {
-        $defaultMap = parent::defineFieldSelectionMap();
-
-        $customMap = [
-            // 'Public API Name' => 'relationship_name.column_name' OR 'base_column'
-            'title' => 'translations.title',
-            'content' => 'translations.content',
-            'short_content' => 'translations.short_content',
-            'image_url' => 'image',
-        ];
-
-        return array_merge($defaultMap, $customMap);
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of attributes that can be specifically filtered.
-     */
-    public function defineFilterableAttributes(): array
-    {
-        return parent::defineFilterableAttributes();
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines the whitelist of attributes that can be sorted.
-     */
-    public function defineSortableAttributes(): array
-    {
-        return parent::defineSortableAttributes();
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines columns from the main table for the global search.
-     */
-    public function defineGlobalSearchBaseAttributes(): array
-    {
-        return [];
-    }
-
-    /**
-     * {@inheritdoc}
-     * Defines columns from the translation table for the global search.
-     */
-    public function defineGlobalSearchTranslationAttributes(): array
-    {
-        return [
-            'title',
-            'content',
-            'short_content'
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     * Specifies the name of the translation table.
-     */
-    public function defineTranslationTableName(): ?string
-    {
-        return (new SectorTranslation())->getTable();
-    }
-
-    /**
-     * {@inheritdoc}
-     * Specifies the foreign key in the translation table.
-     */
-    public function defineForeignKeyInTranslationTable(): ?string
-    {
-        return 'sector_id';
-    }
-
-
     /**
      * Get the attributes that should be cast.
      *
@@ -157,7 +53,6 @@ class Sector extends GeneralModel
 
     public function categories(): HasMany
     {
-        // العلاقة المباشرة مع الفئات
         return $this->hasMany(Category::class, 'sector_id');
     }
 
@@ -177,5 +72,76 @@ class Sector extends GeneralModel
         // )->join('category_post', 'posts.id', '=', 'category_post.post_id')
         //     ->whereColumn('categories.id', 'category_post.category_id')
         //     ->select('posts.*');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AutoFilterable Interface Implementation (The New Advanced Way)
+    |--------------------------------------------------------------------------
+    */
+
+    public function defineRelationships(): array
+    {
+        return [
+            // 'Public API Name' => 'eloquentMethodName'
+            'translations' => 'translations',
+            'categories' => 'categories',
+            'posts' => 'posts',
+        ];
+    }
+
+    public function defineFieldSelectionMap(): array
+    {
+        $defaultMap = parent::defineFieldSelectionMap();
+
+        $customMap = [
+            // 'Public API Name' => 'relationship_name.column_name' OR 'base_column'
+            'title' => 'translations.title',
+            'content' => 'translations.content',
+            'short_content' => 'translations.short_content',
+            'image_url' => 'image',
+        ];
+
+        return array_merge($defaultMap, $customMap);
+    }
+
+
+    public function defineFilterableAttributes(): array
+    {
+        $baseColumns = parent::defineFilterableAttributes();
+
+        $relatedAttributes = [
+            'translations.title',
+            'translations.content',
+            'translations.short_content',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineSortableAttributes(): array
+    {
+        $baseColumns = parent::defineSortableAttributes();
+
+        $relatedAttributes = [
+            'translations.title',
+            'translations.content',
+            'translations.short_content',
+        ];
+
+        return array_merge($baseColumns, $relatedAttributes);
+    }
+
+    public function defineGlobalSearchBaseAttributes(): array
+    {
+        return [];
+    }
+
+    public function defineGlobalSearchTranslationAttributes(): array
+    {
+        return [
+            'translations' => ['title', 'content', 'short_content'],
+        ];
     }
 }

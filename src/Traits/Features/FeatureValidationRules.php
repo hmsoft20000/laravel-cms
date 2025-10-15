@@ -22,7 +22,7 @@ trait FeatureValidationRules
 
             // قواعد الترجمات
             'locales.*.locale'      => ['required', 'string'],
-            'locales.*.title'       => ['required', 'string', 'max:255'],
+            'locales.*.title'       => ['nullable', 'string', 'max:255'],
             'locales.*.description' => ['nullable', 'string'],
         ];
 

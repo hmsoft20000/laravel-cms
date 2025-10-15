@@ -31,6 +31,6 @@ trait HasSingleMedia
      */
     public function getImageUrlAttribute(): ?string
     {
-        return $this->image?->file_url;
+        return $this->media?->file_url;
     }
 }

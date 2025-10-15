@@ -96,7 +96,7 @@ class ExampleController
     {
         // This method should be protected by middleware: cms.permission:manage-content
         // But we can also check manually if needed
-        
+
         if (!$this->hasPermission('manage-content', $request)) {
             return response()->json(['error' => 'Insufficient permissions'], 403);
         }

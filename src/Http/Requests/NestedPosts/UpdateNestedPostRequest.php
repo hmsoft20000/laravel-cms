@@ -25,20 +25,9 @@ class UpdateNestedPostRequest extends MyRequest
         return true;
     }
 
-    /**
-     * Prepare the data for validation.
-     * We will automatically add the owner_type and map owner field here.
-     */
+
     protected function prepareForValidation(): void
     {
-        $owner = $this->route('owner');
-        if ($owner instanceof Model) {
-            $this->merge([
-                'owner_type' => $owner->getMorphClass(),
-                'owner_id' => $owner->id,
-            ]);
-        }
-
         // Convert boolean fields
         $booleanFields = ['show_in_footer', 'show_in_header', 'is_active'];
         foreach ($booleanFields as $field) {

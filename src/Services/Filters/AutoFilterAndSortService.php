@@ -10,6 +10,7 @@ use HMsoft\Cms\Enums\PaginationFormateEnum;
 use HMsoft\Cms\Interfaces\AutoFilterable;
 use HMsoft\Cms\Services\Filters\CustomAttributeFilter;
 use Exception;
+use HMsoft\Cms\Models\Shared\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -143,12 +144,14 @@ class AutoFilterAndSortService
         $allowedFilters = $this->model->defineFilterableAttributes();
         $allowedSorts = $this->model->defineSortableAttributes();
 
+
         $dynamicFilterData->filters = collect($dynamicFilterData->filters)
-            ->filter(fn(ColumnFilterData $filter) => in_array(explode('.', $filter->id)[0], $allowedFilters))
+            ->filter(fn(ColumnFilterData $filter) => in_array($filter->id, $allowedFilters))
             ->values();
 
+
         $dynamicFilterData->sorting = collect($dynamicFilterData->sorting)
-            ->filter(fn(ColumnSortData $sort) => in_array(explode('.', $sort->id)[0], $allowedSorts))
+            ->filter(fn(ColumnSortData $sort) => in_array($sort->id, $allowedSorts))
             ->values();
 
         $pFilterKeys = collect($dynamicFilterData->filters)->groupBy('id');
@@ -156,26 +159,53 @@ class AutoFilterAndSortService
 
         // 3. Apply "before" hook for any initial query modifications.
         if (isset($beforeOperation)) {
-            $beforeOperation($query, ['filterKeys' => $pFilterKeys, 'sortingKeys' => $sortingKeys]);
+            $beforeOperation(
+                $query,
+                ['filterKeys' => $pFilterKeys, 'sortingKeys' => $sortingKeys, 'mainTableAlias' => $mainTableAlias]
+            );
         }
 
         // 4. Apply Filters (Advanced vs. Simple), now alias-aware.
         if (!empty($dynamicFilterData->advanceFilter)) {
-            $query->where(function (Builder $builder) use ($dynamicFilterData, $allowedFilters) {
-                self::applyAdvancedFilterGroup($builder, $dynamicFilterData->advanceFilter, $allowedFilters, $this->joinManager);
+
+            // --- Pre-fetch custom attributes for the advanced filter ---
+            $attributeIds = self::extractAttributeIdsFromGroup($dynamicFilterData->advanceFilter);
+            $attributes = !empty($attributeIds)
+                ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
+                : collect();
+
+            $query->where(function (Builder $builder) use ($dynamicFilterData, $allowedFilters, $attributes) {
+                // Pass the pre-fetched attributes to the handler
+                self::applyAdvancedFilterGroup($builder, $dynamicFilterData->advanceFilter, $allowedFilters, $this->joinManager, $attributes);
             });
         } else {
-            $joinedTables = [];
+
+            // 1. Separate custom attribute filters to prepare them.
+            $customAttributeFilters = collect($dynamicFilterData->filters)->filter(
+                fn($filter) => CustomAttributeFilter::isCustomAttribute($filter)
+            );
+
+            // 2. Extract their IDs.
+            $attributeIds = $customAttributeFilters->map(
+                fn($filter) => (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id)
+            )->unique()->toArray();
+
+            // 3. Fetch all required Attribute models in a SINGLE query to prevent N+1 problem.
+            $attributes = !empty($attributeIds)
+                ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
+                : collect();
+
             foreach ($dynamicFilterData->filters as $filter) {
                 if (CustomAttributeFilter::isCustomAttribute($filter)) {
-                    // $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id);
-                    // $alias = "av_attribute_{$attributeId}";
-                    // if (!isset($joinedTables[$alias])) {
-                    //     CustomAttributeFilter::apply($query, $filter, $this->model);
-                    //     $joinedTables[$alias] = true;
-                    // }
                     // Custom attribute logic needs to be aware of the main table alias.
-                    CustomAttributeFilter::apply($query, $filter, $this->model, $mainTableAlias);
+                    $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id);
+                    // Get the pre-fetched attribute object from the collection.
+                    $attribute = $attributes->get($attributeId);
+                    // Only apply the filter if the attribute exists.
+                    if ($attribute) {
+                        // Call the NEW method signature, passing the pre-fetched $attribute.
+                        CustomAttributeFilter::apply($query, $attribute, $filter, $this->model);
+                    }
                 } else {
                     if (isset($pFilterKeys[$filter->id])) {
                         self::handelFilterOne($query, collect($pFilterKeys[$filter->id])->toArray(), $filter->id, $this->joinManager);
@@ -186,12 +216,20 @@ class AutoFilterAndSortService
 
         // 5. Apply Global Filter (now alias-aware).
         if (isset($dynamicFilterData->globalFilter) && !empty($dynamicFilterData->globalFilter)) {
-            $this->applyGlobalFilter($query, $dynamicFilterData->globalFilter, $globaleFilterExtraOperation, $pFilterKeys, $sortingKeys);
+            $this->applyGlobalFilter($query, $dynamicFilterData->globalFilter, $globaleFilterExtraOperation, $pFilterKeys, $sortingKeys, $mainTableAlias);
         }
 
         // 6. Apply the "extra" hook for any final query modifications.
         if (isset($extraOperation)) {
-            $extraOperation($query, ['filterKeys' => $pFilterKeys, 'sortingKeys' => $sortingKeys, 'globalFilter' => $dynamicFilterData->globalFilter]);
+            $extraOperation(
+                $query,
+                [
+                    'filterKeys' => $pFilterKeys,
+                    'sortingKeys' => $sortingKeys,
+                    'globalFilter' => $dynamicFilterData->globalFilter,
+                    'mainTableAlias'    => $mainTableAlias
+                ]
+            );
         }
 
         // 7. Apply Sorting (now alias-aware).
@@ -211,21 +249,50 @@ class AutoFilterAndSortService
         $mainTableAlias = $this->joinManager->getMainTableAlias();
 
         $query->where(function (Builder $builder) use ($globalFilterValue, $mainTableAlias) {
-            // Search base attributes
+
+            // 1. Search base attributes (no change)
             foreach ($this->model->defineGlobalSearchBaseAttributes() as $column) {
                 $builder->orWhere("{$mainTableAlias}.{$column}", 'LIKE', "%{$globalFilterValue}%");
             }
 
-            // Search translation attributes
-            $relationships = $this->model->defineRelationships();
-            if ($this->model->defineTranslationTableName() && isset($relationships['translations'])) {
-                $translationAlias = $this->joinManager->ensureJoin($relationships['translations']);
-                foreach ($this->model->defineGlobalSearchTranslationAttributes() as $column) {
-                    $builder->orWhere("{$translationAlias}.{$column}", 'LIKE', "%{$globalFilterValue}%");
+            // 2. [NEW] Search related attributes in a generic way
+            if (method_exists($this->model, 'defineGlobalSearchRelatedAttributes')) {
+                $relatedSearchAttrs = $this->model->defineGlobalSearchRelatedAttributes();
+
+                foreach ($relatedSearchAttrs as $relationPath => $columns) {
+                    try {
+                        $relationAlias = $this->joinManager->ensureJoin($relationPath);
+                        foreach ($columns as $column) {
+                            $builder->orWhere("{$relationAlias}.{$column}", 'LIKE', "%{$globalFilterValue}%");
+                        }
+                    } catch (\Exception $e) {
+                        // Optional: Log if a defined search relationship is invalid
+                        // Log::warning("Global search skipped for invalid relation path '{$relationPath}' in model " . get_class($this->model));
+                    }
                 }
             }
         });
     }
+    // private function applyGlobalFilter(Builder $query, string $globalFilterValue): void
+    // {
+    //     $mainTableAlias = $this->joinManager->getMainTableAlias();
+
+    //     $query->where(function (Builder $builder) use ($globalFilterValue, $mainTableAlias) {
+    //         // Search base attributes
+    //         foreach ($this->model->defineGlobalSearchBaseAttributes() as $column) {
+    //             $builder->orWhere("{$mainTableAlias}.{$column}", 'LIKE', "%{$globalFilterValue}%");
+    //         }
+
+    //         // Search translation attributes
+    //         $relationships = $this->model->defineRelationships();
+    //         if ($this->model->defineTranslationTableName() && isset($relationships['translations'])) {
+    //             $translationAlias = $this->joinManager->ensureJoin($relationships['translations']);
+    //             foreach ($this->model->defineGlobalSearchTranslationAttributes() as $column) {
+    //                 $builder->orWhere("{$translationAlias}.{$column}", 'LIKE', "%{$globalFilterValue}%");
+    //             }
+    //         }
+    //     });
+    // }
 
     /**
      * Get data handler with dynamic options, now smarter with AutoFilterable interface.
@@ -238,6 +305,7 @@ class AutoFilterAndSortService
     {
 
         $query = $this->buildQuery($dynamicFilterData);
+
 
         Log::info($query->toRawSql());
 
@@ -252,25 +320,47 @@ class AutoFilterAndSortService
     }
 
     /**
-     * Recursively applies a group of advanced filter rules, now using the JoinManager.
+     * Recursively applies a group of advanced filter rules, now aware of custom attributes.
      */
-    private static function applyAdvancedFilterGroup(Builder $query, object $filterGroup, array $allowedFilters, JoinManager $joinManager): void
+    private static function applyAdvancedFilterGroup(Builder $query, object $filterGroup, array $allowedFilters, JoinManager $joinManager, \Illuminate\Support\Collection $attributes): void
     {
         $condition = strtoupper($filterGroup->condition ?? 'AND') === 'OR' ? 'orWhere' : 'where';
 
         foreach ($filterGroup->rules ?? [] as $rule) {
             if (isset($rule->condition)) {
                 // If the rule is another group, recurse into it.
-                $query->{$condition}(function (Builder $subQuery) use ($rule, $allowedFilters, $joinManager) {
-                    self::applyAdvancedFilterGroup($subQuery, $rule, $allowedFilters, $joinManager);
+                $query->{$condition}(function (Builder $subQuery) use ($rule, $allowedFilters, $joinManager, $attributes) {
+                    self::applyAdvancedFilterGroup($subQuery, $rule, $allowedFilters, $joinManager, $attributes);
                 });
             } elseif (isset($rule->id)) {
-                // If it's a simple rule, apply it.
+                // It's a simple rule, check if it's allowed.
                 if (!in_array($rule->id, $allowedFilters)) {
                     continue; // Security check
                 }
-                $whereClause = $condition === 'orWhere' ? 'OR' : 'AND';
-                self::applySimpleFilterRule($query, $rule, $whereClause, $joinManager);
+
+                // Convert the stdClass rule to a ColumnFilterData DTO
+                $filterData = new ColumnFilterData(
+                    id: $rule->id,
+                    value: $rule->value,
+                    filterFns: FilterFnsEnum::from($rule->filterFns),
+                );
+
+                // --- NEW LOGIC: Route the filter to the correct handler ---
+                if (CustomAttributeFilter::isCustomAttribute($filterData)) {
+                    $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filterData->id);
+                    $attribute = $attributes->get($attributeId);
+
+                    if ($attribute) {
+                        // We need a specific context for this single filter
+                        $query->{$condition}(function (Builder $subQuery) use ($attribute, $filterData, $query) {
+                            CustomAttributeFilter::apply($subQuery, $attribute, $filterData, $query->getModel());
+                        });
+                    }
+                } else {
+                    // It's a regular filter, apply it with the correct condition (AND/OR).
+                    $whereClause = $condition === 'orWhere' ? 'OR' : 'AND';
+                    self::applySimpleFilterRule($query, $rule, $whereClause, $joinManager);
+                }
             }
         }
     }
@@ -281,43 +371,15 @@ class AutoFilterAndSortService
      */
     private static function applySimpleFilterRule(Builder $query, object $rule, string $conditionType, JoinManager $joinManager): void
     {
-        /** @var Model|AutoFilterable $model */
-        $model = $query->getModel();
-        $relationships = $model->defineRelationships();
-        $columnId = $rule->id;
-
-        $qualifiedColumnId = '';
-
-        // Check if the filter ID is a relationship (e.g., 'translations.title')
-        if (str_contains($columnId, '.')) {
-            [$relationName, $columnName] = explode('.', $columnId, 2);
-
-            // Check if the relationship is defined and allowed in the model
-            if (isset($relationships[$relationName])) {
-                $relationMethod = $relationships[$relationName];
-                // Use the JoinManager to get the alias for the joined table
-                $alias = $joinManager->ensureJoin($relationMethod);
-                $qualifiedColumnId = "{$alias}.{$columnName}";
-            }
-        } else {
-            // It's a column on the main table, so use the main table's alias
-            $mainTableAlias = $joinManager->getMainTableAlias();
-            $qualifiedColumnId = "{$mainTableAlias}.{$columnId}";
-        }
-
-        // If the column could not be resolved, ignore the filter.
+        $qualifiedColumnId = self::resolveAndJoin($rule->id, $joinManager, $query->getModel());
         if (empty($qualifiedColumnId)) {
-            return;
+            return; // If the column could not be resolved, ignore the filter.
         }
-
-        // Create a temporary DTO with the fully qualified and aliased column name
         $filterData = new ColumnFilterData(
             id: $qualifiedColumnId,
             value: $rule->value,
             filterFns: FilterFnsEnum::from($rule->filterFns),
         );
-
-        // Use the DTO's existing logic to build the WHERE clause
         $filterData->buildQueryWhereStatment($query, $filterData, null, false, $conditionType);
     }
 
@@ -338,8 +400,6 @@ class AutoFilterAndSortService
     public static function handelFilter(&$query, $filterKeys, $columnPrefix = null)
     {
 
-
-
         $filterKeys->map(function ($filterValueObject, $columnId) use (&$query, $columnPrefix) {
             self::handelFilterOne($query, $filterValueObject, $columnId, $columnPrefix);
         });
@@ -350,25 +410,12 @@ class AutoFilterAndSortService
      */
     public static function handelFilterOne(Builder $query, array $filterObjects, string $columnId, JoinManager $joinManager): void
     {
-        $model = $query->getModel();
-        $relationships = $model->defineRelationships();
-        $filterData = $filterObjects[0];
-
-        $qualifiedColumnId = '';
-        if (str_contains($columnId, '.')) {
-            [$relationName, $columnName] = explode('.', $columnId, 2);
-            if (isset($relationships[$relationName])) {
-                $relationMethod = $relationships[$relationName];
-                $alias = $joinManager->ensureJoin($relationMethod);
-                $qualifiedColumnId = "{$alias}.{$columnName}";
-            }
-        } else {
-            $mainTableAlias = $joinManager->getMainTableAlias();
-            $qualifiedColumnId = "{$mainTableAlias}.{$columnId}";
+        $qualifiedColumnId = self::resolveAndJoin($columnId, $joinManager, $query->getModel());
+        if (empty($qualifiedColumnId)) {
+            return; // Ignore if column/relation is not valid.
         }
 
-        if (empty($qualifiedColumnId)) return; // Ignore if column is not valid
-
+        $filterData = $filterObjects[0];
         // Use a temporary ColumnFilterData with the fully qualified (aliased) column name
         $value = is_array($filterData) ? $filterData['value'] : $filterData->value;
         $filterFns = is_array($filterData) ? $filterData['filterFns'] : $filterData->filterFns;
@@ -383,27 +430,15 @@ class AutoFilterAndSortService
      */
     public static function handelSorting(Builder $query, $sortedColumns, JoinManager $joinManager): void
     {
-        $model = $query->getModel();
-        $relationships = $model->defineRelationships();
-
         foreach ($sortedColumns as $columnCollection) {
             $sortingValue = $columnCollection[0];
             $columnId = $sortingValue->id;
 
-            $qualifiedColumnId = '';
-            if (str_contains($columnId, '.')) {
-                [$relationName, $columnName] = explode('.', $columnId, 2);
-                if (isset($relationships[$relationName])) {
-                    $relationMethod = $relationships[$relationName];
-                    $alias = $joinManager->ensureJoin($relationMethod);
-                    $qualifiedColumnId = "{$alias}.{$columnName}";
-                }
-            } else {
-                $mainTableAlias = $joinManager->getMainTableAlias();
-                $qualifiedColumnId = "{$mainTableAlias}.{$columnId}";
-            }
+            $qualifiedColumnId = self::resolveAndJoin($columnId, $joinManager, $query->getModel());
 
-            if (empty($qualifiedColumnId)) continue; // Ignore if column is not valid
+            if (empty($qualifiedColumnId)) {
+                continue; // Ignore if column/relation is not valid.
+            }
 
             $sortData = new ColumnSortData($qualifiedColumnId, $sortingValue->desc);
             $sortData->buildQuery($query);
@@ -423,12 +458,12 @@ class AutoFilterAndSortService
         switch ($paginationFormate) {
             case PaginationFormateEnum::normal:
                 $finalResult = [
-                    'data' => $query->paginate(perPage: $perPage, page: $page),
+                    'data' => $query->paginate(perPage: (int)$perPage, page: (int) $page),
                     'pagination' => null
                 ];
                 break;
             case PaginationFormateEnum::separated:
-                $result = $query->paginate(perPage: $perPage, page: $page);
+                $result = $query->paginate(perPage: (int) $perPage, page: (int) $page);
                 $finalResult = self::separatedPaginate($result);
                 break;
             case PaginationFormateEnum::none:
@@ -465,7 +500,6 @@ class AutoFilterAndSortService
         $decodedFilters = json_decode(base64_decode($request->input('filters'))) ?? [];
 
         foreach (collect($decodedFilters) as $value) {
-            $arrayValue = (array)$value;
             if (isset($value->id, $value->value, $value->filterFns)) {
                 $filters->push(new ColumnFilterData(
                     id: $value->id,
@@ -592,5 +626,70 @@ class AutoFilterAndSortService
         );
 
         return $service->dynamicFilter($dynamicFilterData);
+    }
+
+
+    /**
+     * [NEW CENTRAL HELPER]
+     * Resolves a public-facing column ID into a qualified, aliased database column name.
+     * This static helper can be used by other static methods.
+     *
+     * @param string $columnId The public column identifier (e.g., 'categories.name').
+     * @param JoinManager $joinManager The active JoinManager instance.
+     * @param Model|AutoFilterable $model The model instance to resolve relationships from.
+     * @return string|null The aliased column name or null if invalid.
+     */
+    private static function resolveAndJoin(string $columnId, JoinManager $joinManager, Model $model): ?string
+    {
+        if (!str_contains($columnId, '.')) {
+            // This is a column on the main table.
+            return $joinManager->getMainTableAlias() . '.' . $columnId;
+        }
+
+        $parts = explode('.', $columnId);
+        $columnName = array_pop($parts);
+        $relationPath = implode('.', $parts);
+
+        // Get the defined relationships from the model to validate the path.
+        // For a deeper validation, one would check each part of the path.
+        $definedRelations = $model->defineRelationships();
+        $rootRelation = $parts[0];
+
+        if (!isset($definedRelations[$rootRelation])) {
+            // The root of the path is not a defined joinable relationship.
+            return null;
+        }
+
+        try {
+            // Ask the JoinManager to handle the entire path.
+            $finalAlias = $joinManager->ensureJoin($relationPath);
+            return "{$finalAlias}.{$columnName}";
+        } catch (\Exception $e) {
+            // Log::warning("Could not resolve column '{$columnId}': {$e->getMessage()}");
+            return null;
+        }
+    }
+
+    /**
+     * Recursively extracts all custom attribute IDs from an advanced filter group.
+     *
+     * @param object $filterGroup
+     * @return array
+     */
+    private static function extractAttributeIdsFromGroup(object $filterGroup): array
+    {
+        $attributeIds = [];
+
+        foreach ($filterGroup->rules ?? [] as $rule) {
+            if (isset($rule->condition)) {
+                // It's a nested group, recurse into it.
+                $attributeIds = array_merge($attributeIds, self::extractAttributeIdsFromGroup($rule));
+            } elseif (isset($rule->id) && str_starts_with($rule->id, CustomAttributeFilter::ATTRIBUTE_PREFIX)) {
+                // It's a custom attribute rule, extract the ID.
+                $attributeIds[] = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $rule->id);
+            }
+        }
+
+        return array_unique($attributeIds);
     }
 }

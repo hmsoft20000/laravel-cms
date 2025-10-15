@@ -2,6 +2,7 @@
 
 namespace HMsoft\Cms\Support;
 
+use HMsoft\Cms\Cms;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -35,18 +36,17 @@ trait ResolvesExtendedModel
      */
     protected static function resolveExtendedInstance(): Model
     {
-        $class = static::class;
-        $extendedModels = config('cms.extended_models', []);
+        $originalClass = static::class;
 
-        if (isset($extendedModels[$class])) {
-            $extended = $extendedModels[$class];
+        // --- التغيير الرئيسي هنا ---
+        // استبدال قراءة ملف الإعدادات بالاستعلام من الكلاس المركزي
+        $extendedClass = Cms::getExtendedFor($originalClass);
 
-            if (is_subclass_of($extended, $class)) {
-                return app($extended);
-            }
+        if ($extendedClass && is_subclass_of($extendedClass, $originalClass)) {
+            return app($extendedClass);
         }
 
-        return app($class);
+        return app($originalClass);
     }
 
     /**
@@ -54,10 +54,11 @@ trait ResolvesExtendedModel
      */
     public function newRelatedInstance($class)
     {
-        $extendedModels = config('cms.extended_models', []);
+        // --- التغيير الرئيسي هنا ---
+        $extendedClass = Cms::getExtendedFor($class);
 
-        if (isset($extendedModels[$class]) && is_subclass_of($extendedModels[$class], $class)) {
-            $class = $extendedModels[$class];
+        if ($extendedClass && is_subclass_of($extendedClass, $class)) {
+            $class = $extendedClass;
         }
 
         return app($class);
