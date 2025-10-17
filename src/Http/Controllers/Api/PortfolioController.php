@@ -26,7 +26,7 @@ class PortfolioController extends Controller
     public function index(): JsonResponse
     {
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Portfolio(),
+            model: resolve(Portfolio::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) {
                 // if (!$this->authService->hasPermission('portfolios.viewUnpublished')) {
                 //     $query->where('t_main.is_active', true);
@@ -49,7 +49,7 @@ class PortfolioController extends Controller
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return (new PortfolioResource($item))->withFields(request()->get('fields'));
+            return resolve(PortfolioResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -66,7 +66,7 @@ class PortfolioController extends Controller
         $portfolio = $this->repo->store($request->validated());
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new PortfolioResource($this->repo->show($portfolio)))->withFields(request()->get('fields')),
+            data: resolve(PortfolioResource::class, ['resource' => $this->repo->show($portfolio)])->withFields(request()->get('fields')),
         );
     }
 
@@ -76,7 +76,7 @@ class PortfolioController extends Controller
     public function show(Portfolio $portfolio): JsonResponse
     {
         $portfolio = $this->repo->show($portfolio);
-        return successResponse(data: (new PortfolioResource($portfolio))->withFields(request()->get('fields')));
+        return successResponse(data: resolve(PortfolioResource::class, ['resource' => $portfolio])->withFields(request()->get('fields')));
     }
 
     /**
@@ -88,7 +88,7 @@ class PortfolioController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new PortfolioResource($updatedPortfolio))->withFields(request()->get('fields'))
+            data: resolve(PortfolioResource::class, ['resource' => $updatedPortfolio])->withFields(request()->get('fields'))
         );
     }
 
@@ -104,7 +104,9 @@ class PortfolioController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: PortfolioResource::collection($updatedPortfolios)
+            data: collect($updatedPortfolios)->map(function ($item) {
+                return resolve(PortfolioResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 

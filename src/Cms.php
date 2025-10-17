@@ -39,8 +39,34 @@ class Cms
     public function replace(string $original, string $extended): void
     {
         static::$extensions[$original] = $extended;
+
+        // Normal IoC binding
         App::bind($original, $extended);
+
+        // // 🔥 Create a runtime alias (for direct instantiation)
+        // if (class_exists($original) && class_exists($extended)) {
+        //     // if (class_exists($original)) {
+        //     //     // Attempt alias even if already loaded (safe if class isn't user-defined)
+        //     //     if (!is_subclass_of($original, $extended) && $original !== $extended) {
+        //     //         class_alias($extended, $original);
+        //     //     }
+        //     // } else {
+        //     //     class_alias($extended, $original);
+        //     // }
+
+        //     // Only alias if not already aliased
+        //     if (!class_exists($original, false)) {
+        //         // ensure original class is loaded to avoid redeclaration errors
+        //         class_alias($extended, $original);
+            // }
+        // }
     }
+
+    // public function replace(string $original, string $extended): void
+    // {
+    //     static::$extensions[$original] = $extended;
+    //     App::bind($original, $extended);
+    // }
 
     /**
      * Get the extended class for a given original class, if it exists.
@@ -52,5 +78,11 @@ class Cms
     public static function getExtendedFor(string $original): ?string
     {
         return static::$extensions[$original] ?? null;
+    }
+
+    public static function resolve(string $original, ...$parameters)
+    {
+        $class = static::getExtendedFor($original) ?? $original;
+        return app()->makeWith($class, $parameters);
     }
 }

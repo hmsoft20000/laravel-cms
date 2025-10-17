@@ -22,7 +22,7 @@ class SectorResource extends BaseJsonResource
             'image' => $this->whenLoaded('image', $this->image),
             'image_url' => $this->image_url,
             'posts' => $this->whenLoaded('posts', function () {
-                return  PostResource::collection($this->posts);
+                return  resolve(PostResource::class, ['resource' => $this->posts]);
             }),
             'translations' => $this->whenLoaded('translations', function () {
                 return $this->translations;

@@ -33,7 +33,7 @@ class OurValueController extends Controller
         );
 
         $result['data'] =  collect($result['data'])->map(function ($item) {
-            return (new OurValueResource($item))->withFields(request()->get('fields'));
+            return resolve(OurValueResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return  successResponse(
@@ -47,7 +47,7 @@ class OurValueController extends Controller
         $ourValue = $this->repo->store($request->validated());
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: new OurValueResource($this->repo->show($ourValue))
+            data: resolve(OurValueResource::class, ['resource' => $this->repo->show($ourValue)])->withFields(request()->get('fields')),
         );
     }
 
@@ -55,7 +55,7 @@ class OurValueController extends Controller
     {
 
         return  successResponse(
-            data: (new OurValueResource($ourValue))->withFields(request()->get('fields'))
+            data: resolve(OurValueResource::class, ['resource' => $ourValue])->withFields(request()->get('fields')),
         );
     }
 
@@ -64,7 +64,7 @@ class OurValueController extends Controller
         $updatedOurValue = $this->repo->update($ourValue, $request->validated());
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: new OurValueResource($updatedOurValue)
+            data: resolve(OurValueResource::class, ['resource' => $updatedOurValue])->withFields(request()->get('fields')),
         );
     }
 
@@ -87,7 +87,9 @@ class OurValueController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: OurValueResource::collection($updatedOurValue)
+            data: collect($updatedOurValue)->map(function ($item) {
+                return resolve(OurValueResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 
@@ -104,7 +106,7 @@ class OurValueController extends Controller
 
         return successResponse(
             message: translate('cms::messages.image_updated_successfully'),
-            data: new OurValueResource($updatedOurValue)
+            data: resolve(OurValueResource::class, ['resource' => $updatedOurValue])->withFields(request()->get('fields')),
         );
     }
 

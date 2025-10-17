@@ -19,7 +19,7 @@ class UpdateAllFaqRequest extends MyRequest
     public function rules(): array
     {
         $singleRules = $this->getFaqRules('update');
-        $tableName = (new Faq())->getTable();
+        $tableName = resolve(Faq::class)->getTable();
         $rulesForAll = [
             '*' => ['required', 'array'],
             '*.id' => ['required', 'integer', 'exists:' . $tableName . ',id'],

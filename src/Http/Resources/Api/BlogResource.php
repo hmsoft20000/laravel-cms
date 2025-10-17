@@ -25,10 +25,10 @@ class BlogResource extends BaseJsonResource
             'show_in_footer' => $this->show_in_footer,
             'show_in_header' => $this->show_in_header,
             'partners' => $this->whenLoaded('partners', function () {
-                return  OrganizationResource::collection($this->partners);
+                return  resolve(OrganizationResource::class, ['resource' => $this->partners]);
             }),
             'sponsors' => $this->whenLoaded('sponsors', function () {
-                return  OrganizationResource::collection($this->sponsors);
+                return  resolve(OrganizationResource::class, ['resource' => $this->sponsors]);
             }),
             'meta_keywords' => $this->meta_keywords,
             'created_at' => $this->created_at,
@@ -71,16 +71,16 @@ class BlogResource extends BaseJsonResource
             }),
 
             'categories' => $this->whenLoaded('categories', function () use ($request) {
-                return  CategoryResource::collection($this->categories)->toArray($request);
+                return  resolve(CategoryResource::class, ['resource' => $this->categories])->toArray($request);
             }),
             'features' => $this->whenLoaded('features', function () use ($request) {
-                return  FeatureResource::collection($this->features)->toArray($request);
+                return  resolve(FeatureResource::class, ['resource' => $this->features])->toArray($request);
             }),
             'downloads' => $this->whenLoaded('downloads', function () use ($request) {
-                return  DownloadResource::collection($this->downloads)->toArray($request);
+                return  resolve(DownloadResource::class, ['resource' => $this->downloads])->toArray($request);
             }),
             'plans' => $this->whenLoaded('plans', function () use ($request) {
-                return  DownloadResource::collection($this->plans)->toArray($request);
+                return  resolve(DownloadResource::class, ['resource' => $this->plans])->toArray($request);
             }),
 
             'attribute_values' => $this->formatAndGroupAttributeValues($this->resource),

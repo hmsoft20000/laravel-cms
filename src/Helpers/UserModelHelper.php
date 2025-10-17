@@ -36,7 +36,7 @@ class UserModelHelper
         if (!$user || !method_exists($user, 'hasPermission')) {
             return false;
         }
-        
+
         return $user->hasPermission($permission);
     }
 
@@ -49,7 +49,7 @@ class UserModelHelper
         if (!$user || !method_exists($user, 'hasRole')) {
             return false;
         }
-        
+
         return $user->hasRole($role);
     }
 
@@ -62,7 +62,7 @@ class UserModelHelper
         if (!$user || !method_exists($user, 'getRoles')) {
             return [];
         }
-        
+
         return $user->getRoles()->pluck('name')->toArray();
     }
 
@@ -75,7 +75,7 @@ class UserModelHelper
         if (!$user || !method_exists($user, 'getAllPermissions')) {
             return [];
         }
-        
+
         return $user->getAllPermissions();
     }
 
@@ -88,7 +88,7 @@ class UserModelHelper
         if (!$user || !method_exists($user, 'isGuest')) {
             return true; // If user not found, consider as guest
         }
-        
+
         return $user->isGuest();
     }
 
@@ -98,20 +98,35 @@ class UserModelHelper
     public static function currentOrGuest(): object
     {
         $userModelClass = self::getUserModelClass();
-        
+
         // Try to get current authenticated user
         $user = \Illuminate\Support\Facades\Auth::user();
         if ($user) {
             return $user;
         }
-        
+
         // Return guest user if no authenticated user
         return new class {
-            public function isGuest(): bool { return true; }
-            public function hasPermission(string $permission): bool { return false; }
-            public function hasRole(string $role): bool { return false; }
-            public function getAllPermissions(): array { return []; }
-            public function getRoles(): array { return []; }
+            public function isGuest(): bool
+            {
+                return true;
+            }
+            public function hasPermission(string $permission): bool
+            {
+                return false;
+            }
+            public function hasRole(string $role): bool
+            {
+                return false;
+            }
+            public function getAllPermissions(): array
+            {
+                return [];
+            }
+            public function getRoles(): array
+            {
+                return [];
+            }
         };
     }
 

@@ -38,7 +38,7 @@ class UpdateAllPortfolioRequest extends MyRequest
     public function rules()
     {
         $singleRules = $this->getPortfolioRules('update');
-        $tableName = (new Portfolio())->getTable();
+        $tableName = resolve(Portfolio::class)->getTable();
         $rulesForAll = [
             '*' => ['required', 'array'],
             '*.id' => ['required', 'integer', 'exists:' . $tableName . ',id'],
@@ -53,7 +53,7 @@ class UpdateAllPortfolioRequest extends MyRequest
         $sponsorRules = $this->getOrganizationIdsValidationRules('sponsor', '*.sponsor_ids');
         $featureRules = $this->getNestedFeatureRules('*.features.*.', 'update');
         $downloadRules = $this->getNestedDownloadRules('*.downloads.*.', 'update');
-        $attributeRules = $this->getAttributeValidationRules((new Portfolio)->getMorphClass(), '*.');
+        $attributeRules = $this->getAttributeValidationRules(resolve(Portfolio::class)->getMorphClass(), '*.');
         $rulesForAll = array_merge($rulesForAll, $categoryRules, $partnerRules, $sponsorRules, $featureRules, $downloadRules, $attributeRules);
 
         return $rulesForAll;

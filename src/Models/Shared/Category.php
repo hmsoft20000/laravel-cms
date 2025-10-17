@@ -44,6 +44,11 @@ class Category extends GeneralModel
         ];
     }
 
+    public function getMorphClass(): string
+    {
+        return 'category';
+    }
+
 
     // =================================================================
     // RELATIONS

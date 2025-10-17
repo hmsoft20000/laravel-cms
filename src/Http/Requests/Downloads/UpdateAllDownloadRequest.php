@@ -18,7 +18,7 @@ class UpdateAllDownloadRequest extends MyRequest
     public function rules(): array
     {
         $singleRules = $this->getDownloadRules('update');
-        $tableName = (new Download())->getTable();
+        $tableName = resolve(Download::class)->getTable();
         $rulesForAll = [
             '*' => ['required', 'array'],
             '*.id' => ['required', 'integer', 'exists:' . $tableName . ',id'],

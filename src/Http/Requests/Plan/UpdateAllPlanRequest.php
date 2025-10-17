@@ -18,7 +18,7 @@ class UpdateAllPlanRequest extends MyRequest
     public function rules(): array
     {
         $singleRules = $this->getPlanRules('update');
-        $tableName = (new Plan())->getTable();
+        $tableName = resolve(Plan::class)->getTable();
         $rulesForAll = [
             // '' => ['required', 'array', 'max:50'],
             '*.id' => ['required', 'integer', 'exists:' . $tableName . ',id'],

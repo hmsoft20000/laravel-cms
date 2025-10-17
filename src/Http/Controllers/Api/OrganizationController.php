@@ -37,7 +37,7 @@ class OrganizationController extends Controller
         );
 
         $result['data'] =  collect($result['data'])->map(function ($item) {
-            return (new OrganizationResource($item))->withFields(request()->get('fields'));
+            return resolve(OrganizationResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return  successResponse(
@@ -52,7 +52,7 @@ class OrganizationController extends Controller
 
         $organization->load(['translations', 'image']);
         return  successResponse(
-            data: (new OrganizationResource($organization))->withFields(request()->get('fields'))
+            data: resolve(OrganizationResource::class, ['resource' => $organization])->withFields(request()->get('fields'))
         );
     }
 
@@ -65,7 +65,7 @@ class OrganizationController extends Controller
         $organization->load(['translations', 'image']);
         return  successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new OrganizationResource($organization))->withFields(request()->get('fields'))
+            data: resolve(OrganizationResource::class, ['resource' => $organization])->withFields(request()->get('fields'))
         );
     }
 
@@ -78,7 +78,7 @@ class OrganizationController extends Controller
         $organization->load(['translations', 'image']);
         return  successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new OrganizationResource($organization))->withFields(request()->get('fields'))
+            data: resolve(OrganizationResource::class, ['resource' => $organization])->withFields(request()->get('fields'))
         );
     }
 
@@ -97,7 +97,9 @@ class OrganizationController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: OrganizationResource::collection($updatedModel)
+            data: collect($updatedModel)->map(function ($item) {
+                return resolve(OrganizationResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 
@@ -114,7 +116,7 @@ class OrganizationController extends Controller
 
         return successResponse(
             message: translate('cms::messages.image_updated_successfully'),
-            data: new OrganizationResource($updatedOrganization)
+            data: resolve(OrganizationResource::class, ['resource' => $updatedOrganization])->withFields(request()->get('fields')),
         );
     }
 

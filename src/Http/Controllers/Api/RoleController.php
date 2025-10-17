@@ -20,7 +20,7 @@ class RoleController extends Controller
         // $this->authorize('manage', Role::class);
 
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Role(),
+            model: resolve(Role::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($request) {
                 $query->with(['parent', 'permissions']);
             },
@@ -234,7 +234,7 @@ class RoleController extends Controller
         foreach ($request->all() as $roleData) {
             if (isset($roleData['id'])) {
                 $role = Role::findOrFail($roleData['id']);
-                
+
                 // Prevent circular reference
                 if (isset($roleData['parent_id']) && $roleData['parent_id'] != $role->parent_id) {
                     $this->validateParentRelationship($roleData['parent_id'], $role->id);

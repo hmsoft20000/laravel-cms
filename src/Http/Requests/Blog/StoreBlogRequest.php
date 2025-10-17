@@ -55,7 +55,7 @@ class StoreBlogRequest extends MyRequest
         $sponsorRules = $this->getOrganizationIdsValidationRules('sponsor', 'sponsor_ids');
         $featureRules = $this->getNestedFeatureRules('features.*.', 'create');
         $downloadRules = $this->getNestedDownloadRules('downloads.*.', 'create');
-        $attributeRules = $this->getAttributeValidationRules((new Blog)->getMorphClass());
+        $attributeRules = $this->getAttributeValidationRules(resolve(Blog::class)->getMorphClass());
 
         $rules = array_merge($rules, $categoryRules, $partnerRules, $sponsorRules, $featureRules, $downloadRules, $attributeRules);
 

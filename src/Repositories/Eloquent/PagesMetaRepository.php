@@ -78,7 +78,7 @@ class PagesMetaRepository implements PagesMetaRepositoryInterface
             Cache::forget('pages_meta');
             $pages_meta = Cache::rememberForever('pages_meta', function () {
                 return $this->model->with('translations')->get()->map(function ($type) {
-                    return (new PageMetaResource($type))->toArray(request());
+                    return resolve(PageMetaResource::class, ['resource' => $type])->toArray(request());
                 })->groupBy('name')->mapWithKeys(function ($value, $key) {
                     return [$key => collect($value)->values()->toArray()[0]];
                 });

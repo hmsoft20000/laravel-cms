@@ -155,7 +155,7 @@ class Slider extends GeneralModel
      */
     public function defineTranslationTableName(): ?string
     {
-        return (new SliderTranslation())->getTable();
+        return resolve(SliderTranslation::class)->getTable();
     }
 
     /**

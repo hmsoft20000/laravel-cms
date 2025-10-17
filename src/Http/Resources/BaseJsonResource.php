@@ -90,7 +90,7 @@ class BaseJsonResource extends JsonResource
         $ignoredKeys = ['id', 'locale', 'created_at', 'updated_at', 'deleted_at', 'created_by', 'updated_by', 'deleted_by'];
 
         foreach ($allTranslatableFields as $field) {
-            if (in_array($field, $ignoredKeys)) {
+            if (in_array($field, $ignoredKeys) || str_ends_with($field, '_id')) {
                 continue;
             }
 
@@ -111,7 +111,7 @@ class BaseJsonResource extends JsonResource
 
         // Ensure every translatable field exists at top-level even if null
         foreach ($allTranslatableFields as $field) {
-            if (in_array($field, $ignoredKeys)) {
+            if (in_array($field, $ignoredKeys) || str_ends_with($field, '_id')) {
                 continue;
             }
             if (!array_key_exists($field, $data)) {

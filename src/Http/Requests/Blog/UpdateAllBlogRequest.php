@@ -38,7 +38,7 @@ class UpdateAllBlogRequest extends MyRequest
     public function rules()
     {
         $singleRules = $this->getBlogRules('update');
-        $tableName = (new Blog())->getTable();
+        $tableName = (resolve(Blog::class))->getTable();
         $rulesForAll = [
             '*' => ['required', 'array'],
             '*.id' => ['required', 'integer', 'exists:' . $tableName . ',id'],
@@ -53,7 +53,7 @@ class UpdateAllBlogRequest extends MyRequest
         $sponsorRules = $this->getOrganizationIdsValidationRules('sponsor', '*.sponsor_ids');
         $featureRules = $this->getNestedFeatureRules('*.features.*.', 'update');
         $downloadRules = $this->getNestedDownloadRules('*.downloads.*.', 'update');
-        $attributeRules = $this->getAttributeValidationRules((new Blog)->getMorphClass(), '*.');
+        $attributeRules = $this->getAttributeValidationRules(resolve(Blog::class)->getMorphClass(), '*.');
         $rulesForAll = array_merge($rulesForAll, $categoryRules, $partnerRules, $sponsorRules, $featureRules, $downloadRules, $attributeRules);
 
         return $rulesForAll;

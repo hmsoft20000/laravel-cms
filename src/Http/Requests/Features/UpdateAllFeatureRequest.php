@@ -19,7 +19,7 @@ class UpdateAllFeatureRequest extends MyRequest
     public function rules(): array
     {
         $singleRules = $this->getFeatureRules('update');
-        $tableName = (new Feature())->getTable();
+        $tableName = resolve(Feature::class)->getTable();
         $rulesForAll = [
             '*' => ['required', 'array'],
             '*.id' => ['required', 'integer', 'exists:' . $tableName . ',id'],

@@ -63,7 +63,7 @@ class LegalResource extends BaseJsonResource
                 return collect($this->keywords)->pluck('keyword')->all();
             }),
             'features' => $this->whenLoaded('features', function () {
-                return  FeatureResource::collection($this->features);
+                return  resolve(FeatureResource::class, ['resource' => $this->features]);
             }),
         ];
     }

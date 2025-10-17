@@ -24,7 +24,7 @@ class TopicCreated implements ShouldBroadcast
     public function __construct(Topic $topic)
     {
         // نستخدم TopicResource لضمان أن البيانات المرسلة متناسقة
-        $this->topic = (new TopicResource($topic->toArray()))->resolve();
+        $this->topic = resolve(TopicResource::class, ['resource' => $topic])->toArray();
     }
 
     public function broadcastOn(): array

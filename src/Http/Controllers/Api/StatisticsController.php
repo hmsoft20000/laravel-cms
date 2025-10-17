@@ -31,7 +31,7 @@ class StatisticsController extends Controller
         );
 
         $result['data'] =  collect($result['data'])->map(function ($item) {
-            return (new StatisticsResource($item))->withFields(request()->get('fields'));
+            return resolve(StatisticsResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return  successResponse(
@@ -47,7 +47,7 @@ class StatisticsController extends Controller
         $statistics = $this->repo->show($statistics);
 
         return  successResponse(
-            data: (new StatisticsResource($statistics))->withFields(request()->get('fields'))
+            data: resolve(StatisticsResource::class, ['resource' => $statistics])->withFields(request()->get('fields'))
         );
     }
 
@@ -63,7 +63,7 @@ class StatisticsController extends Controller
         $statistics->load(['translations', 'image']);
         return  successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new StatisticsResource($statistics))->withFields(request()->get('fields'))
+            data: resolve(StatisticsResource::class, ['resource' => $statistics])->withFields(request()->get('fields'))
         );
     }
 
@@ -79,7 +79,7 @@ class StatisticsController extends Controller
         $statistics->load(['translations', 'image']);
         return  successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new StatisticsResource($statistics))->withFields(request()->get('fields'))
+            data: resolve(StatisticsResource::class, ['resource' => $statistics])->withFields(request()->get('fields'))
         );
     }
 
@@ -88,7 +88,7 @@ class StatisticsController extends Controller
         // $this->authorize('updateAny', Statistics::class);
 
         $updatedStatistics = [];
-        
+
         foreach ($request->all() as $featureData) {
             if (isset($featureData['id'])) {
                 $statistics = Statistics::findOrFail($featureData['id']);
@@ -105,7 +105,9 @@ class StatisticsController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: StatisticsResource::collection($updatedStatistics)
+            data: collect($updatedStatistics)->map(function ($item) {
+                return resolve(StatisticsResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 
@@ -122,7 +124,7 @@ class StatisticsController extends Controller
 
         return successResponse(
             message: translate('cms::messages.image_updated_successfully'),
-            data: new StatisticsResource($updatedStatistics)
+            data: resolve(StatisticsResource::class, ['resource' => $updatedStatistics])->withFields(request()->get('fields')),
         );
     }
 

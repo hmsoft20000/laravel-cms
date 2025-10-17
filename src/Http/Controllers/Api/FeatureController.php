@@ -38,7 +38,7 @@ class FeatureController extends Controller
         $owner = $this->resolveOwner($request);
 
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Feature(),
+            model: resolve(Feature::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($owner) {
                 $query->where('owner_type', $owner->getMorphClass());
                 $query->where('owner_id', $owner->id);
@@ -51,7 +51,7 @@ class FeatureController extends Controller
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return new FeatureResource($item);
+            return resolve(FeatureResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -82,7 +82,7 @@ class FeatureController extends Controller
         $feature = $this->repository->store($validated);
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: new FeatureResource($feature),
+            data: resolve(FeatureResource::class, ['resource' => $feature])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
     }
@@ -107,7 +107,7 @@ class FeatureController extends Controller
         if ($feature->owner_type != $owner->getMorphClass() || $feature->owner_id != $owner->id) {
             abort(404);
         }
-        return successResponse(data: new FeatureResource($this->repository->show($feature)));
+        return successResponse(data: resolve(FeatureResource::class, ['resource' => $this->repository->show($feature)])->withFields(request()->get('fields')));
     }
 
     /**
@@ -132,7 +132,7 @@ class FeatureController extends Controller
         $updatedFeature = $this->repository->update($feature, $request->validated());
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: new FeatureResource($updatedFeature)
+            data: resolve(FeatureResource::class, ['resource' => $updatedFeature])->withFields(request()->get('fields'))
         );
     }
 
@@ -189,7 +189,9 @@ class FeatureController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: FeatureResource::collection($updatedFeatures)
+            data: collect($updatedFeatures)->map(function ($item) {
+                return resolve(FeatureResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 
@@ -223,7 +225,7 @@ class FeatureController extends Controller
 
         return successResponse(
             message: translate('cms::messages.image_updated_successfully'),
-            data: new FeatureResource($updatedFeature)
+            data: resolve(FeatureResource::class, ['resource' => $updatedFeature])->withFields(request()->get('fields')),
         );
     }
 }

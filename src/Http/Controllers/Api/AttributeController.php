@@ -32,7 +32,7 @@ class AttributeController extends Controller
 
         // This logic is preserved from your preferred pattern
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Attribute(),
+            model: resolve(Attribute::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($scope) {
                 $query->ofScope($scope);
                 $query->with(['translations', 'options.translations', 'categories']);
@@ -40,7 +40,7 @@ class AttributeController extends Controller
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return (new AttributeResource($item))->withFields(request()->get('fields'));
+            return resolve(AttributeResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -58,7 +58,7 @@ class AttributeController extends Controller
         $attribute = $this->repository->store($validated);
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: new AttributeResource($this->repository->show($attribute)),
+            data: resolve(AttributeResource::class, ['resource' => $this->repository->show($attribute)])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
     }
@@ -69,7 +69,7 @@ class AttributeController extends Controller
     public function show(Attribute $attribute): JsonResponse
     {
         return successResponse(
-            data: new AttributeResource($this->repository->show($attribute))
+            data: resolve(AttributeResource::class, ['resource' => $this->repository->show($attribute)])->withFields(request()->get('fields')),
         );
     }
 
@@ -81,7 +81,7 @@ class AttributeController extends Controller
         $updatedAttribute = $this->repository->update($attribute, $request->validated());
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: new AttributeResource($updatedAttribute)
+            data: resolve(AttributeResource::class, ['resource' => $updatedAttribute])->withFields(request()->get('fields')),
         );
     }
 
@@ -100,22 +100,31 @@ class AttributeController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: AttributeResource::collection($updatedAttributes)
+            data: collect($updatedAttributes)->map(function ($item) {
+                return resolve(AttributeResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 
     public function updateImage(Request $request, Attribute $attribute): JsonResponse
     {
-        $validated = $request->validate([
-            'image' => ['sometimes', 'image', 'max:2048'],
-            'delete_image' => ['sometimes'],
-        ]);
+        $rules = [
+            'delete_image' => ['sometimes', 'boolean'],
+        ];
 
-        $updatedFeature = $this->repository->update($attribute, $validated);
+        if ($request->hasFile('image')) {
+            $rules['image'] = ['required', 'image', 'max:2048'];
+        } elseif ($request->filled('image')) {
+            $rules['image'] = ['required', 'string', 'max:255'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $updatedAttribute = $this->repository->update($attribute, $validated);
 
         return successResponse(
             message: translate('cms::messages.image_updated_successfully'),
-            data: new AttributeResource($updatedFeature)
+            data: resolve(AttributeResource::class, ['resource' => $updatedAttribute])->withFields(request()->get('fields')),
         );
     }
 

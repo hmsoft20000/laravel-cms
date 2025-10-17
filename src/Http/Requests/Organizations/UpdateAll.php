@@ -20,7 +20,7 @@ class UpdateAll extends MyRequest
     public function rules(): array
     {
         $singleRules = $this->getOrganizationRules('update');
-        $tableName = (new Organization())->getTable();
+        $tableName = resolve(Organization::class)->getTable();
         $rulesForAll = [
             '*' => ['required', 'array'],
             '*.id' => [

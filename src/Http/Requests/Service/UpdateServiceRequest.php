@@ -54,7 +54,7 @@ class UpdateServiceRequest extends MyRequest
         $sponsorRules = $this->getOrganizationIdsValidationRules('sponsor', 'sponsor_ids');
         $featureRules = $this->getNestedFeatureRules('features.*.', 'update');
         $downloadRules = $this->getNestedDownloadRules('downloads.*.', 'update');
-        $attributeRules = $this->getAttributeValidationRules((new Service)->getMorphClass());
+        $attributeRules = $this->getAttributeValidationRules(resolve(Service::class)->getMorphClass());
 
         $rules = array_merge($rules, $categoryRules, $partnerRules, $sponsorRules, $featureRules, $downloadRules, $attributeRules);
 

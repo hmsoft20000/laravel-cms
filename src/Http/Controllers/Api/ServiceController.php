@@ -26,7 +26,7 @@ class ServiceController extends Controller
     public function index(): JsonResponse
     {
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Service(),
+            model: resolve(Service::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) {
                 // if (!$this->authService->hasPermission('services.viewUnpublished')) {
                 //     $query->where('t_main.is_active', true);
@@ -49,7 +49,7 @@ class ServiceController extends Controller
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return (new ServiceResource($item))->withFields(request()->get('fields'));
+            return resolve(ServiceResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -66,7 +66,7 @@ class ServiceController extends Controller
         $service = $this->repo->store($request->validated());
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new ServiceResource($this->repo->show($service)))->withFields(request()->get('fields')),
+            data: resolve(ServiceResource::class, ['resource' => $this->repo->show($service)])->withFields(request()->get('fields')),
         );
     }
 
@@ -76,7 +76,7 @@ class ServiceController extends Controller
     public function show(Service $service): JsonResponse
     {
         $service = $this->repo->show($service);
-        return successResponse(data: (new ServiceResource($service))->withFields(request()->get('fields')));
+        return successResponse(data: resolve(ServiceResource::class, ['resource' => $service])->withFields(request()->get('fields')));
     }
 
     /**
@@ -88,7 +88,7 @@ class ServiceController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new ServiceResource($updatedService))->withFields(request()->get('fields'))
+            data: resolve(ServiceResource::class, ['resource' => $updatedService])->withFields(request()->get('fields'))
         );
     }
 
@@ -104,7 +104,9 @@ class ServiceController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: ServiceResource::collection($updatedServices)
+            data: collect($updatedServices)->map(function ($item) {
+                return resolve(ServiceResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 

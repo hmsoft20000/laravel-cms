@@ -25,12 +25,11 @@ class LanguageController extends Controller
 
         $result =  AutoFilterAndSortService::dynamicSearchFromRequest(
             model: Lang::class,
-            extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query, $option) {
-            },
+            extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query, $option) {},
         );
 
         $result['data'] =  collect($result['data'])->map(function ($item) {
-            return (new LangResource($item))->withFields(request()->get('fields'));
+            return resolve(LangResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return  successResponse(
@@ -45,7 +44,7 @@ class LanguageController extends Controller
 
         $lang->load(['translations']);
         return  successResponse(
-            data: (new LangResource($lang))->withFields(request()->get('fields'))
+            data: resolve(LangResource::class, ['resource' => $lang])->withFields(request()->get('fields'))
         );
     }
 
@@ -58,7 +57,7 @@ class LanguageController extends Controller
         $lang->load(['translations']);
         return  successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new LangResource($lang))->withFields(request()->get('fields'))
+            data: resolve(LangResource::class, ['resource' => $lang])->withFields(request()->get('fields'))
         );
     }
 
@@ -71,7 +70,7 @@ class LanguageController extends Controller
         $lang->load(['translations']);
         return  successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new LangResource($lang))->withFields(request()->get('fields'))
+            data: resolve(LangResource::class, ['resource' => $lang])->withFields(request()->get('fields'))
         );
     }
 
@@ -96,7 +95,9 @@ class LanguageController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: LangResource::collection($updatedLangs)
+            data: collect($updatedLangs)->map(function ($item) {
+                return resolve(LangResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 
@@ -112,7 +113,7 @@ class LanguageController extends Controller
 
         return successResponse(
             message: translate('cms::messages.image_updated_successfully'),
-            data: new LangResource($updatedLang)
+            data: resolve(LangResource::class, ['resource' => $updatedLang])->withFields(request()->get('fields')),
         );
     }
 

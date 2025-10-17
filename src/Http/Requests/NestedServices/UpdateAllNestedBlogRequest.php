@@ -24,7 +24,7 @@ class UpdateAllNestedServiceRequest extends MyRequest
     public function rules(): array
     {
         $singleRules = $this->getServiceRules('update');
-        $tableName = (new Service())->getTable();
+        $tableName = resolve(Service::class)->getTable();
 
         $rulesForAll = [
             '*' => ['required', 'array'],

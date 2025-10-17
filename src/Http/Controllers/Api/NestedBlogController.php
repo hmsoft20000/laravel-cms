@@ -29,7 +29,7 @@ class NestedBlogController extends Controller
     {
 
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Blog(),
+            model: resolve(Blog::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($owner) {
                 $query->where('owner_type', $owner->getMorphClass());
                 $query->where('owner_id', $owner->id);
@@ -40,7 +40,7 @@ class NestedBlogController extends Controller
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return new BlogResource($item);
+            return resolve(BlogResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -64,7 +64,7 @@ class NestedBlogController extends Controller
 
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new BlogResource($blog))->withFields(request()->get('fields')),
+            data: resolve(BlogResource::class, ['resource' => $blog])->withFields(request()->get('fields')),
         );
     }
 
@@ -77,7 +77,7 @@ class NestedBlogController extends Controller
         if ($blog->owner_type != $owner->getMorphClass() || $blog->owner_id != $owner->id) {
             abort(404);
         }
-        return successResponse(data: (new BlogResource($this->repo->show($blog)))->withFields(request()->get('fields')));
+        return successResponse(data: resolve(BlogResource::class, ['resource' => $this->repo->show($blog)])->withFields(request()->get('fields')));
     }
 
     /**
@@ -95,7 +95,7 @@ class NestedBlogController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new BlogResource($updatedBlog))->withFields(request()->get('fields'))
+            data: resolve(BlogResource::class, ['resource' => $updatedBlog])->withFields(request()->get('fields'))
         );
     }
 
@@ -114,7 +114,9 @@ class NestedBlogController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: BlogResource::collection($updatedBlogs)
+            data: collect($updatedBlogs)->map(function ($item) {
+                return resolve(BlogResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 

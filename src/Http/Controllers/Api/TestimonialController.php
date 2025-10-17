@@ -30,7 +30,7 @@ class TestimonialController extends Controller
         );
 
         $result['data'] =  collect($result['data'])->map(function ($item) {
-            return (new TestimonialResource($item))->withFields(request()->get('fields'));
+            return resolve(TestimonialResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return  successResponse(
@@ -45,7 +45,7 @@ class TestimonialController extends Controller
 
         $this->repo->show($testimonial);
         return  successResponse(
-            data: (new TestimonialResource($testimonial))->withFields(request()->get('fields'))
+            data: resolve(TestimonialResource::class, ['resource' => $testimonial])->withFields(request()->get('fields'))
         );
     }
 
@@ -60,7 +60,7 @@ class TestimonialController extends Controller
         $testimonial = $this->repo->store($validated);
         return  successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new TestimonialResource($testimonial))->withFields(request()->get('fields'))
+            data: resolve(TestimonialResource::class, ['resource' => $testimonial])->withFields(request()->get('fields'))
         );
     }
 
@@ -75,7 +75,7 @@ class TestimonialController extends Controller
         $testimonial = $this->repo->update($testimonial, $validated);
         return  successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new TestimonialResource($testimonial))->withFields(request()->get('fields'))
+            data: resolve(TestimonialResource::class, ['resource' => $testimonial])->withFields(request()->get('fields'))
         );
     }
 
@@ -93,7 +93,9 @@ class TestimonialController extends Controller
         }
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: TestimonialResource::collection($updatedTestimonials)
+            data: collect($updatedTestimonials)->map(function ($item) {
+                return resolve(TestimonialResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 
@@ -109,7 +111,7 @@ class TestimonialController extends Controller
 
         return successResponse(
             message: translate('cms::messages.image_updated_successfully'),
-            data: new TestimonialResource($updatedTestimonial)
+            data: resolve(TestimonialResource::class, ['resource' => $updatedTestimonial])->withFields(request()->get('fields')),
         );
     }
 

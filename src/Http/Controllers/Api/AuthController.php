@@ -20,7 +20,13 @@ class AuthController extends Controller
     {
         try {
             $user = $this->repo->register($request->validated());
-            return successResponse(__('cms::auth.registered'), ['user' => new UserResource($user)], 201);
+            return successResponse(
+                __('cms::auth.registered'),
+                [
+                    'user' => resolve(UserResource::class, ['resource' => $user])->withFields(request()->get('fields')),
+                ],
+                201
+            );
         } catch (\Exception $e) {
             return errorResponse(__('cms::auth.registration_failed'), 500);
         }
@@ -32,7 +38,7 @@ class AuthController extends Controller
             $result = $this->repo->login($request->validated());
             $user = $result['user'];
             return successResponse(__('cms::auth.logged_in_successfully'), [
-                'user' => new UserResource($user),
+                'user' => resolve(UserResource::class, ['resource' => $user])->withFields(request()->get('fields')),
                 'token' => $result['token'],
             ]);
         } catch (CredentialsDoNotMatchException $e) {
@@ -58,7 +64,7 @@ class AuthController extends Controller
         try {
             $user = $this->repo->user($request);
             return successResponse(__('cms::auth.user_retrieved'), [
-                'user' => new UserResource($user),
+                'user' => resolve(UserResource::class, ['resource' => $user])->withFields(request()->get('fields')),
                 'token' => $request->bearerToken(),
             ]);
         } catch (\Exception $e) {
@@ -102,7 +108,7 @@ class AuthController extends Controller
         try {
             $user = $this->repo->user($request);
             return successResponse(__('cms::auth.profile_retrieved'), [
-                'user' => new UserResource($user),
+                'user' => resolve(UserResource::class, ['resource' => $user])->withFields(request()->get('fields')),
                 'token' => $request->bearerToken(),
             ]);
         } catch (\Exception $e) {
@@ -120,7 +126,12 @@ class AuthController extends Controller
 
             $data['id'] = $request->user()->getKey();
             $user = $this->repo->updateProfile($data);
-            return successResponse(__('cms::auth.profile_updated'), ['user' => new UserResource($user)]);
+            return successResponse(
+                __('cms::auth.profile_updated'),
+                [
+                    'user' => resolve(UserResource::class, ['resource' => $user])->withFields(request()->get('fields')),
+                ]
+            );
         } catch (\Exception $e) {
             return errorResponse(__('cms::auth.profile_update_failed'), 500);
         }

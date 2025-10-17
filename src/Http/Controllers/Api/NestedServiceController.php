@@ -25,7 +25,7 @@ class NestedServiceController extends Controller
     {
 
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Service(),
+            model: resolve(Service::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($owner) {
                 $query->where('owner_type', $owner->getMorphClass());
                 $query->where('owner_id', $owner->id);
@@ -36,7 +36,7 @@ class NestedServiceController extends Controller
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return new ServiceResource($item);
+            return resolve(ServiceResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -60,7 +60,7 @@ class NestedServiceController extends Controller
 
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new ServiceResource($service))->withFields(request()->get('fields')),
+            data: resolve(ServiceResource::class, ['resource' => $service])->withFields(request()->get('fields')),
         );
     }
 
@@ -73,7 +73,7 @@ class NestedServiceController extends Controller
         if ($service->owner_type != $owner->getMorphClass() || $service->owner_id != $owner->id) {
             abort(404);
         }
-        return successResponse(data: (new ServiceResource($this->repo->show($service)))->withFields(request()->get('fields')));
+        return successResponse(data: resolve(ServiceResource::class, ['resource' => $this->repo->show($service)])->withFields(request()->get('fields')));
     }
 
     /**
@@ -91,7 +91,7 @@ class NestedServiceController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new ServiceResource($updatedService))->withFields(request()->get('fields'))
+            data: resolve(ServiceResource::class, ['resource' => $updatedService])->withFields(request()->get('fields'))
         );
     }
 
@@ -110,7 +110,9 @@ class NestedServiceController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: ServiceResource::collection($updatedServices)
+            data: collect($updatedServices)->map(function ($item) {
+                return resolve(ServiceResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 

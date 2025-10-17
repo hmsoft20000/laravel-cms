@@ -17,7 +17,7 @@ class AttributeResource extends BaseJsonResource
         return [
             'id' => $this->id,
             'type' => $this->type,
-            // 'scope' => $this->scope, // The new scope field (e.g., 'portfolio', 'product')
+            // 'scope' => $this->scope, 
             'is_active' => $this->is_active,
             'sort_number' => $this->sort_number,
             'image' => $this->image,

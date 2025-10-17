@@ -27,7 +27,7 @@ class PlanResource extends BaseJsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'features' => $this->whenLoaded('features', function () {
-                return  PlanFeatureResource::collection($this->features);
+                return  resolve(PlanFeatureResource::class, ['resource' => $this->features]);
             }),
             'translations' => $this->whenLoaded('translations', function () {
                 return $this->translations;

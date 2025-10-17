@@ -26,7 +26,7 @@ class CategoryController extends Controller
         $type = $request->route('type');
 
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Category(),
+            model: resolve(Category::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($type) {
                 $query->ofType($type);
                 $query->with(['translations', 'sector']);
@@ -34,7 +34,7 @@ class CategoryController extends Controller
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return (new CategoryResource($item))->withFields(request()->get('fields'));
+            return resolve(CategoryResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -50,7 +50,7 @@ class CategoryController extends Controller
         $category = $this->repository->store($request->validated());
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: new CategoryResource($this->repository->show($category)),
+            data: resolve(CategoryResource::class, ['resource' => $this->repository->show($category)])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
     }
@@ -60,7 +60,7 @@ class CategoryController extends Controller
         // $this->authorize('view', $category);
 
         return successResponse(
-            data: new CategoryResource($this->repository->show($category))
+            data: resolve(CategoryResource::class, ['resource' => $this->repository->show($category)])->withFields(request()->get('fields'))
         );
     }
 
@@ -71,7 +71,7 @@ class CategoryController extends Controller
         $updatedCategory = $this->repository->update($category, $request->validated());
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: new CategoryResource($updatedCategory)
+            data: resolve(CategoryResource::class, ['resource' => $updatedCategory])->withFields(request()->get('fields'))
         );
     }
 
@@ -90,7 +90,33 @@ class CategoryController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: CategoryResource::collection($updatedCategories)
+            data: collect($updatedCategories)->map(function ($item) {
+                return resolve(CategoryResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
+        );
+    }
+
+    public function updateImage(Request $request, Category $category): JsonResponse
+    {
+
+        $rules = [
+            'delete_image' => ['sometimes', 'boolean'],
+        ];
+
+        if ($request->hasFile('image')) {
+            $rules['image'] = ['required', 'image', 'max:2048'];
+        } elseif ($request->filled('image')) {
+            $rules['image'] = ['required', 'string', 'max:255'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $updatedCategory = $this->repository->update($category, $validated);
+
+        return successResponse(
+            message: translate('cms::messages.image_updated_successfully'),
+            data: resolve(CategoryResource::class, ['resource' => $updatedCategory])->withFields(request()->get('fields')),
+
         );
     }
 

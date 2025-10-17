@@ -38,7 +38,7 @@ class UpdateAllServiceRequest extends MyRequest
     public function rules()
     {
         $singleRules = $this->getServiceRules('update');
-        $tableName = (new Service())->getTable();
+        $tableName = resolve(Service::class)->getTable();
         $rulesForAll = [
             '*' => ['required', 'array'],
             '*.id' => ['required', 'integer', 'exists:' . $tableName . ',id'],
@@ -53,7 +53,7 @@ class UpdateAllServiceRequest extends MyRequest
         $sponsorRules = $this->getOrganizationIdsValidationRules('sponsor', '*.sponsor_ids');
         $featureRules = $this->getNestedFeatureRules('*.features.*.', 'update');
         $downloadRules = $this->getNestedDownloadRules('*.downloads.*.', 'update');
-        $attributeRules = $this->getAttributeValidationRules((new Service)->getMorphClass(), '*.');
+        $attributeRules = $this->getAttributeValidationRules(resolve(Service::class)->getMorphClass(), '*.');
         $rulesForAll = array_merge($rulesForAll, $categoryRules, $partnerRules, $sponsorRules, $featureRules, $downloadRules, $attributeRules);
 
         return $rulesForAll;

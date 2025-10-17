@@ -55,7 +55,7 @@ class StorePortfolioRequest extends MyRequest
         $sponsorRules = $this->getOrganizationIdsValidationRules('sponsor', 'sponsor_ids');
         $featureRules = $this->getNestedFeatureRules('features.*.', 'create');
         $downloadRules = $this->getNestedDownloadRules('downloads.*.', 'create');
-        $attributeRules = $this->getAttributeValidationRules((new Portfolio)->getMorphClass());
+        $attributeRules = $this->getAttributeValidationRules(resolve(Portfolio::class)->getMorphClass());
 
         $rules = array_merge($rules, $categoryRules, $partnerRules, $sponsorRules, $featureRules, $downloadRules, $attributeRules);
 

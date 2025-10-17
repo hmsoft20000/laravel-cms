@@ -22,14 +22,14 @@ class CategoryResource extends BaseJsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'sector' => $this->whenLoaded('sector', function () {
-                return new SectorResource($this->sector);
+                return resolve(SectorResource::class, ['resource' => $this->sector]);
             }),
-            'posts' => $this->whenLoaded('posts', function () {
-                return  PostResource::collection($this->posts);
-            }),
-            'portfolios' => $this->whenLoaded('portfolios', function () {
-                return  PostResource::collection($this->portfolios);
-            }),
+            // 'posts' => $this->whenLoaded('posts', function () {
+            //     return  resolve(PostResource::class, ['resource' => $this->posts]);
+            // }),
+            // 'portfolios' => $this->whenLoaded('portfolios', function () {
+            //     return  resolve(PostResource::class, ['resource' => $this->portfolios]);
+            // }),
             'posts_count' => $this->posts_count,
             'translations' => $this->whenLoaded('translations', function () {
                 return $this->translations;

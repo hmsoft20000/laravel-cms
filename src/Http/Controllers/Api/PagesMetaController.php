@@ -26,7 +26,7 @@ class PagesMetaController extends Controller
             },
         );
         $result['data'] =  collect($result['data'])->map(function ($item) {
-            return (new PageMetaResource($item))->withFields(request()->get('fields'));
+            return resolve(PageMetaResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return  successResponse(
@@ -39,7 +39,7 @@ class PagesMetaController extends Controller
     {
         $pageMeta->load(['translations']);
         return  successResponse(
-            data: (new PageMetaResource($pageMeta))->withFields(request()->get('fields'))
+            data: resolve(PageMetaResource::class, ['resource' => $pageMeta])->withFields(request()->get('fields'))
         );
     }
 
@@ -50,7 +50,7 @@ class PagesMetaController extends Controller
         $pageMeta->load(['translations']);
         return  successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new PageMetaResource($pageMeta))->withFields(request()->get('fields'))
+            data: resolve(PageMetaResource::class, ['resource' => $pageMeta])->withFields(request()->get('fields'))
         );
     }
 
@@ -60,7 +60,7 @@ class PagesMetaController extends Controller
         $pageMeta = $this->repo->update($pageMeta, $validated);
         return  successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new PageMetaResource($pageMeta))->withFields(request()->get('fields'))
+            data: resolve(PageMetaResource::class, ['resource' => $pageMeta])->withFields(request()->get('fields'))
         );
     }
 
@@ -76,7 +76,7 @@ class PagesMetaController extends Controller
             },
         );
         $result['data'] =  collect($result['data'])->map(function ($item) {
-            return (new PageMetaResource($item))->withFields(request()->get('fields'));
+            return resolve(PageMetaResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return  successResponse(

@@ -28,7 +28,7 @@ class TeamController extends Controller
         );
 
         $result['data'] =  collect($result['data'])->map(function ($item) {
-            return (new TeamResource($item))->withFields(request()->get('fields'));
+            return resolve(TeamResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return  successResponse(
@@ -43,7 +43,7 @@ class TeamController extends Controller
 
         $team->load(['translations']);
         return  successResponse(
-            data: (new TeamResource($team))->withFields(request()->get('fields'))
+            data: resolve(TeamResource::class, ['resource' => $team])->withFields(request()->get('fields'))
         );
     }
 
@@ -56,7 +56,7 @@ class TeamController extends Controller
         $team->load(['translations']);
         return  successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new TeamResource($team))->withFields(request()->get('fields'))
+            data: resolve(TeamResource::class, ['resource' => $team])->withFields(request()->get('fields'))
         );
     }
 
@@ -69,7 +69,7 @@ class TeamController extends Controller
         $team->load(['translations']);
         return  successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new TeamResource($team))->withFields(request()->get('fields'))
+            data: resolve(TeamResource::class, ['resource' => $team])->withFields(request()->get('fields'))
         );
     }
 
@@ -94,7 +94,9 @@ class TeamController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: TeamResource::collection($updatedStatistics)
+            data: collect($updatedStatistics)->map(function ($item) {
+                return resolve(TeamResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 
@@ -111,7 +113,7 @@ class TeamController extends Controller
 
         return successResponse(
             message: translate('cms::messages.image_updated_successfully'),
-            data: new TeamResource($updatedTeam)
+            data: resolve(TeamResource::class, ['resource' => $updatedTeam])->withFields(request()->get('fields')),
         );
     }
 

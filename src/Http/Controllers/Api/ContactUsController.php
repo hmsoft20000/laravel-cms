@@ -123,7 +123,7 @@ class ContactUsController extends Controller
 
         $result['data'] =  collect($result['data'])->map(function ($item) {
             $item['snippet'] = mb_substr($item['snippet'], 0, 100, 'UTF-8');
-            return (new ContactUsConversationResource($item))->withFields(request()->get('fields'));
+            return resolve(ContactUsConversationResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return  successResponse(
@@ -140,7 +140,7 @@ class ContactUsController extends Controller
         );
 
         $result['data'] =  collect($result['data'])->map(function ($item) {
-            return (new ContactUsResource($item))->withFields(request()->get('fields'));
+            return resolve(ContactUsResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return  successResponse(
@@ -153,7 +153,7 @@ class ContactUsController extends Controller
     {
         $message->load(['translations']);
         return  successResponse(
-            data: (new ContactUsResource($message))->withFields(request()->get('fields'))
+            data: resolve(ContactUsResource::class, ['resource' => $message])->withFields(request()->get('fields'))
         );
     }
 
@@ -164,7 +164,7 @@ class ContactUsController extends Controller
 
         return successResponse(
             message: __('cms::contact.message_sent_success'),
-            data: (new ContactUsResource($message))->withFields(request()->get('fields'))
+            data: resolve(ContactUsResource::class, ['resource' => $message])->withFields(request()->get('fields'))
 
         );
     }
@@ -175,7 +175,7 @@ class ContactUsController extends Controller
         $message = $this->repo->update($message, $validated);
         return  successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new ContactUsResource($message))->withFields(request()->get('fields'))
+            data: resolve(ContactUsResource::class, ['resource' => $message])->withFields(request()->get('fields'))
         );
     }
 
@@ -206,17 +206,18 @@ class ContactUsController extends Controller
                 $message
             );
 
-            // Return the successful response with the new message data
             return successResponse(
-                trans('contact.messages.reply_success'),
-                new ContactUsResource($newReplyMessage),
+                message: translate('contact.messages.reply_success'),
+                data: [
+                    'message' => resolve(ContactUsResource::class, ['resource' => $newReplyMessage])->withFields(request()->get('fields')),
+                ],
             );
         } catch (\Exception $e) {
             // The repository might throw an exception (e.g., mail server is down)
             report($e);
             return errorResponse(
-                trans('contact.messages.reply_failed'),
-                500
+                message: translate('contact.messages.reply_failed'),
+                state: 500
             );
         }
     }

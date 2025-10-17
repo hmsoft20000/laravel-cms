@@ -14,8 +14,8 @@ trait CategoryValidationRules
     protected function getCategoryRules(string $context = 'update'): array
     {
 
-        $table = (new Category())->getTable();
-        $tableSector = (new Sector())->getTable();
+        $table = resolve(Category::class)->getTable();
+        $tableSector = resolve(Sector::class)->getTable();
 
         $rules = [
             'parent_id' => ['sometimes', 'nullable', Rule::exists($table, 'id')],

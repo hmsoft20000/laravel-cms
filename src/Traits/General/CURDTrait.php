@@ -17,7 +17,7 @@ trait CURDTrait
             }
             if (hasColumn($model, 'created_by')) {
                 $userModelClass = UserModelHelper::getUserModelClass();
-                $userModel = new $userModelClass();
+                $userModel = resolve($userModelClass);
                 $authUser = Auth::check() ? Auth::user() : null;
                 $model->created_by = $authUser?->{$userModel->getKeyName()} ?? null;
             }
@@ -29,7 +29,7 @@ trait CURDTrait
             }
             if (hasColumn($model, 'updated_by')) {
                 $userModelClass = UserModelHelper::getUserModelClass();
-                $userModel = new $userModelClass();
+                $userModel = resolve($userModelClass);
                 $authUser = Auth::check() ? Auth::user() : null;
                 $model->updated_by = $authUser?->{$userModel->getKeyName()} ?? null;
             }
@@ -41,7 +41,7 @@ trait CURDTrait
             }
             if (hasColumn($model, 'deleted_by')) {
                 $userModelClass = UserModelHelper::getUserModelClass();
-                $userModel = new $userModelClass();
+                $userModel = resolve($userModelClass);
                 $authUser = Auth::check() ? Auth::user() : null;
                 $model->deleted_by = $authUser?->{$userModel->getKeyName()} ?? null;
             }

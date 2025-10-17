@@ -19,7 +19,7 @@ class CustomAttributeFilter
     public static function apply(Builder $query, Attribute $attribute, ColumnFilterData $filter, AutoFilterable|Model $model): void
     {
 
-        $avTable = (new \HMsoft\Cms\Models\Shared\AttributeValue)->getTable();
+        $avTable = resolve(\HMsoft\Cms\Models\Shared\AttributeValue::class)->getTable();
 
         $mainTable = $model->getTable();
         $mainKey = $model->getKeyName();
@@ -74,7 +74,7 @@ class CustomAttributeFilter
      */
     protected static function applyMultiValueFilter(Builder $subQuery, ColumnFilterData $filter): void
     {
-        $asoTable = (new \HMsoft\Cms\Models\Shared\AttributeSelectedOption)->getTable();
+        $asoTable = resolve(\HMsoft\Cms\Models\Shared\AttributeSelectedOption::class)->getTable();
 
         $selectedOptionIds = is_array($filter->value)
             ? $filter->value

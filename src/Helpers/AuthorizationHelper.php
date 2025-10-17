@@ -140,12 +140,12 @@ class AuthorizationHelper
         if (!$user) {
             return false;
         }
-        
+
         // Use Laravel's built-in authorization if available
         if (method_exists($user, 'can')) {
             return $user->can($ability, $model);
         }
-        
+
         return false;
     }
 

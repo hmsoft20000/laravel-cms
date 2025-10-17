@@ -24,7 +24,7 @@ class UpdateAllNestedBlogRequest extends MyRequest
     public function rules(): array
     {
         $singleRules = $this->getBlogRules('update');
-        $tableName = (new Blog())->getTable();
+        $tableName = resolve(Blog::class)->getTable();
 
         $rulesForAll = [
             '*' => ['required', 'array'],

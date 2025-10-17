@@ -29,7 +29,7 @@ class SectorController extends Controller
         );
 
         $result['data'] =  collect($result['data'])->map(function ($item) {
-            return (new SectorResource($item))->withFields(request()->get('fields'));
+            return resolve(SectorResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return  successResponse(
@@ -44,7 +44,7 @@ class SectorController extends Controller
 
         $sector->load(['translations', 'image']);
         return  successResponse(
-            data: (new SectorResource($sector))->withFields(request()->get('fields'))
+            data: resolve(SectorResource::class, ['resource' => $sector])->withFields(request()->get('fields'))
         );
     }
 
@@ -57,7 +57,7 @@ class SectorController extends Controller
         $sector->load(['translations', 'image']);
         return  successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new SectorResource($sector))->withFields(request()->get('fields'))
+            data: resolve(SectorResource::class, ['resource' => $sector])->withFields(request()->get('fields'))
         );
     }
 
@@ -70,7 +70,7 @@ class SectorController extends Controller
         $sector->load(['translations', 'image']);
         return  successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new SectorResource($sector))->withFields(request()->get('fields'))
+            data: resolve(SectorResource::class, ['resource' => $sector])->withFields(request()->get('fields'))
         );
     }
 
@@ -95,7 +95,9 @@ class SectorController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: SectorResource::collection($updatedSectors)
+            data: collect($updatedSectors)->map(function ($item) {
+                return resolve(SectorResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 
@@ -112,7 +114,7 @@ class SectorController extends Controller
 
         return successResponse(
             message: translate('cms::messages.image_updated_successfully'),
-            data: new SectorResource($updatedSector)
+            data: resolve(SectorResource::class, ['resource' => $updatedSector])->withFields(request()->get('fields')),
         );
     }
 

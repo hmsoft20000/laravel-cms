@@ -14,7 +14,6 @@ class ReplyRequest extends MyRequest
         return true;
     }
 
-    // FIX: Point to the new lang file keys
     public function messages()
     {
         return trans('cms::contact.validation.reply.messages');

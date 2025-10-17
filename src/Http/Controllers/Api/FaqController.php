@@ -32,7 +32,7 @@ class FaqController extends Controller
         // $this->authorize('viewAny', [Feature::class, $owner]);
 
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Faq(),
+            model: resolve(Faq::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($owner) {
                 $query->where('owner_type', $owner->getMorphClass());
                 $query->where('owner_id', $owner->id);
@@ -43,7 +43,7 @@ class FaqController extends Controller
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return new FaqResource($item);
+            return resolve(FaqResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -70,7 +70,7 @@ class FaqController extends Controller
         $faq = $this->repository->store($validated);
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: new FaqResource($faq),
+            data: resolve(FaqResource::class, ['resource' => $faq])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
     }
@@ -89,7 +89,7 @@ class FaqController extends Controller
         if ($faq->owner_type != $owner->getMorphClass() || $faq->owner_id != $owner->id) {
             abort(404);
         }
-        return successResponse(data: new FaqResource($this->repository->show($faq)));
+        return successResponse(data: resolve(FaqResource::class, ['resource' => $this->repository->show($faq)])->withFields(request()->get('fields')));
     }
 
     /**
@@ -111,7 +111,7 @@ class FaqController extends Controller
         $updatedFaq = $this->repository->update($faq, $request->validated());
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: new FaqResource($updatedFaq)
+            data: resolve(FaqResource::class, ['resource' => $updatedFaq])->withFields(request()->get('fields'))
         );
     }
 
@@ -158,7 +158,9 @@ class FaqController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: FaqResource::collection($updatedFaqs)
+            data: collect($updatedFaqs)->map(function ($item) {
+                return resolve(FaqResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 }

@@ -28,7 +28,7 @@ class PlanController extends Controller
         // $this->authorize('viewAny', [Plan::class, $owner]);
 
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Plan(),
+            model: resolve(Plan::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($owner) {
                 $query->where('owner_type', $owner->getMorphClass());
                 $query->where('owner_id', $owner->id);
@@ -40,7 +40,7 @@ class PlanController extends Controller
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return new PlanResource($item);
+            return resolve(PlanResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -68,7 +68,7 @@ class PlanController extends Controller
         $plan = $this->repository->store($validated);
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: new PlanResource($plan),
+            data: resolve(PlanResource::class, ['resource' => $plan])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
     }
@@ -88,7 +88,7 @@ class PlanController extends Controller
         if ($plan->owner_type != $owner->getMorphClass() || $plan->owner_id != $owner->id) {
             abort(404);
         }
-        return successResponse(data: new PlanResource($this->repository->show($plan)));
+        return successResponse(data: resolve(PlanResource::class, ['resource' => $this->repository->show($plan)])->withFields(request()->get('fields')));
     }
 
 
@@ -111,7 +111,7 @@ class PlanController extends Controller
         $updatedPlan = $this->repository->update($plan, $request->validated());
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: new PlanResource($updatedPlan)
+            data: resolve(PlanResource::class, ['resource' => $updatedPlan])->withFields(request()->get('fields'))
         );
     }
 
@@ -158,7 +158,9 @@ class PlanController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: PlanResource::collection($updatedPlans)
+            data: collect($updatedPlans)->map(function ($item) {
+                return resolve(PlanResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 }

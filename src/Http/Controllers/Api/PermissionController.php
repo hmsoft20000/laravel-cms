@@ -20,7 +20,7 @@ class PermissionController extends Controller
         // $this->authorize('manage', Permission::class);
 
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Permission(),
+            model: resolve(Permission::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($request) {
                 // Filter by module if provided
                 if ($request->has('module') && $request->module) {

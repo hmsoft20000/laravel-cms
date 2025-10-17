@@ -30,7 +30,7 @@ class MediaController extends Controller
         // $this->authorize('viewAny', [Medium::class, $owner]);
 
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Medium(),
+            model: resolve(Medium::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($owner) {
                 $query->where('owner_type', $owner->getMorphClass());
                 $query->where('owner_id', $owner->id);

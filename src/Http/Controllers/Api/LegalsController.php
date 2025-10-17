@@ -38,7 +38,7 @@ class LegalsController extends Controller
         );
 
         $result['data'] =  collect($result['data'])->map(function ($item) {
-            return (new LegalResource($item))->withFields(request()->get('fields'));
+            return resolve(LegalResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         if ($this->type != 'legal' && count($result['data']) > 0) {
@@ -60,7 +60,7 @@ class LegalsController extends Controller
 
         return  successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new LegalResource($legal))->withFields(request()->get('fields'))
+            data: resolve(LegalResource::class, ['resource' => $legal])->withFields(request()->get('fields'))
         );
     }
 }

@@ -32,7 +32,7 @@ class DownloadController extends Controller
         // $this->authorize('viewAny', [Feature::class, $owner]);
 
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Download(),
+            model: resolve(Download::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($owner) {
                 $query->where('owner_type', $owner->getMorphClass());
                 $query->where('owner_id', $owner->id);
@@ -43,7 +43,7 @@ class DownloadController extends Controller
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return new DownloadResource($item);
+            return resolve(DownloadResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -70,7 +70,7 @@ class DownloadController extends Controller
         $download = $this->repository->store($validated);
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: new DownloadResource($download),
+            data: resolve(DownloadResource::class, ['resource' => $download])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
     }
@@ -89,7 +89,7 @@ class DownloadController extends Controller
         if ($download->owner_type != $owner->getMorphClass() || $download->owner_id != $owner->id) {
             abort(404);
         }
-        return successResponse(data: new DownloadResource($this->repository->show($download)));
+        return successResponse(data: resolve(DownloadResource::class, ['resource' => $this->repository->show($download)])->withFields(request()->get('fields')));
     }
 
     /**
@@ -111,7 +111,7 @@ class DownloadController extends Controller
         $updatedDownload = $this->repository->update($download, $request->validated());
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: new DownloadResource($updatedDownload)
+            data: resolve(DownloadResource::class, ['resource' => $updatedDownload])->withFields(request()->get('fields'))
         );
     }
 
@@ -158,7 +158,9 @@ class DownloadController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: DownloadResource::collection($updatedDownloads)
+            data: collect($updatedDownloads)->map(function ($item) {
+                return resolve(DownloadResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 
@@ -186,7 +188,7 @@ class DownloadController extends Controller
 
         return successResponse(
             message: translate('cms::messages.file_updated_successfully'),
-            data: new DownloadResource($updatedDownload)
+            data: resolve(DownloadResource::class, ['resource' => $updatedDownload])->withFields(request()->get('fields')),
         );
     }
 }

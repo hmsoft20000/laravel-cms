@@ -39,7 +39,7 @@ class BusinessSettingController extends Controller
 
     public function update(BusinessSettingRequest $request)
     {
-        // $this->authorize('update', new \HMsoft\Cms\Models\BusinessSetting());
+        // $this->authorize('update', resolve(\HMsoft\Cms\Models\BusinessSetting::class));
 
         $validated = $request->validated();
 
@@ -53,7 +53,7 @@ class BusinessSettingController extends Controller
 
     public function updateAll(UpdateAllBusinessSettingRequest $request)
     {
-        // $this->authorize('update', new \HMsoft\Cms\Models\BusinessSetting());
+        // $this->authorize('update', resolve(\HMsoft\Cms\Models\BusinessSetting::class));
 
         $validated = $request->validated();
 

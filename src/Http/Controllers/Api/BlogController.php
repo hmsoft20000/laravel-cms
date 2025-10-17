@@ -26,7 +26,7 @@ class BlogController extends Controller
     public function index(): JsonResponse
     {
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: new Blog(),
+            model: resolve(Blog::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) {
                 // if (!$this->authService->hasPermission('blogs.viewUnpublished')) {
                 //     $query->where('t_main.is_active', true);
@@ -49,7 +49,7 @@ class BlogController extends Controller
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return (new BlogResource($item))->withFields(request()->get('fields'));
+            return resolve(BlogResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -66,7 +66,7 @@ class BlogController extends Controller
         $blog = $this->repo->store($request->validated());
         return successResponse(
             message: translate('cms::messages.added_successfully'),
-            data: (new BlogResource($this->repo->show($blog)))->withFields(request()->get('fields')),
+            data: resolve(BlogResource::class, ['resource' => $this->repo->show($blog)])->withFields(request()->get('fields')),
         );
     }
 
@@ -76,7 +76,7 @@ class BlogController extends Controller
     public function show(Blog $blog): JsonResponse
     {
         $blog = $this->repo->show($blog);
-        return successResponse(data: (new BlogResource($blog))->withFields(request()->get('fields')));
+        return successResponse(data: resolve(BlogResource::class, ['resource' => $blog])->withFields(request()->get('fields')));
     }
 
     /**
@@ -88,7 +88,7 @@ class BlogController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: (new BlogResource($updatedBlog))->withFields(request()->get('fields'))
+            data: resolve(BlogResource::class, ['resource' => $updatedBlog])->withFields(request()->get('fields'))
         );
     }
 
@@ -104,7 +104,9 @@ class BlogController extends Controller
 
         return successResponse(
             message: translate('cms::messages.updated_successfully'),
-            data: BlogResource::collection($updatedBlogs)
+            data: collect($updatedBlogs)->map(function ($item) {
+                return resolve(BlogResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            })->all(),
         );
     }
 

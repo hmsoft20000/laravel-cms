@@ -57,7 +57,7 @@ class UpdateAll extends MyRequest
     {
 
         $singleRules = $this->getTestimonialRules('update');
-        $tableName = (new Testimonial())->getTable();
+        $tableName = resolve(Testimonial::class)->getTable();
         $rulesForAll = [
             // '' => ['required', 'array', 'max:50'],
             '*.id' => ['required', 'integer', 'exists:' . $tableName . ',id'],
