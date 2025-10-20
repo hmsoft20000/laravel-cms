@@ -3,12 +3,13 @@
 namespace HMsoft\Cms\Http\Resources\Api;
 
 use HMsoft\Cms\Http\Resources\BaseJsonResource;
+use Illuminate\Http\Request;
 
 class StatisticsResource extends BaseJsonResource
 {
 
     
-    public function resolveData($request)
+    public function resolveData(Request $request)
     {
         $data = [
             'id' => $this->id,

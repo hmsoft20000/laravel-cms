@@ -3,6 +3,7 @@
 namespace HMsoft\Cms\Http\Resources\Api;
 
 use HMsoft\Cms\Http\Resources\BaseJsonResource;
+use Illuminate\Http\Request;
 
 class TestimonialResource extends BaseJsonResource
 {
@@ -12,7 +13,7 @@ class TestimonialResource extends BaseJsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
-    public function toArray($request)
+    public function resolveData(Request $request)
     {
         $data = [
             'id' => $this->id,

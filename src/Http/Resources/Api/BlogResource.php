@@ -24,11 +24,15 @@ class BlogResource extends BaseJsonResource
             'is_active' => $this->is_active,
             'show_in_footer' => $this->show_in_footer,
             'show_in_header' => $this->show_in_header,
-            'partners' => $this->whenLoaded('partners', function () {
-                return  resolve(OrganizationResource::class, ['resource' => $this->partners]);
+            'partners' => $this->whenLoaded('partners', function () use ($request) {
+                return collect($this->partners)->map(function ($item) use ($request) {
+                    return  resolve(OrganizationResource::class, ['resource' => $item])->toArray($request);
+                });
             }),
-            'sponsors' => $this->whenLoaded('sponsors', function () {
-                return  resolve(OrganizationResource::class, ['resource' => $this->sponsors]);
+            'sponsors' => $this->whenLoaded('sponsors', function () use ($request) {
+                return collect($this->sponsors)->map(function ($item) use ($request) {
+                    return  resolve(OrganizationResource::class, ['resource' => $item])->toArray($request);
+                });
             }),
             'meta_keywords' => $this->meta_keywords,
             'created_at' => $this->created_at,
@@ -71,16 +75,24 @@ class BlogResource extends BaseJsonResource
             }),
 
             'categories' => $this->whenLoaded('categories', function () use ($request) {
-                return  resolve(CategoryResource::class, ['resource' => $this->categories])->toArray($request);
+                return collect($this->categories)->map(function ($item) use ($request) {
+                    return  resolve(CategoryResource::class, ['resource' => $item])->toArray($request);
+                });
             }),
             'features' => $this->whenLoaded('features', function () use ($request) {
-                return  resolve(FeatureResource::class, ['resource' => $this->features])->toArray($request);
+                return collect($this->features)->map(function ($item) use ($request) {
+                    return  resolve(FeatureResource::class, ['resource' => $item])->toArray($request);
+                });
             }),
             'downloads' => $this->whenLoaded('downloads', function () use ($request) {
-                return  resolve(DownloadResource::class, ['resource' => $this->downloads])->toArray($request);
+                return collect($this->downloads)->map(function ($item) use ($request) {
+                    return  resolve(DownloadResource::class, ['resource' => $item])->toArray($request);
+                });
             }),
             'plans' => $this->whenLoaded('plans', function () use ($request) {
-                return  resolve(DownloadResource::class, ['resource' => $this->plans])->toArray($request);
+                return collect($this->plans)->map(function ($item) use ($request) {
+                    return  resolve(PlanResource::class, ['resource' => $item])->toArray($request);
+                });
             }),
 
             'attribute_values' => $this->formatAndGroupAttributeValues($this->resource),

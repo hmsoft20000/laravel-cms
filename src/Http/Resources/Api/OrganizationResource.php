@@ -28,8 +28,10 @@ class OrganizationResource extends BaseJsonResource
             'role' => $this->whenLoaded('role', function () {
                 return resolve(OrganizationsRolesResource::class, ['resource' => $this->role]);
             }),
-            'roles' => $this->whenLoaded('roles', function () {
-                return  resolve(OrganizationsRolesResource::class, ['resource' => $this->roles]);
+            'roles' => $this->whenLoaded('roles', function () use ($request) {
+                return collect($this->roles)->map(function ($item) use ($request) {
+                    return  resolve(OrganizationsRolesResource::class, ['resource' => $item])->toArray($request);
+                });
             }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

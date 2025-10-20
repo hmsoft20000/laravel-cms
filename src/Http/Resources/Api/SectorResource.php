@@ -21,8 +21,10 @@ class SectorResource extends BaseJsonResource
             'sort_number' => $this->sort_number,
             'image' => $this->whenLoaded('image', $this->image),
             'image_url' => $this->image_url,
-            'posts' => $this->whenLoaded('posts', function () {
-                return  resolve(PostResource::class, ['resource' => $this->posts]);
+            'posts' => $this->whenLoaded('posts', function () use ($request) {
+                return collect($this->posts)->map(function ($item) use ($request) {
+                    return  resolve(PostResource::class, ['resource' => $item])->toArray($request);
+                });
             }),
             'translations' => $this->whenLoaded('translations', function () {
                 return $this->translations;
