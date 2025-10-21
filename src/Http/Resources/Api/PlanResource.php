@@ -26,8 +26,10 @@ class PlanResource extends BaseJsonResource
             'sort_number' => $this->sort_number,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'features' => $this->whenLoaded('features', function () {
-                return  resolve(PlanFeatureResource::class, ['resource' => $this->features]);
+            'features' => $this->whenLoaded('features', function () use ($request) {
+                return collect($this->features)->map(function ($item) use ($request) {
+                    return  resolve(PlanFeatureResource::class, ['resource' => $item])->toArray($request);
+                });
             }),
             'translations' => $this->whenLoaded('translations', function () {
                 return $this->translations;
