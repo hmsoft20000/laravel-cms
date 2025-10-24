@@ -79,6 +79,12 @@ trait ValidatesCustomAttributes
                         case 'date':
                             $ruleList[] = 'date';
                             break;
+                        case 'datetime':
+                            $ruleList[] = 'date';
+                            break;
+                        case 'year':
+                            $ruleList[] = 'digits:4';
+                            break;
                         case 'boolean':
                             $ruleList[] = 'boolean';
                             break;
