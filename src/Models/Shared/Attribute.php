@@ -37,11 +37,17 @@ class Attribute extends GeneralModel
     {
         return [
             'sort_number' => 'integer',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'is_required' => 'boolean',
         ];
     }
 
-    
+    public function isRequired(): bool
+    {
+        $hasColumn = array_key_exists('is_required', $this->getAttributes());
+        return $hasColumn ? $this->getAttribute('is_required') : false;
+    }
+
     // =================================================================
     // RELATIONS
     // =================================================================
@@ -81,7 +87,7 @@ class Attribute extends GeneralModel
     {
         $query->where('scope', $scope);
     }
-    
+
     /*
     |--------------------------------------------------------------------------
     | AutoFilterable Interface Implementation (The New Advanced Way)
@@ -143,5 +149,4 @@ class Attribute extends GeneralModel
             'translations' => ['name', 'description'],
         ];
     }
-
 }

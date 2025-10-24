@@ -17,7 +17,7 @@ trait AttributeValidationRules
 
     protected function getAttributeRules(string $scope, string $context = 'update'): array
     {
-        $acceptedTypes = ['text', 'textarea', 'select', 'radio', 'checkbox', 'number', 'date', 'boolean', 'color', 'wysiwyg', 'url'];
+        $acceptedTypes = ['text', 'textarea', 'select', 'radio', 'checkbox', 'number', 'date', 'datetime', 'year', 'boolean', 'color', 'wysiwyg', 'url'];
 
         $rules = [
             'image' => ['sometimes', 'nullable', 'image', 'max:2048'],
