@@ -35,18 +35,20 @@ trait AttributeValidationRules
             'options.*.locales' => ['required_with:options', 'array'],
             'options.*.locales.*.locale' => ['required', 'string'],
             'options.*.locales.*.title' => ['sometimes', 'nullable', 'max:255'],
+            'is_active' => ['sometimes', 'boolean'],
+            'is_required' => ['sometimes', 'boolean'],
+            'is_fast_search' => ['sometimes', 'boolean'],
         ];
 
         switch ($context) {
             case 'create':
                 $rules['scope'] = ['required', 'string'];
                 $rules['type'] = ['required', 'string', Rule::in($acceptedTypes)];
-                $rules['is_active'] = ['sometimes', 'boolean'];
                 $rules['locales'] = ['required', 'array', 'min:1'];
+                $rules['options.*.id'] = ['sometimes', 'integer', 'exists:attribute_options,id'];
                 break;
             case 'update':
                 $rules['type'] = ['sometimes', 'string', Rule::in($acceptedTypes)];
-                $rules['is_active'] = ['sometimes', 'boolean'];
                 $rules['delete_image'] = ['sometimes', 'boolean'];
                 $rules['locales'] = ['sometimes', 'array', 'min:1'];
                 $rules['options.*.id'] = ['sometimes', 'integer', 'exists:attribute_options,id'];
