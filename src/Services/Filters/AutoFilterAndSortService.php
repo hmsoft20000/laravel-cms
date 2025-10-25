@@ -127,8 +127,10 @@ class AutoFilterAndSortService
         }
 
         $query = $this->model->query();
-        $mainTableAlias = 't_main'; // The alias for the main table.
-        $query->from($this->model->getTable(), $mainTableAlias); // Apply the alias immediately.
+        $tableName = $this->model->getTable();
+        // $mainTableAlias = 't_main'; // The alias for the main table.
+        $mainTableAlias = $tableName; // The alias for the main table.
+        $query->from($tableName, $mainTableAlias); // Apply the alias immediately.
 
 
         $this->joinManager = new JoinManager($query, $mainTableAlias);
