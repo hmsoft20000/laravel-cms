@@ -36,6 +36,7 @@ trait AttributeValidationRules
             'options.*.locales.*.locale' => ['required', 'string'],
             'options.*.locales.*.title' => ['sometimes', 'nullable', 'max:255'],
             'is_active' => ['sometimes', 'boolean'],
+            'is_sortable' => ['sometimes', 'boolean'],
             'is_required' => ['sometimes', 'boolean'],
             'is_fast_search' => ['sometimes', 'boolean'],
         ];
