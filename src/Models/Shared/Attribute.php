@@ -40,6 +40,7 @@ class Attribute extends GeneralModel
             'is_active' => 'boolean',
             'is_required' => 'boolean',
             'is_fast_search' => 'boolean',
+            'is_in_card' => 'boolean',
         ];
     }
 

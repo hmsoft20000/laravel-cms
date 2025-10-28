@@ -21,6 +21,7 @@ class AttributeResource extends BaseJsonResource
             'is_active' => $this->is_active,
             'is_required' => $this->is_required,
             'is_fast_search' => $this->is_fast_search,
+            'is_in_card' => $this->is_in_card,
             'sort_number' => $this->sort_number,
             'image' => $this->image,
             'image_url' => $this->image_url,
@@ -31,16 +32,17 @@ class AttributeResource extends BaseJsonResource
                 return $this->translations;
             }),
             'options' => $this->whenLoaded('options', function () {
-                return collect($this->options)->map(function ($option) {
-                    $filteredOption = collect($option)->only(['id', 'is_active', 'sort_number'])->all();
-                    $filteredOption['translations'] = collect($option->translations)->mapWithKeys(function ($translation) {
-                        return [$translation['locale'] => [
-                            'id' => $translation['id'],
-                            'title' => $translation['title'],
-                        ]];
-                    })->all();
-                    return $filteredOption;
-                })->all();
+                return AttributeOptionResource::collection($this->options)->resolve();
+                // return collect($this->options)->map(function ($option) {
+                //     $filteredOption = collect($option)->only(['id', 'is_active', 'sort_number'])->all();
+                //     $filteredOption['translations'] = collect($option->translations)->mapWithKeys(function ($translation) {
+                //         return [$translation['locale'] => [
+                //             'id' => $translation['id'],
+                //             'title' => $translation['title'],
+                //         ]];
+                //     })->all();
+                //     return $filteredOption;
+                // })->all();
             }),
         ];
     }
