@@ -10,7 +10,7 @@ class DynamicFilterData extends Data
 {
 
     /**
-     *  dynamic filter data model.
+     * dynamic filter data model.
      *
      * @param ?string $globalFilter global filter string
      * @param array<ColumnFilterData> $filters dynamic filtering array [id,value,filterFns]
@@ -24,6 +24,7 @@ class DynamicFilterData extends Data
      * @param callable $beforeOperation before logic take one param \Illuminate\Database\Eloquent\Builder
      * @param PaginationFormateEnum $paginationFormate pagination formate
      * @param ?string $fields fields to select
+     * @param bool $count_only
      **/
     public function __construct(
         public ?string $globalFilter = null,
@@ -37,7 +38,8 @@ class DynamicFilterData extends Data
         public  $beforeOperation = null,
         public  $globaleFilterExtraOperation = null,
         public ?string $fields = null,
-        public PaginationFormateEnum $paginationFormate = PaginationFormateEnum::normal
+        public PaginationFormateEnum $paginationFormate = PaginationFormateEnum::normal,
+        public bool $count_only = false 
     ) {
         $this->perPage = $this->perPage ?? (string) cmsPagination('default_data_limit');
     }

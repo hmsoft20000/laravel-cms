@@ -3,6 +3,7 @@
 namespace HMsoft\Cms\Services\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use HMsoft\Cms\Data\ColumnFilterData;
 use HMsoft\Cms\Interfaces\AutoFilterable;
 use HMsoft\Cms\Models\Shared\Attribute;
@@ -26,7 +27,7 @@ class CustomAttributeFilter
         $mainMorphClass = $model->getMorphClass();
 
         // Add a subquery for this attribute filter
-        $query->whereExists(function (Builder $subQuery) use ($mainTable, $mainKey, $mainMorphClass, $attribute, $filter, $avTable) {
+        $query->whereExists(function (Builder|QueryBuilder $subQuery) use ($mainTable, $mainKey, $mainMorphClass, $attribute, $filter, $avTable) {
 
             $subQuery->select(DB::raw(1))
                 ->from("{$avTable} as av")
@@ -72,7 +73,7 @@ class CustomAttributeFilter
     /**
      * Applies a multi-value condition (e.g., select, checkbox, multi-select) inside the EXISTS subquery.
      */
-    protected static function applyMultiValueFilter(Builder $subQuery, ColumnFilterData $filter): void
+    protected static function applyMultiValueFilter(Builder|QueryBuilder $subQuery, ColumnFilterData $filter): void
     {
         $asoTable = resolve(\HMsoft\Cms\Models\Shared\AttributeSelectedOption::class)->getTable();
 

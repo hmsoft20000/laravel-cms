@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class AutoFilterAndSortService
 {
@@ -56,7 +57,8 @@ class AutoFilterAndSortService
         $beforeOperation = null,
         array $filterKeyMap = [],
         array $sortKeyMap = [],
-        $fields = null
+        $fields = null,
+        $count_only = null // [NEW]
     ): DynamicFilterData {
         if ($dynamicFilterData) {
             return $dynamicFilterData;
@@ -67,14 +69,20 @@ class AutoFilterAndSortService
         $finalPage = $page ?? $request->input('page');
         $finalPerPage = $perPage ?? $request->input('perPage', $request->input('per_page', $request->input('limit')));
 
+        // [NEW] Read count_only from request
+        $finalCountOnly = $count_only !== null ? (bool) $count_only : (bool) $request->input('count_only', false);
+
         $finalPaginationFormate = is_null($paginationFormate)
             ? PaginationFormateEnum::from($request->input('paginationFormate', PaginationFormateEnum::separated->value))
             : $paginationFormate;
 
-        if (is_null($finalPage) || is_null($finalPerPage) || $finalPerPage === 'all' || $request->header('pdt') === '0') {
+        // [MODIFIED] count_only also forces pagination to 'none'
+        if (is_null($finalPage) || is_null($finalPerPage) || $finalPerPage === 'all' || $request->header('pdt') === '0' || $finalCountOnly) {
             $finalPaginationFormate = PaginationFormateEnum::none;
+            // if (!$finalCountOnly) {
             $finalPage = 'all';
             $finalPerPage = 'all';
+            // }
         }
 
         $finalFilters = $filters ?? self::getFiltersValuesFromRequest($request);
@@ -112,7 +120,8 @@ class AutoFilterAndSortService
             globaleFilterExtraOperation: $globaleFilterExtraOperation,
             extraOperation: $extraOperation,
             beforeOperation: $beforeOperation,
-            fields: $finalFields
+            fields: $finalFields,
+            count_only: $finalCountOnly
         );
     }
 
@@ -136,7 +145,10 @@ class AutoFilterAndSortService
         $this->joinManager = new JoinManager($query, $mainTableAlias);
 
         // 1. Build dynamic SELECT clause (now alias-aware).
-        $this->buildSelectClause($query, $dynamicFilterData->fields);
+        // [MODIFIED] Optimization: Don't build SELECT if we only need the count.
+        if (!$dynamicFilterData->count_only) {
+            $this->buildSelectClause($query, $dynamicFilterData->fields);
+        }
 
         $extraOperation = $dynamicFilterData->extraOperation;
         $globaleFilterExtraOperation = $dynamicFilterData->globaleFilterExtraOperation;
@@ -235,9 +247,13 @@ class AutoFilterAndSortService
         }
 
         // 7. Apply Sorting (now alias-aware).
-        self::handelSorting($query, $sortingKeys, $this->joinManager);
+        // [MODIFIED] Optimization: Don't apply sorting if we only need the count.
+        if (!$dynamicFilterData->count_only) {
+            self::handelSorting($query, $sortingKeys, $this->joinManager);
+        }
 
         // 8. Group By using the main table alias to ensure distinct results.
+        // (This is required for the count to be correct after joins).
         $query->groupBy("{$mainTableAlias}." . $this->model->definePrimaryKeyName());
 
         return $query;
@@ -269,32 +285,12 @@ class AutoFilterAndSortService
                         }
                     } catch (\Exception $e) {
                         // Optional: Log if a defined search relationship is invalid
-                        // Log::warning("Global search skipped for invalid relation path '{$relationPath}' in model " . get_class($this->model));
                     }
                 }
             }
         });
     }
-    // private function applyGlobalFilter(Builder $query, string $globalFilterValue): void
-    // {
-    //     $mainTableAlias = $this->joinManager->getMainTableAlias();
 
-    //     $query->where(function (Builder $builder) use ($globalFilterValue, $mainTableAlias) {
-    //         // Search base attributes
-    //         foreach ($this->model->defineGlobalSearchBaseAttributes() as $column) {
-    //             $builder->orWhere("{$mainTableAlias}.{$column}", 'LIKE', "%{$globalFilterValue}%");
-    //         }
-
-    //         // Search translation attributes
-    //         $relationships = $this->model->defineRelationships();
-    //         if ($this->model->defineTranslationTableName() && isset($relationships['translations'])) {
-    //             $translationAlias = $this->joinManager->ensureJoin($relationships['translations']);
-    //             foreach ($this->model->defineGlobalSearchTranslationAttributes() as $column) {
-    //                 $builder->orWhere("{$translationAlias}.{$column}", 'LIKE', "%{$globalFilterValue}%");
-    //             }
-    //         }
-    //     });
-    // }
 
     /**
      * Get data handler with dynamic options, now smarter with AutoFilterable interface.
@@ -308,9 +304,30 @@ class AutoFilterAndSortService
 
         $query = $this->buildQuery($dynamicFilterData);
 
+        // [NEW] Handle count_only flag
+        // If true, perform the optimized count and return immediately.
+        if ($dynamicFilterData->count_only) {
+            $countQuery = clone $query;
+            $countQuery->getQuery()->orders = null; // Remove sorting for count
+            $countQuery->getQuery()->columns = null; // Remove selects for count
+            $countQuery->select(DB::raw('1')); // Select minimal column
+
+            // Use the existing subquery count logic which is correct for GROUP BY
+            $totalRecords = DB::connection($this->model->getConnectionName())
+                ->table(DB::raw("({$countQuery->toSql()}) as sub"))
+                ->mergeBindings($countQuery->getQuery())
+                ->count();
+
+            return [
+                'data' => $totalRecords,
+                'pagination' => null
+            ];
+        }
+        // [END NEW]
 
         Log::info($query->toRawSql());
 
+        // This code now effectively becomes the 'else' block for when count_only is false.
         $countQuery = clone $query;
         $countQuery->getQuery()->orders = null;
         $countQuery->getQuery()->columns = null;
@@ -432,20 +449,152 @@ class AutoFilterAndSortService
      */
     public static function handelSorting(Builder $query, $sortedColumns, JoinManager $joinManager): void
     {
+        // --- الخطوة 1: جلب أنواع السمات المطلوبة ---
+        $attributeIdsToFetch = [];
+        foreach ($sortedColumns as $columnCollection) {
+            $columnId = $columnCollection[0]->id;
+            if (str_starts_with($columnId, CustomAttributeFilter::ATTRIBUTE_PREFIX)) {
+                $attributeIdsToFetch[] = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $columnId);
+            }
+        }
+
+        /** @var \Illuminate\Support\Collection $attributes */
+        // جلب السمات المطلوبة للترتيب في استعلام واحد (لمنع N+1)
+        $attributes = !empty($attributeIdsToFetch)
+            ? resolve(\HMsoft\Cms\Models\Shared\Attribute::class)->whereIn('id', $attributeIdsToFetch)->get()->keyBy('id')
+            : collect();
+        // --- [نهاية الخطوة 1] ---
+
+
+        // (جلب المعلومات الأساسية)
+        $model = $query->getModel();
+        $avTable = resolve(\HMsoft\Cms\Models\Shared\AttributeValue::class)->getTable();
+        $mainTableAlias = $joinManager->getMainTableAlias();
+        $mainKey = $model->getKeyName();
+        $mainMorphClass = $model->getMorphClass();
+
         foreach ($sortedColumns as $columnCollection) {
             $sortingValue = $columnCollection[0];
             $columnId = $sortingValue->id;
+            $sortDirection = $sortingValue->desc ? 'desc' : 'asc';
 
-            $qualifiedColumnId = self::resolveAndJoin($columnId, $joinManager, $query->getModel());
+            // (سيحتوي هذا المتغير على التعبير الذي سيتم الترتيب بناءً عليه)
+            $sortExpression = null;
 
-            if (empty($qualifiedColumnId)) {
-                continue; // Ignore if column/relation is not valid.
+            if (str_starts_with($columnId, CustomAttributeFilter::ATTRIBUTE_PREFIX)) {
+                try {
+                    $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $columnId);
+
+                    /** @var \HMsoft\Cms\Models\Shared\Attribute|null $attribute */
+                    $attribute = $attributes->get($attributeId);
+
+                    $sortAlias = "sort_av_{$attributeId}";
+                    $sortColumnAlias = "sort_col_{$attributeId}";
+
+                    $query->leftJoin(
+                        "{$avTable} as {$sortAlias}",
+                        function ($join) use ($sortAlias, $mainTableAlias, $mainKey, $mainMorphClass, $attributeId) {
+                            $join->on("{$sortAlias}.owner_id", '=', "{$mainTableAlias}.{$mainKey}")
+                                ->where("{$sortAlias}.owner_type", $mainMorphClass)
+                                ->where("{$sortAlias}.attribute_id", $attributeId);
+                        }
+                    );
+
+                    // --- الخطوة 2: تطبيق CAST بشكل مشروط ---
+                    $valueColumn = "MAX({$sortAlias}.value)"; // الافتراضي (نصي)
+
+                    if ($attribute && in_array($attribute->type, ['number', 'year'])) {
+                        // إذا كان رقم، استخدم CAST كـ SIGNED (رقم)
+                        $valueColumn = "MAX(CAST({$sortAlias}.value AS SIGNED))";
+                    } elseif ($attribute && in_array($attribute->type, ['date', 'datetime'])) {
+                        // إذا كان تاريخ، استخدم CAST كـ DATETIME
+                        $valueColumn = "MAX(CAST({$sortAlias}.value AS DATETIME))";
+                    }
+                    // (الأنواع الأخرى ستبقى نصية)
+
+                    $sortExpression = $valueColumn;
+
+                    // إضافة الـ SELECT (ضروري لـ GROUP BY)
+                    $query->addSelect(DB::raw("{$sortExpression} as {$sortColumnAlias}"));
+                } catch (\Exception $e) {
+                    Log::error("Failed to apply custom attribute sort for '{$columnId}': " . $e->getMessage());
+                    continue;
+                }
+            } else {
+                // هذا عمود عادي (مثل 'created_at')
+                $sortExpression = self::resolveAndJoin($columnId, $joinManager, $model);
             }
 
-            $sortData = new ColumnSortData($qualifiedColumnId, $sortingValue->desc);
-            $sortData->buildQuery($query);
+            if (empty($sortExpression)) {
+                continue;
+            }
+
+            // --- الخطوة 3: تطبيق الترتيب (مع NULLs في النهاية) ---
+            // (يستخدم التعبير مباشرة لحل خطأ MySQL 1247)
+            $query->orderByRaw("{$sortExpression} IS NULL ASC, {$sortExpression} {$sortDirection}");
         }
     }
+
+    // public static function handelSorting(Builder $query, $sortedColumns, JoinManager $joinManager): void
+    // {
+    //     // جلب المعلومات الأساسية المطلوبة
+    //     $model = $query->getModel();
+    //     $avTable = resolve(\HMsoft\Cms\Models\Shared\AttributeValue::class)->getTable();
+    //     $mainTableAlias = $joinManager->getMainTableAlias();
+    //     $mainKey = $model->getKeyName();
+    //     $mainMorphClass = $model->getMorphClass();
+
+    //     foreach ($sortedColumns as $columnCollection) {
+    //         $sortingValue = $columnCollection[0];
+    //         $columnId = $sortingValue->id; // e.g., 'attribute_2' or 'created_at'
+    //         $sortDirection = $sortingValue->desc ? 'desc' : 'asc';
+
+    //         $sortExpression = null;
+
+    //         // --- [المنطق الجديد] ---
+    //         // التحقق إذا كان الترتيب لسمة مخصصة
+    //         if (str_starts_with($columnId, CustomAttributeFilter::ATTRIBUTE_PREFIX)) {
+    //             try {
+    //                 $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $columnId);
+
+    //                 // 1. إنشاء alias فريد لهذا الـ JOIN
+    //                 $sortAlias = "sort_av_{$attributeId}";
+    //                 // 2. إنشاء alias لعمود الـ SELECT
+    //                 $sortColumnAlias = "sort_col_{$attributeId}";
+
+    //                 // 3. إضافة LEFT JOIN لجدول attribute_values
+    //                 $query->leftJoin(
+    //                     "{$avTable} as {$sortAlias}",
+    //                     function ($join) use ($sortAlias, $mainTableAlias, $mainKey, $mainMorphClass, $attributeId) {
+    //                         $join->on("{$sortAlias}.owner_id", '=', "{$mainTableAlias}.{$mainKey}")
+    //                             ->where("{$sortAlias}.owner_type", $mainMorphClass)
+    //                             ->where("{$sortAlias}.attribute_id", $attributeId);
+    //                     }
+    //                 );
+
+    //                 $sortExpression = "MAX({$sortAlias}.value)";
+    //                 $query->addSelect(DB::raw("{$sortExpression} as {$sortColumnAlias}"));
+    //             } catch (\Exception $e) {
+    //                 Log::error("Failed to apply custom attribute sort for '{$columnId}': " . $e->getMessage());
+    //                 continue; // تجاهل هذا الترتيب إذا فشل
+    //             }
+    //         } else {
+    //             // هذا عمود عادي (مثل created_at)، استخدم المنطق القديم
+    //             $sortExpression = self::resolveAndJoin($columnId, $joinManager, $model);
+    //         }
+    //         // --- [نهاية المنطق الجديد] ---
+
+    //         if (empty($sortExpression)) {
+    //             continue;
+    //         }
+
+    //         // لأننا نستخدم alias مُجمع (MAX)، يجب أن نطبق 'orderBy' مباشرة
+    //         // بدلاً من تمريره إلى 'ColumnSortData'
+    //         // $query->orderBy($qualifiedSortColumn, $sortDirection);
+    //         // $query->orderByRaw("{$qualifiedSortColumn} IS NULL ASC, {$qualifiedSortColumn} {$sortDirection}");
+    //         $query->orderByRaw("{$sortExpression} IS NULL ASC, {$sortExpression} {$sortDirection}");
+    //     }
+    // }
 
     public static function handelResultFormate(
         PaginationFormateEnum $paginationFormate,
@@ -496,53 +645,154 @@ class AutoFilterAndSortService
     }
 
 
-    public static function getFiltersValuesFromRequest($request)
+    public static function getFiltersValuesFromRequest($request): Collection
     {
         $filters = collect([]);
-        $decodedFilters = json_decode(base64_decode($request->input('filters'))) ?? [];
+        $encodedFilters = $request->input('filters');
 
-        foreach (collect($decodedFilters) as $value) {
-            if (isset($value->id, $value->value, $value->filterFns)) {
-                $filters->push(new ColumnFilterData(
-                    id: $value->id,
-                    value: $value->value,
-                    filterFns: FilterFnsEnum::from($value->filterFns),
-                ));
+        if (empty($encodedFilters)) {
+            return $filters;
+        }
+
+        $decodedFilters = self::smartDecode($encodedFilters, 'Filters');
+
+        if ($decodedFilters === null) {
+            return $filters;
+        }
+
+        foreach ($decodedFilters as $filter) {
+            if (is_array($filter) && isset($filter['id'], $filter['value'], $filter['filterFns'])) {
+                $filterFnEnum = FilterFnsEnum::tryFrom($filter['filterFns']);
+                if ($filterFnEnum) {
+                    $filters->push(new ColumnFilterData(
+                        id: $filter['id'],
+                        value: $filter['value'],
+                        filterFns: $filterFnEnum,
+                    ));
+                }
             }
         }
+
         return $filters;
     }
 
-    public static function getSortingValuesFromRequest($request)
+    /**
+     * استخراج الترتيب من الطلب
+     */
+    public static function getSortingValuesFromRequest($request): Collection
     {
         $sorting = collect([]);
-        $decodedSorting = json_decode(base64_decode($request->input('sorting'))) ?? [];
-        foreach (collect($decodedSorting) as $value) {
-            if (isset($value->id, $value->desc)) {
+        $encodedSorting = $request->input('sorting');
+
+        if (empty($encodedSorting)) {
+            return $sorting;
+        }
+
+        $decodedSorting = self::smartDecode($encodedSorting, 'Sorting');
+
+        if ($decodedSorting === null) {
+            return $sorting;
+        }
+
+        foreach ($decodedSorting as $sort) {
+            if (is_array($sort) && isset($sort['id'], $sort['desc'])) {
                 $sorting->push(new ColumnSortData(
-                    id: $value->id,
-                    desc: $value->desc,
+                    id: $sort['id'],
+                    desc: (bool)$sort['desc']
                 ));
             }
         }
+
         return $sorting;
     }
 
     /**
-     * Decodes and retrieves the advanced filter object from the request.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return object|null
+     * استخراج الفلاتر المتقدمة من الطلب
      */
-    public static function getAdvanceFilterFromRequest($request): ?object
+    public static function getAdvanceFilterFromRequest($request): ?array
     {
-        $advanceFilterInput = $request->input('advanceFilter');
+        $encodedAdvanceFilter = $request->input('advanceFilter');
 
-        if (!$advanceFilterInput) {
+        if (empty($encodedAdvanceFilter)) {
             return null;
         }
 
-        return json_decode(base64_decode($advanceFilterInput));
+        $decodedAdvanceFilter = self::smartDecode($encodedAdvanceFilter, 'AdvanceFilter');
+
+        if ($decodedAdvanceFilter === null) {
+            return null;
+        }
+
+        return $decodedAdvanceFilter;
+    }
+
+    /**
+     * -------------------------------------------------------------------
+     * ℹ️ الدالة المساعدة (smartDecode) - (النسخة الصحيحة)
+     * -------------------------------------------------------------------
+     * معالج ذكي متعدد الطبقات لفك تشفير البارامترات
+     */
+    private static function smartDecode(string $encodedData, string $paramName = 'data'): ?array
+    {
+
+        // المرحلة 0: إصلاح أحرف URL-Safe (آمن لجميع التنسيقات)
+        $b64Standard = str_replace(['-', '_'], ['+', '/'], $encodedData);
+
+        // المرحلة 1: فك Base64 (الطبقة 1)
+        $step1 = base64_decode($b64Standard, true);
+        if ($step1 === false) {
+            return null;
+        }
+
+        // المرحلة 2: اختبار التنسيق القديم (Legacy)
+        $jsonAttempt = json_decode($step1, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($jsonAttempt)) {
+            return $jsonAttempt;
+        }
+
+        // المرحلة 3: اختبار التنسيق المضغوط (Compressed)
+
+        // 3أ: محاولة Deflate
+        $inflateAttempt = @gzinflate($step1);
+        if ($inflateAttempt !== false) {
+            $jsonAttempt = json_decode($inflateAttempt, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($jsonAttempt)) {
+                return $jsonAttempt;
+            }
+        }
+
+        // 3ب: محاولة Gzip
+        $gzipAttempt = @gzdecode($step1);
+        if ($gzipAttempt !== false) {
+            $jsonAttempt = json_decode($gzipAttempt, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($jsonAttempt)) {
+                return $jsonAttempt;
+            }
+        }
+
+        // المرحلة 4: اختبار التنسيق الخاطئ (Buggy / Double-Encoded)
+        // إذا فشل كل ما سبق، نفترض أن $step1 هو نفسه نص Base64
+
+        $step2 = @base64_decode($step1, true);
+        if ($step2 !== false) {
+            // 4أ: محاولة Deflate
+            $inflateAttempt2 = @gzinflate($step2);
+            if ($inflateAttempt2 !== false) {
+                $jsonAttempt2 = json_decode($inflateAttempt2, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($jsonAttempt2)) {
+                    return $jsonAttempt2;
+                }
+            }
+            // 4ب: محاولة Gzip
+            $gzipAttempt2 = @gzdecode($step2);
+            if ($gzipAttempt2 !== false) {
+                $jsonAttempt2 = json_decode($gzipAttempt2, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($jsonAttempt2)) {
+                    return $jsonAttempt2;
+                }
+            }
+        }
+        return null;
     }
 
 
@@ -604,7 +854,8 @@ class AutoFilterAndSortService
         $beforeOperation = null,
         array $filterKeyMap = [],
         array $sortKeyMap = [],
-        $fields = null
+        $fields = null,
+        $count_only = null // [NEW]
     ) {
         $request = request();
 
@@ -624,7 +875,8 @@ class AutoFilterAndSortService
             beforeOperation: $beforeOperation,
             filterKeyMap: $filterKeyMap,
             sortKeyMap: $sortKeyMap,
-            fields: $fields
+            fields: $fields,
+            count_only: $count_only // [NEW]
         );
 
         return $service->dynamicFilter($dynamicFilterData);
@@ -667,7 +919,6 @@ class AutoFilterAndSortService
             $finalAlias = $joinManager->ensureJoin($relationPath);
             return "{$finalAlias}.{$columnName}";
         } catch (\Exception $e) {
-            // Log::warning("Could not resolve column '{$columnId}': {$e->getMessage()}");
             return null;
         }
     }
