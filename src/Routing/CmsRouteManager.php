@@ -85,6 +85,24 @@ class CmsRouteManager
     }
 
     /**
+     * Registers the core sponsor resource routes.
+     * يقوم بتسجيل مسارات المورد الأساسية للرعاة.
+     * @param \Closure|null $callback
+     * @return void
+     */
+    public function organization(string $type, string $prefix, string $as, ?Closure $callback = null): void
+    {
+        $defaults = [
+            'file' => 'organizations.php',
+            'prefix' => $prefix,
+            'as' => $as,
+            'middleware' => ['api'],
+            'options' => ['type' => $type] // <-- The crucial addition
+        ];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    /**
      * Registers the core partner resource routes.
      * يقوم بتسجيل مسارات المورد الأساسية للشركاء.
      * @param \Closure|null $callback

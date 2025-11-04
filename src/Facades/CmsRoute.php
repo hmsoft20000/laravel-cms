@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void portfolios(\Closure $callback = null)
  * @method static void services(\Closure $callback = null)
  * @method static void sponsors(\Closure $callback = null)
+ * @method static void organization(string $type, string $prefix, string $as, ?Closure $callback = null)
  * @method static void partners(\Closure $callback = null)
  * @method static void statistics(\Closure $callback = null)
  * @method static void sectors(\Closure $callback = null)

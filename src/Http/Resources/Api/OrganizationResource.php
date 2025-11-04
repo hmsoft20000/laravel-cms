@@ -22,6 +22,10 @@ class OrganizationResource extends BaseJsonResource
             'image_url' => $this->image_url,
             'is_active' => $this->is_active,
             'website_url' => $this->website_url,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
+            'address' => $this->address,
+            'mobile' => $this->mobile,
             'translations' => $this->whenLoaded('translations', function () {
                 return $this->translations;
             }),

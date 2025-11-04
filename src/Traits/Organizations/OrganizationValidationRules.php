@@ -24,6 +24,10 @@ trait OrganizationValidationRules
         // Base rules applicable to both create and update
         $rules = [
             'website_url'           => ['sometimes', 'nullable', 'url'],
+            'latitude'           => ['sometimes', 'nullable'],
+            'longitude'           => ['sometimes', 'nullable'],
+            'address'           => ['sometimes', 'nullable'],
+            'mobile'           => ['sometimes', 'nullable'],
             'locales'           => ['array', 'min:1'],
             'locales.*.locale'  => ['required', 'string', Rule::in($validLocales)],
             'locales.*.name'    => ['sometimes', 'nullable', 'string', 'max:255'],
