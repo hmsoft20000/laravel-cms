@@ -17,6 +17,7 @@ return [
     'routes' => function (RouteRegistrar $registrar) {
         $registrar->get('/', 'index')->name('index');
         $registrar->post('/', 'store')->name('store');
+        $registrar->put('/update-all', 'updateAll')->name('updateAll');
         $registrar->get('/{portfolio}', 'show')->name('show');
         $registrar->post('/{portfolio}', 'update')->name('update');
         $registrar->delete('/{portfolio}', 'destroy')->name('destroy');

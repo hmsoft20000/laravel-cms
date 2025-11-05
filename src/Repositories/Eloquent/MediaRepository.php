@@ -115,26 +115,37 @@ class MediaRepository implements MediaRepositoryInterface
     public function delete(Model $owner, int $mediaId): void
     {
         DB::transaction(function () use ($owner, $mediaId) {
-            $mediumToDelete = $owner->media()->findOrFail($mediaId);
+            // $mediumToDelete = $owner->media()->findOrFail($mediaId);
+            $mediumsToDelete = $owner->media()->where('id', $mediaId)->get();
+            $mediumsToDeleteIds = $mediumsToDelete->pluck('id');
+            $defaultMediumWillBeDeleted = $mediumsToDelete->where('is_default', true)->first();
 
-            if ($mediumToDelete->is_default) {
-                $nextDefaultCandidate = $owner->media()
-                    ->where('id', '!=', $mediumToDelete->id)
-                    ->orderBy('sort_number', 'asc')
-                    ->orderBy('id', 'asc')
-                    ->first();
-
-                if ($nextDefaultCandidate) {
-                    $nextDefaultCandidate->update(['is_default' => true]);
+            if ($defaultMediumWillBeDeleted) {
+                $mediumsToDeleteWithoutDefault = $owner->media()->whereNotIn('id', $mediumsToDeleteIds)->orderBy('sort_number', 'asc')->orderBy('id', 'asc')->first();
+                if ($mediumsToDeleteWithoutDefault) {
+                    $mediumsToDeleteWithoutDefault->update(['is_default' => true]);
                 }
             }
 
-            if ($mediumToDelete->mime_type !== 'link') {
-                $ownerType = $owner->getMorphClass();
-                $ownerId = $owner->id;
-                $this->deleteFile("{$ownerType}/{$ownerId}/media/{$mediumToDelete->file_path}");
+            // if ($defaultMediumWillBeDeleted) {
+            //     $nextDefaultCandidate = $owner->media()
+            //         ->where('id', '!=', $defaultMediumWillBeDeleted->id)
+            //         ->orderBy('sort_number', 'asc')
+            //         ->orderBy('id', 'asc')
+            //         ->first();
+
+            //     if ($nextDefaultCandidate) {
+            //         $nextDefaultCandidate->update(['is_default' => true]);
+            //     }
+            // }
+            foreach ($mediumsToDelete as $mediumToDelete) {
+                if ($mediumToDelete->mime_type !== 'link') {
+                    $ownerType = $owner->getMorphClass();
+                    $ownerId = $owner->id;
+                    $this->deleteFile("{$ownerType}/{$ownerId}/media/{$mediumToDelete->file_path}");
+                }
+                $mediumToDelete->delete();
             }
-            $mediumToDelete->delete();
         });
     }
 

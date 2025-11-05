@@ -23,6 +23,52 @@ trait HandlesSingleMedia
      */
     protected function syncSingleImage(Model $model, array $data, MediaRepositoryInterface $mediaRepository): void
     {
+        $currentImage = $model->image;
+
+
+        if (!empty($data['delete_image'])) {
+            info('delete_image is not empty');
+            if ($currentImage instanceof Model) {
+                info('currentImage instanceOf Model');
+                $mediaRepository->delete($model, $currentImage->id);
+            } else {
+                info('currentImage is null');
+                $model->image = null;
+                $model->save();
+            }
+            return;
+        }
+
+        if (isset($data['image'])) {
+            info('image_isset');
+            $newImage = $data['image'];
+
+            if ($newImage instanceof UploadedFile) {
+                info('newImage instanceof UploadedFile');
+                if ($currentImage instanceof Model) {
+                    info('currentImage instanceOf Model');
+                    
+                    $mediaRepository->delete($model, $currentImage->id);
+                } else {
+                    info('currentImage is not instanceOf Model');
+                }
+                $mediaRepository->store($model, [
+                    'media' => [['file' => $newImage, 'is_default' => true]]
+                ]);
+            } elseif (is_string($newImage)) {
+                info('newImage is string');
+                if ($currentImage instanceof Model) {
+                    info('currentImage instanceOf Model');
+                    $mediaRepository->delete($model, $currentImage->id);
+                }
+                $model->image = $newImage;
+                $model->save();
+            }
+        }
+    }
+
+    protected function syncSingleImageOld(Model $model, array $data, MediaRepositoryInterface $mediaRepository): void
+    {
         $usesColumn = Schema::hasColumn($model->getTable(), 'image');
         if ($usesColumn) {
             $currentImageValue = $model->getAttribute('image');
