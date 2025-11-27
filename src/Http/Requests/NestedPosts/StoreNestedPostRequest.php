@@ -28,7 +28,7 @@ class StoreNestedPostRequest extends MyRequest
 
     protected function prepareForValidation(): void
     {
-      
+
         // Set the post type from route parameter
         $this->merge([
             'type' => $this->route('type'),
@@ -47,12 +47,14 @@ class StoreNestedPostRequest extends MyRequest
 
     public function messages()
     {
-        return trans("cms::posts.validation.store.messages");
+        $file = 'cms.posts.validation.store.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans("cms::posts.validation.store.attributes");
+        $file = 'cms.posts.validation.store.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function rules(): array
@@ -60,7 +62,7 @@ class StoreNestedPostRequest extends MyRequest
         $postType = $this->input('type');
 
         $rules = $this->getPostRules('create');
-        
+
         // Add category, organization, feature, download, and attribute rules
         $categoryRules = $this->getCategoryIdsValidationRules($postType, 'category_ids');
         $partnerRules = $this->getOrganizationIdsValidationRules('partner', 'partner_ids');

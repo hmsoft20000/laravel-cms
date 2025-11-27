@@ -15,7 +15,7 @@ trait MediaValidationRules
         return [
             'media' => ['required', 'array', 'min:1'],
             'media.*.id' => ['required', 'integer'],
-            'media.*.is_default' => ['sometimes', 'boolean'],
+            'media.*.is_default' => ['sometimes'],
             'media.*.sort_number' => ['sometimes', 'integer', 'min:0'],
         ];
     }
@@ -29,7 +29,7 @@ trait MediaValidationRules
             'media' => ['required', 'array', 'min:1'],
             'media.*' => ['required', 'array'], // كل عنصر يجب أن يكون object/array
             'media.*.file' => ['required', new FileOrUrl], // <-- استخدام القاعدة المخصصة
-            'media.*.is_default' => ['sometimes', 'boolean'],
+            'media.*.is_default' => ['sometimes'],
             'media.*.sort_number' => ['sometimes', 'integer', 'min:0'],
         ];
     }

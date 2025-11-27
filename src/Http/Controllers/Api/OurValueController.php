@@ -46,7 +46,7 @@ class OurValueController extends Controller
     {
         $ourValue = $this->repo->store($request->validated());
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(OurValueResource::class, ['resource' => $this->repo->show($ourValue)])->withFields(request()->get('fields')),
         );
     }
@@ -63,7 +63,7 @@ class OurValueController extends Controller
     {
         $updatedOurValue = $this->repo->update($ourValue, $request->validated());
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(OurValueResource::class, ['resource' => $updatedOurValue])->withFields(request()->get('fields')),
         );
     }
@@ -86,7 +86,7 @@ class OurValueController extends Controller
         $updatedOurValue = OurValue::whereIn('id', $ids)->with(['translations', 'image'])->get();
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedOurValue)->map(function ($item) {
                 return resolve(OurValueResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -98,14 +98,14 @@ class OurValueController extends Controller
         // $this->authorize('manageImages', $ourValue);
 
         $validated = $request->validate([
-            'image' => ['required', 'image', 'max:2048'],
+            'image' => ['required'],
         ]);
 
         $updatedOurValue = $this->repo->update($ourValue, $validated);
         $updatedOurValue->load(['image']);
 
         return successResponse(
-            message: translate('cms::messages.image_updated_successfully'),
+            message: translate('cms.messages.image_updated_successfully'),
             data: resolve(OurValueResource::class, ['resource' => $updatedOurValue])->withFields(request()->get('fields')),
         );
     }
@@ -113,6 +113,6 @@ class OurValueController extends Controller
     public function destroy(OurValue $ourValue): JsonResponse
     {
         $this->repo->delete($ourValue);
-        return successResponse(message: translate('cms::messages.deleted_successfully'));
+        return successResponse(message: translate('cms.messages.deleted_successfully'));
     }
 }

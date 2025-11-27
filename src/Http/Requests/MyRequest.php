@@ -18,14 +18,14 @@ class MyRequest extends FormRequest
 
         $firstError = collect($errors)
             ->flatten()
-            ->first() ?? __('cms::validation.error');
+            ->first() ?? trans('cms.validation.error');
 
         $allMessagesCount = collect($errors)->flatten()->count();
         $additionalCount = $allMessagesCount - 1;
 
         $customMessage = $firstError;
         if ($additionalCount > 0) {
-            $customMessage .= ' ' . trans('cms::validation.more_errors', ['count' => $additionalCount]);
+            $customMessage .= ' ' . trans('cms.validation.more_errors', ['count' => $additionalCount]);
         }
 
         throw new \Illuminate\Http\Exceptions\HttpResponseException(

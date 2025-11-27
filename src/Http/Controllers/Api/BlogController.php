@@ -10,6 +10,7 @@ use HMsoft\Cms\Models\Content\Blog;
 use HMsoft\Cms\Repositories\Contracts\BlogRepositoryInterface;
 use HMsoft\Cms\Services\Filters\AutoFilterAndSortService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class BlogController extends Controller
 {
@@ -38,7 +39,6 @@ class BlogController extends Controller
                     'keywords',
                     'categories.translations',
                     'features.translations',
-                    'downloads.translations',
                     'partners.translations',
                     'sponsors.translations',
                     'attributeValues.attribute.translations',
@@ -65,7 +65,7 @@ class BlogController extends Controller
     {
         $blog = $this->repo->store($request->validated());
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(BlogResource::class, ['resource' => $this->repo->show($blog)])->withFields(request()->get('fields')),
         );
     }
@@ -87,7 +87,7 @@ class BlogController extends Controller
         $updatedBlog = $this->repo->update($blog, $request->validated());
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(BlogResource::class, ['resource' => $updatedBlog])->withFields(request()->get('fields'))
         );
     }
@@ -103,7 +103,7 @@ class BlogController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedBlogs)->map(function ($item) {
                 return resolve(BlogResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -117,7 +117,17 @@ class BlogController extends Controller
     {
         $this->repo->delete($blog);
         return successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
+        );
+    }
+
+    public function attachDownloads(Request $request, $id): JsonResponse
+    {
+        $blog = Blog::findOrFail($id);
+        $this->repo->attachDownloads($blog, $request->input('download_item_ids', []));
+
+        return successResponse(
+            message: translate('cms.messages.updated_successfully'),
         );
     }
 }

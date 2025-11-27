@@ -40,11 +40,13 @@ class StoreBlogRequest extends MyRequest
 
     public function messages()
     {
-        return trans("cms::blogs.validation.store.messages");
+        $file = 'cms.blogs.validation.store.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
     public function attributes()
     {
-        return trans("cms::blogs.validation.store.attributes");
+        $file = 'cms.blogs.validation.store.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
     public function rules(): array
     {

@@ -10,6 +10,7 @@ use HMsoft\Cms\Models\Content\Portfolio;
 use HMsoft\Cms\Repositories\Contracts\PortfolioRepositoryInterface;
 use HMsoft\Cms\Services\Filters\AutoFilterAndSortService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class PortfolioController extends Controller
 {
@@ -38,7 +39,6 @@ class PortfolioController extends Controller
                     'keywords',
                     'categories.translations',
                     'features.translations',
-                    'downloads.translations',
                     'partners.translations',
                     'sponsors.translations',
                     'attributeValues.attribute.translations',
@@ -65,7 +65,7 @@ class PortfolioController extends Controller
     {
         $portfolio = $this->repo->store($request->validated());
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(PortfolioResource::class, ['resource' => $this->repo->show($portfolio)])->withFields(request()->get('fields')),
         );
     }
@@ -87,7 +87,7 @@ class PortfolioController extends Controller
         $updatedPortfolio = $this->repo->update($portfolio, $request->validated());
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(PortfolioResource::class, ['resource' => $updatedPortfolio])->withFields(request()->get('fields'))
         );
     }
@@ -103,7 +103,7 @@ class PortfolioController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedPortfolios)->map(function ($item) {
                 return resolve(PortfolioResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -117,7 +117,16 @@ class PortfolioController extends Controller
     {
         $this->repo->delete($portfolio);
         return successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
+        );
+    }
+
+    public function attachDownloads(Request $request, Portfolio $portfolio): JsonResponse
+    {
+        $this->repo->attachDownloads($portfolio, $request->input('download_item_ids', []));
+        return successResponse(
+            message: translate('cms.messages.updated_successfully'),
+            data: $portfolio
         );
     }
 }

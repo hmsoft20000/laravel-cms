@@ -62,7 +62,7 @@ class StatisticsController extends Controller
         $statistics = $this->repo->store($validated);
         $statistics->load(['translations', 'image']);
         return  successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(StatisticsResource::class, ['resource' => $statistics])->withFields(request()->get('fields'))
         );
     }
@@ -78,7 +78,7 @@ class StatisticsController extends Controller
         $statistics = $this->repo->update($statistics, $validated);
         $statistics->load(['translations', 'image']);
         return  successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(StatisticsResource::class, ['resource' => $statistics])->withFields(request()->get('fields'))
         );
     }
@@ -104,7 +104,7 @@ class StatisticsController extends Controller
         });
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedStatistics)->map(function ($item) {
                 return resolve(StatisticsResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -116,14 +116,14 @@ class StatisticsController extends Controller
         // $this->authorize('manageImages', $statistics);
 
         $validated = $request->validate([
-            'image' => ['required', 'image', 'max:2048'],
+            'image' => ['required'],
         ]);
 
         $updatedStatistics = $this->repo->update($statistics, $validated);
         $updatedStatistics->load(['image']);
 
         return successResponse(
-            message: translate('cms::messages.image_updated_successfully'),
+            message: translate('cms.messages.image_updated_successfully'),
             data: resolve(StatisticsResource::class, ['resource' => $updatedStatistics])->withFields(request()->get('fields')),
         );
     }
@@ -134,7 +134,7 @@ class StatisticsController extends Controller
 
         $this->repo->destroy($statistics);
         return  successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 }

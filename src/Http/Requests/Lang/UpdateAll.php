@@ -20,12 +20,14 @@ class UpdateAll extends MyRequest
 
     public function messages()
     {
-        return trans('cms::langs.validation.update_all.messages');
+        $file = 'cms.langs.validation.update_all.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::langs.validation.update_all.attributes');
+        $file = 'cms.langs.validation.update_all.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     /**

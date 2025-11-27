@@ -29,7 +29,7 @@ class ResetCodeMail extends Mailable
      */
     public function build()
     {
-        return $this->subject(__('cms::auth.password_reset_code_subject'))
+        return $this->subject(__('cms.auth.password_reset_code_subject'))
                     ->view('emails.reset_code')
                     ->with(['code' => $this->code]);
     }

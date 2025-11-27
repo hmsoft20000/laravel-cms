@@ -163,7 +163,7 @@ class ContactUsController extends Controller
         $message = $this->repo->store($validated);
 
         return successResponse(
-            message: __('cms::contact.message_sent_success'),
+            message: __('cms.contact.message_sent_success'),
             data: resolve(ContactUsResource::class, ['resource' => $message])->withFields(request()->get('fields'))
 
         );
@@ -174,7 +174,7 @@ class ContactUsController extends Controller
         $validated = $request->validated();
         $message = $this->repo->update($message, $validated);
         return  successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(ContactUsResource::class, ['resource' => $message])->withFields(request()->get('fields'))
         );
     }
@@ -183,7 +183,7 @@ class ContactUsController extends Controller
     {
         $this->repo->destroy($message);
         return  successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 
@@ -192,7 +192,7 @@ class ContactUsController extends Controller
         $validated = $request->validated();
         $this->repo->destroyAll($validated['ids']);
         return  successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 

@@ -18,6 +18,7 @@ class AttributeResource extends BaseJsonResource
             'id' => $this->id,
             'type' => $this->type,
             // 'scope' => $this->scope, 
+            'is_variant' => $this->is_variant,
             'is_active' => $this->is_active,
             'is_sortable' => $this->is_sortable,
             'is_required' => $this->is_required,

@@ -38,7 +38,7 @@ class CheckUserRole
 
         if ($request->expectsJson()) {
             return errorResponse(
-                message: __('cms::errors.403.title'),
+                message: __('cms.errors.403.title'),
                 state: 403
             );
         }

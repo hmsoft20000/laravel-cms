@@ -2,6 +2,7 @@
 
 namespace HMsoft\Cms\Models\Content;
 
+use App\Models\Item\Item;
 use HMsoft\Cms\Models\GeneralModel;
 use HMsoft\Cms\Models\Shared\Attribute as CustomAttribute;
 use HMsoft\Cms\Models\Shared\Category;
@@ -19,6 +20,10 @@ use HMsoft\Cms\Traits\Plans\HasPlans;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Builder;
+use HMsoft\Cms\Models\Shared\Review;
+use HMsoft\Cms\Models\Shared\DownloadItem;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Blog extends GeneralModel
 {
@@ -62,6 +67,15 @@ class Blog extends GeneralModel
     // RELATIONS
     // =================================================================
 
+    public function items()
+    {
+        return $this->morphedByMany(
+            Item::class,
+            'bloggable',
+            'bloggables'
+        );
+    }
+
     public function categories()
     {
         return $this->morphToMany(
@@ -88,6 +102,11 @@ class Blog extends GeneralModel
     {
         return $this->hasMany(BlogTranslation::class);
     }
+
+    // public function reviews(): MorphMany
+    // {
+    //     return $this->morphMany(Review::class, 'owner');
+    // }
 
     /**
      * Scope a query to only include attributes of a given type.
@@ -151,7 +170,7 @@ class Blog extends GeneralModel
             ->pluck('id')
             ->toArray();
 
-        $customAttributeFilters = array_map(fn ($id) => 'attribute_' . $id, $customAttributeIds);
+        $customAttributeFilters = array_map(fn($id) => 'attribute_' . $id, $customAttributeIds);
 
         return array_merge($baseColumns, $relatedAttributes, $customAttributeFilters);
     }
@@ -169,7 +188,7 @@ class Blog extends GeneralModel
             ->pluck('id')
             ->toArray();
 
-        $customAttributeFilters = array_map(fn ($id) => 'attribute_' . $id, $customAttributeIds);
+        $customAttributeFilters = array_map(fn($id) => 'attribute_' . $id, $customAttributeIds);
 
         return array_merge($baseColumns, $customAttributeFilters, $relatedAttributes);
     }

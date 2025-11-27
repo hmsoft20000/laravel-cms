@@ -91,11 +91,13 @@ class UpdateAllBusinessSettingRequest extends MyRequest
 
     public function messages()
     {
-        return trans('cms::business_settings.validation.update_all.messages');
+        $file = 'cms.business_settings.validation.update_all.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::business_settings.validation.update_all.attributes');
+        $file = 'cms.business_settings.validation.update_all.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 }

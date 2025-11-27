@@ -26,12 +26,14 @@ class UpdateAll extends MyRequest
 
     public function messages()
     {
-        return trans('cms::teams.validation.update_all.messages');
+        $file = 'cms.teams.validation.update_all.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::teams.validation.update_all.attributes');
+        $file = 'cms.teams.validation.update_all.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
 

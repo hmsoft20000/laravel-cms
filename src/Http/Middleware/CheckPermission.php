@@ -56,7 +56,7 @@ class CheckPermission
                 'success' => false,
                 'message' => $message,
                 'errors' => [
-                    'authorization' => [__('cms::errors.403.title')]
+                    'authorization' => [__('cms.errors.403.title')]
                 ]
             ], 403);
         }

@@ -126,6 +126,11 @@ class BlogRepository implements BlogRepositoryInterface
         return $model->delete();
     }
 
+    public function attachDownloads(Blog $blog, array $downloadItemIds): void
+    {
+        $blog->downloads()->sync($downloadItemIds);
+    }
+
     public function destroy(Model $model): bool
     {
         return $model->delete();

@@ -48,7 +48,7 @@ trait OurValueValidationRules
                 if (!$hasAtLeastOneTitle) {
                     $validator->errors()->add(
                         'locales.0.title', // Point error to the first title field
-                        __('cms::statistics.validation.at_least_one_title')
+                        __('cms.statistics.validation.at_least_one_title')
                     );
                 }
             }

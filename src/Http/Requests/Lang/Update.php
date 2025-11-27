@@ -14,12 +14,14 @@ class Update extends MyRequest
 
     public function messages(): array
     {
-        return trans('cms::langs.validation.update.messages');
+        $file = 'cms.langs.validation.update.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes(): array
     {
-        return trans('cms::langs.validation.update.attributes');
+        $file = 'cms.langs.validation.update.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function rules(): array

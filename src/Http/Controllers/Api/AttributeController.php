@@ -57,7 +57,7 @@ class AttributeController extends Controller
         $validated = $request->validated();
         $attribute = $this->repository->store($validated);
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(AttributeResource::class, ['resource' => $this->repository->show($attribute)])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
@@ -80,7 +80,7 @@ class AttributeController extends Controller
     {
         $updatedAttribute = $this->repository->update($attribute, $request->validated());
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(AttributeResource::class, ['resource' => $updatedAttribute])->withFields(request()->get('fields')),
         );
     }
@@ -99,7 +99,7 @@ class AttributeController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedAttributes)->map(function ($item) {
                 return resolve(AttributeResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -113,9 +113,9 @@ class AttributeController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            $rules['image'] = ['required', 'image', 'max:2048'];
+            $rules['image'] = ['required'];
         } elseif ($request->filled('image')) {
-            $rules['image'] = ['required', 'string', 'max:255'];
+            $rules['image'] = ['required', 'string'];
         }
 
         $validated = $request->validate($rules);
@@ -123,7 +123,7 @@ class AttributeController extends Controller
         $updatedAttribute = $this->repository->update($attribute, $validated);
 
         return successResponse(
-            message: translate('cms::messages.image_updated_successfully'),
+            message: translate('cms.messages.image_updated_successfully'),
             data: resolve(AttributeResource::class, ['resource' => $updatedAttribute])->withFields(request()->get('fields')),
         );
     }
@@ -134,6 +134,6 @@ class AttributeController extends Controller
     public function destroy(Attribute $attribute): JsonResponse
     {
         $this->repository->delete($attribute);
-        return successResponse(message: translate('cms::messages.deleted_successfully'));
+        return successResponse(message: translate('cms.messages.deleted_successfully'));
     }
 }

@@ -19,6 +19,9 @@ use HMsoft\Cms\Traits\Plans\HasPlans;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Builder;
+use HMsoft\Cms\Models\Shared\Faq;
+use HMsoft\Cms\Models\Shared\DownloadItem;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Service extends GeneralModel
 {
@@ -87,6 +90,11 @@ class Service extends GeneralModel
     public function translations(): HasMany
     {
         return $this->hasMany(ServiceTranslation::class);
+    }
+
+    public function faqs(): MorphToMany
+    {
+        return $this->morphToMany(Faq::class, 'owner', 'faq_items');
     }
 
     /**

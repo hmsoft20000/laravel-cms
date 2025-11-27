@@ -59,7 +59,7 @@ class LegalsController extends Controller
         $legal = $this->repo->update($legal, $validated);
 
         return  successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(LegalResource::class, ['resource' => $legal])->withFields(request()->get('fields'))
         );
     }

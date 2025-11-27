@@ -39,11 +39,13 @@ class UpdatePortfolioRequest extends MyRequest
 
     public function messages()
     {
-        return trans("cms::portfolios.validation.update.messages");
+        $file = 'cms.portfolios.validation.update.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
     public function attributes()
     {
-        return trans("cms::portfolios.validation.update.attributes");
+        $file = 'cms.portfolios.validation.update.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
     public function rules(): array
     {

@@ -3,6 +3,7 @@
 namespace HMsoft\Cms\Http\Requests\NestedBlogs;
 
 use HMsoft\Cms\Http\Requests\MyRequest;
+use HMsoft\Cms\Models\Content\Blog;
 use HMsoft\Cms\Traits\Blogs\BlogValidationRules;
 
 class StoreNestedBlogRequest extends MyRequest
@@ -27,6 +28,13 @@ class StoreNestedBlogRequest extends MyRequest
      */
     public function rules(): array
     {
-        return $this->getBlogRules('create');
+        // نحصل على اسم جدول المدونات للتحقق من الـ id
+        $blogTable = resolve(Blog::class)->getTable();
+
+        return [
+            'blog_id'     => ["required", "integer", "exists:{$blogTable},id"],
+            'sort_number' => ['nullable', 'integer'],
+            'is_active'   => ['nullable', 'boolean'],
+        ];
     }
 }

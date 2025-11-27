@@ -23,12 +23,14 @@ class Store extends MyRequest
 
     public function messages()
     {
-        return trans('cms::sectors.validation.store.messages');
+        $file = 'cms.sectors.validation.store.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::sectors.validation.store.attributes');
+        $file = 'cms.sectors.validation.store.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     /**
@@ -71,7 +73,7 @@ class Store extends MyRequest
             if (! $hasAtLeastOneName) {
                 $validator->errors()->add(
                     'locales.*.name',
-                    __('cms::sectors.validation.store.at_least_one_name')
+                    trans('sectors.validation.store.at_least_one_name')
                 );
             }
         });

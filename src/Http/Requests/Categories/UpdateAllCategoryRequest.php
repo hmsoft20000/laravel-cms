@@ -50,11 +50,13 @@ class UpdateAllCategoryRequest extends MyRequest
 
     public function messages()
     {
-        return trans('cms::categories.validation.update_all.messages');
+        $file = 'cms.categories.validation.update_all.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::categories.validation.update_all.attributes');
+        $file = 'cms.categories.validation.update_all.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 }

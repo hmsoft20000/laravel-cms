@@ -8,6 +8,10 @@ use HMsoft\Cms\Traits\Media\DeletesSingleFileOnDelete;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use HMsoft\Cms\Traits\Categories\Categorizable;
+use HMsoft\Cms\Traits\Media\DeletesAllMedia;
+use HMsoft\Cms\Traits\Media\HasMedia;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Polymorphic Download Model.
@@ -15,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class Download extends GeneralModel
 {
-    use HasSingleFile, DeletesSingleFileOnDelete;
+    use HasSingleFile, DeletesSingleFileOnDelete, Categorizable, HasMedia, DeletesAllMedia;
 
     /**
      * The table associated with the model.
@@ -28,7 +32,6 @@ class Download extends GeneralModel
      * @var array<string>|bool
      */
     protected $guarded = ['id'];
-
 
     /**
      * The attributes that should be cast.
@@ -50,13 +53,14 @@ class Download extends GeneralModel
     }
 
     /**
-     * Get all of the translations for the download.
+     * Get the downloadItem that owns the Download
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function translations(): HasMany
+    public function downloadItem(): BelongsTo
     {
-        return $this->hasMany(DownloadTranslation::class, 'download_id');
+        return $this->belongsTo(DownloadItem::class, 'download_item_id', 'id');
     }
-
 
     /**
      * Scope a query to only include attributes of a given type.
@@ -70,7 +74,7 @@ class Download extends GeneralModel
     public function defineRelationships(): array
     {
         return [
-            'translations' => 'translations',
+            'downloadItems' => 'downloadItems',
         ];
     }
 
@@ -79,7 +83,7 @@ class Download extends GeneralModel
         $defaultMap = parent::defineFieldSelectionMap();
 
         $customMap = [
-            'name' => 'translations.name',
+            'name' => 'downloadItems.name',
         ];
 
         return array_merge($defaultMap, $customMap);
@@ -90,7 +94,7 @@ class Download extends GeneralModel
         $baseColumns = parent::defineFilterableAttributes();
 
         $relatedAttributes = [
-            'translations.name',
+            'downloadItems.name',
         ];
 
         return array_merge($baseColumns, $relatedAttributes);
@@ -101,7 +105,7 @@ class Download extends GeneralModel
         $baseColumns = parent::defineSortableAttributes();
 
         $relatedAttributes = [
-            'translations.name',
+            'downloadItems.name',
         ];
 
         return array_merge($baseColumns, $relatedAttributes);
@@ -110,7 +114,7 @@ class Download extends GeneralModel
     public function defineGlobalSearchRelatedAttributes(): array
     {
         return [
-            'translations' => ['name'],
+            'downloadItems' => ['name'],
         ];
     }
 }

@@ -123,6 +123,103 @@ class BaseJsonResource extends JsonResource
     }
 
     /**
+     * =================================================================
+     * [جديد] الدالة العالمية التي أضفتها
+     * =================================================================
+     *
+     * Formats custom attribute values for any resource.
+     * Changed from 'private' to 'protected' to be accessible by child classes.
+     */
+    protected function formatAndGroupAttributeValues($resource): array
+    {
+        if (!$resource->relationLoaded('attributeValues')) {
+            return [];
+        }
+
+        $formattedAttributes = [];
+        $groupedValues = $resource->attributeValues->groupBy('attribute_id');
+
+        foreach ($groupedValues as $attributeId => $values) {
+            $firstValue = $values->first();
+            if (!$firstValue || !$firstValue->relationLoaded('attribute')) {
+                continue;
+            }
+
+            $attributeData = $firstValue->attribute;
+            if (!$attributeData) {
+                continue;
+            }
+
+            $attributeTranslations = $this->formatTranslations($attributeData->translations);
+
+            $processedAttribute = $this->processTranslations(['translations' => $attributeTranslations]);
+
+            $finalValue = null;
+            $translatedValues = [];
+
+            switch ($attributeData->type) {
+                case 'text':
+                case 'textarea':
+                    $finalValue = $values->mapWithKeys(fn($val) => [$val['locale'] => $val['value']])->all();
+                    break;
+
+                case 'checkbox':
+                    $valueContainer = $values->first();
+                    if ($valueContainer && $valueContainer->relationLoaded('selectedOptions')) {
+                        $translatedValues = $valueContainer->selectedOptions->map(function ($selectedOption) {
+                            if (!$selectedOption->relationLoaded('option')) return null;
+
+                            $optionTranslations = $this->formatTranslations($selectedOption->option->translations);
+                            $processedOption = $this->processTranslations(['translations' => $optionTranslations]);
+
+                            return [
+                                'id' => $selectedOption->option->id,
+                                'title' => $processedOption['title'] ?? null,
+                                'translations' => $processedOption['translations'],
+                            ];
+                        })->filter()->values()->all();
+
+                        $finalValue = collect($translatedValues)->pluck('id')->all();
+                    }
+                    break;
+
+                case 'select':
+                case 'radio':
+                    $valueModel = $values->first();
+                    if ($valueModel && $attributeData->relationLoaded('options')) {
+                        $option = $attributeData->options->firstWhere('id', $valueModel->value);
+                        if ($option) {
+                            $optionTranslations = $this->formatTranslations($option->translations);
+                            $finalValue = $this->processTranslations(['translations' => $optionTranslations]);
+                        }
+                    }
+                    break;
+
+                default:
+                    $finalValue = $values->first()->value;
+                    break;
+            }
+
+            $attributeArray = [
+                'attribute_id' => $attributeData->id,
+                'attribute_id' => $attributeData->id,
+                'type' => $attributeData->type,
+                'title' => $processedAttribute['title'] ?? null,
+                'translations' => $attributeTranslations,
+                'value' => $finalValue,
+            ];
+
+            if ($attributeData->type === 'checkbox' && !empty($translatedValues)) {
+                $attributeArray['value_translations'] = $translatedValues;
+            }
+
+            $formattedAttributes[] = $attributeArray;
+        }
+
+        return $formattedAttributes;
+    }
+
+    /**
      * Recursively filters an array based on selected fields.
      */
     protected function filterDataRecursively(array $data, string $fieldsString): array

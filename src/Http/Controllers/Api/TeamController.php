@@ -55,7 +55,7 @@ class TeamController extends Controller
         $team = $this->repo->store($validated);
         $team->load(['translations']);
         return  successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(TeamResource::class, ['resource' => $team])->withFields(request()->get('fields'))
         );
     }
@@ -68,7 +68,7 @@ class TeamController extends Controller
         $team = $this->repo->update($team, $validated);
         $team->load(['translations']);
         return  successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(TeamResource::class, ['resource' => $team])->withFields(request()->get('fields'))
         );
     }
@@ -93,7 +93,7 @@ class TeamController extends Controller
         });
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedStatistics)->map(function ($item) {
                 return resolve(TeamResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -112,7 +112,7 @@ class TeamController extends Controller
         $updatedTeam = $this->repo->update($team, $validated);
 
         return successResponse(
-            message: translate('cms::messages.image_updated_successfully'),
+            message: translate('cms.messages.image_updated_successfully'),
             data: resolve(TeamResource::class, ['resource' => $updatedTeam])->withFields(request()->get('fields')),
         );
     }
@@ -123,7 +123,7 @@ class TeamController extends Controller
 
         $this->repo->destroy($team);
         return  successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 }

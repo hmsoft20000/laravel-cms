@@ -61,6 +61,12 @@ use Illuminate\Support\Facades\Facade;
  * @method static void permissions(\Closure $callback = null)
  * @method static void roles(\Closure $callback = null)
  * @method static void ourValues(\Closure $callback = null)
+ * 
+ * --- Download Items Routes (المسارات الموارد التحميلات) ---
+ * @method static void downloadItems(string $pluralName = 'downloadItems', \Closure $callback = null)
+ *
+ * --- Item Routes (المسارات الموارد العناصر) ---
+ * @method static void items(string $pluralName = 'items', \Closure $callback = null)
  */
 class CmsRoute extends Facade
 {

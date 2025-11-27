@@ -32,12 +32,14 @@ class Update extends MyRequest
 
     public function messages()
     {
-        return trans('cms::statistics.validation.update.messages');
+        $file = 'cms.statistics.validation.update.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::statistics.validation.update.attributes');
+        $file = 'cms.statistics.validation.update.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     /**

@@ -56,7 +56,7 @@ class SectorController extends Controller
         $sector = $this->repo->store($validated);
         $sector->load(['translations', 'image']);
         return  successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(SectorResource::class, ['resource' => $sector])->withFields(request()->get('fields'))
         );
     }
@@ -69,7 +69,7 @@ class SectorController extends Controller
         $sector = $this->repo->update($sector, $validated);
         $sector->load(['translations', 'image']);
         return  successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(SectorResource::class, ['resource' => $sector])->withFields(request()->get('fields'))
         );
     }
@@ -94,7 +94,7 @@ class SectorController extends Controller
         });
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedSectors)->map(function ($item) {
                 return resolve(SectorResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -106,14 +106,14 @@ class SectorController extends Controller
         // $this->authorize('manageImages', $sector);
 
         $validated = $request->validate([
-            'image' => ['required', 'image', 'max:2048'],
+            'image' => ['required'],
         ]);
 
         $updatedSector = $this->repo->update($sector, $validated);
         $updatedSector->load(['image']);
 
         return successResponse(
-            message: translate('cms::messages.image_updated_successfully'),
+            message: translate('cms.messages.image_updated_successfully'),
             data: resolve(SectorResource::class, ['resource' => $updatedSector])->withFields(request()->get('fields')),
         );
     }
@@ -124,7 +124,7 @@ class SectorController extends Controller
 
         $this->repo->destroy($sector);
         return  successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 }

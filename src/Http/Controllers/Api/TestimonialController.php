@@ -59,7 +59,7 @@ class TestimonialController extends Controller
         $validated = $request->validated();
         $testimonial = $this->repo->store($validated);
         return  successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(TestimonialResource::class, ['resource' => $testimonial])->withFields(request()->get('fields'))
         );
     }
@@ -74,7 +74,7 @@ class TestimonialController extends Controller
         $validated = $request->validated();
         $testimonial = $this->repo->update($testimonial, $validated);
         return  successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(TestimonialResource::class, ['resource' => $testimonial])->withFields(request()->get('fields'))
         );
     }
@@ -92,7 +92,7 @@ class TestimonialController extends Controller
             }
         }
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedTestimonials)->map(function ($item) {
                 return resolve(TestimonialResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -110,7 +110,7 @@ class TestimonialController extends Controller
         $updatedTestimonial = $this->repo->update($testimonial, $validated);
 
         return successResponse(
-            message: translate('cms::messages.image_updated_successfully'),
+            message: translate('cms.messages.image_updated_successfully'),
             data: resolve(TestimonialResource::class, ['resource' => $updatedTestimonial])->withFields(request()->get('fields')),
         );
     }
@@ -121,7 +121,7 @@ class TestimonialController extends Controller
 
         $this->repo->destroy($testimonial);
         return  successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 }

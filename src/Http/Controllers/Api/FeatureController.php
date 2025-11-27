@@ -81,7 +81,7 @@ class FeatureController extends Controller
         $validated = array_merge($validated, $ownerData);
         $feature = $this->repository->store($validated);
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(FeatureResource::class, ['resource' => $feature])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
@@ -131,7 +131,7 @@ class FeatureController extends Controller
         }
         $updatedFeature = $this->repository->update($feature, $request->validated());
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(FeatureResource::class, ['resource' => $updatedFeature])->withFields(request()->get('fields'))
         );
     }
@@ -160,7 +160,7 @@ class FeatureController extends Controller
             abort(404);
         }
         $this->repository->delete($feature);
-        return successResponse(message: translate('cms::messages.deleted_successfully'));
+        return successResponse(message: translate('cms.messages.deleted_successfully'));
     }
 
     /**
@@ -188,7 +188,7 @@ class FeatureController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedFeatures)->map(function ($item) {
                 return resolve(FeatureResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -217,14 +217,14 @@ class FeatureController extends Controller
             abort(404);
         }
         $validated = $request->validate([
-            'image' => ['sometimes', 'image', 'max:2048'],
+            'image' => ['sometimes'],
             'delete_image' => ['sometimes'],
         ]);
 
         $updatedFeature = $this->repository->update($feature, $validated);
 
         return successResponse(
-            message: translate('cms::messages.image_updated_successfully'),
+            message: translate('cms.messages.image_updated_successfully'),
             data: resolve(FeatureResource::class, ['resource' => $updatedFeature])->withFields(request()->get('fields')),
         );
     }

@@ -46,7 +46,7 @@ class BusinessSettingController extends Controller
         $re = $this->repo->updateAll($validated);
 
         return  successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: $this->repo->all(),
         );
     }
@@ -63,7 +63,7 @@ class BusinessSettingController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: $this->repo->all(),
         );
     }

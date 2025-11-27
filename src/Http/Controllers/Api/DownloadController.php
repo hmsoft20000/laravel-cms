@@ -4,8 +4,10 @@ namespace HMsoft\Cms\Http\Controllers\Api;
 
 use HMsoft\Cms\Http\Controllers\Controller;
 use HMsoft\Cms\Http\Requests\Downloads\{StoreDownloadRequest, UpdateAllDownloadRequest, UpdateDownloadRequest};
+use HMsoft\Cms\Http\Resources\Api\DownloadItemResource;
 use HMsoft\Cms\Http\Resources\Api\DownloadResource;
 use HMsoft\Cms\Models\Shared\Download;
+use HMsoft\Cms\Models\Shared\DownloadItem;
 use HMsoft\Cms\Repositories\Contracts\DownloadRepositoryInterface;
 use HMsoft\Cms\Services\Filters\AutoFilterAndSortService;
 use Illuminate\Database\Eloquent\Model;
@@ -31,19 +33,34 @@ class DownloadController extends Controller
     {
         // $this->authorize('viewAny', [Feature::class, $owner]);
 
+        // $result = AutoFilterAndSortService::dynamicSearchFromRequest(
+        //     model: resolve(Download::class),
+        //     extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($owner) {
+        //         $query->where('owner_type', $owner->getMorphClass());
+        //         $query->where('owner_id', $owner->id);
+        //         $query->with([
+        //             'downloadItem.links',
+        //             'downloadItem.translations',
+        //         ]);
+        //     },
+        // );
+
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
-            model: resolve(Download::class),
-            extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($owner) {
-                $query->where('owner_type', $owner->getMorphClass());
-                $query->where('owner_id', $owner->id);
-                $query->with([
-                    'translations',
-                ]);
+            model: resolve(DownloadItem::class),
+            extraOperation: function ($query) use ($owner) {
+                // [FIX]: نقوم بعمل Join يدوي مع الجدول الوسيط لكي تعمل الفلترة
+                $query->join('downloads', 'download_items.id', '=', 'downloads.download_item_id')
+                    ->where('downloads.owner_id', $owner->id)
+                    ->where('downloads.owner_type', $owner->getMorphClass())
+                    ->select('download_items.*'); // نحدد أعمدة المدونات فقط لتجنب تضارب الـ ID
+
+                // إضافة العلاقات المطلوبة
+                $query->with(['links', 'translations']);
             },
         );
 
         $result['data'] = collect($result['data'])->map(function ($item) {
-            return resolve(DownloadResource::class, ['resource' => $item])->withFields(request()->get('fields'));
+            return resolve(DownloadItemResource::class, ['resource' => $item])->withFields(request()->get('fields'));
         })->all();
 
         return successResponse(
@@ -69,7 +86,7 @@ class DownloadController extends Controller
         $validated = array_merge($validated, $ownerData);
         $download = $this->repository->store($validated);
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(DownloadResource::class, ['resource' => $download])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
@@ -110,7 +127,7 @@ class DownloadController extends Controller
         }
         $updatedDownload = $this->repository->update($download, $request->validated());
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(DownloadResource::class, ['resource' => $updatedDownload])->withFields(request()->get('fields'))
         );
     }
@@ -131,7 +148,7 @@ class DownloadController extends Controller
             abort(404);
         }
         $this->repository->delete($download);
-        return successResponse(message: translate('cms::messages.deleted_successfully'));
+        return successResponse(message: translate('cms.messages.deleted_successfully'));
     }
 
     /**
@@ -157,7 +174,7 @@ class DownloadController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedDownloads)->map(function ($item) {
                 return resolve(DownloadResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -187,7 +204,7 @@ class DownloadController extends Controller
         $updatedDownload = $this->repository->update($download, $validated);
 
         return successResponse(
-            message: translate('cms::messages.file_updated_successfully'),
+            message: translate('cms.messages.file_updated_successfully'),
             data: resolve(DownloadResource::class, ['resource' => $updatedDownload])->withFields(request()->get('fields')),
         );
     }

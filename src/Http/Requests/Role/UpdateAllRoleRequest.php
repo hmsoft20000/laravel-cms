@@ -47,11 +47,13 @@ class UpdateAllRoleRequest extends MyRequest
 
     public function messages()
     {
-        return trans('cms::roles.validation.update_all.messages');
+        $file = 'cms.roles.validation.update_all.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::roles.validation.update_all.attributes');
+        $file = 'cms.roles.validation.update_all.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 }

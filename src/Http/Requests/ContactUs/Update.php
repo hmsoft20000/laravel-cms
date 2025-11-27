@@ -26,12 +26,14 @@ class Update extends MyRequest
 
     public function messages()
     {
-        return trans('cms::contact.validation.update.messages');
+        $file = 'cms.contact.validation.update.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::contact.validation.update.attributes');
+        $file = 'cms.contact.validation.update.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     /**

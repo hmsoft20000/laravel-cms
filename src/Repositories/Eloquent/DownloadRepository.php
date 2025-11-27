@@ -44,7 +44,7 @@ class DownloadRepository implements DownloadRepositoryInterface
 
     public function show(Model $model): Model
     {
-        return $model->load('translations');
+        return $model->load('downloadItem', 'downloadItem.translations', 'downloadItem.links');
     }
 
     public function delete(Model $model): bool

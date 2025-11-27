@@ -3,7 +3,7 @@
 namespace HMsoft\Cms\Traits\Blogs;
 
 use HMsoft\Cms\Models\Content\Blog;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 /**
  * Trait HasNestedBlogs
@@ -15,8 +15,15 @@ trait HasNestedBlogs
     /**
      * Get all of the model's blogs.
      */
-    public function blogs(): MorphMany
+    public function blogs(): MorphToMany
     {
-        return $this->morphMany(Blog::class, 'owner');
+        return $this->morphToMany(
+            Blog::class,
+            'bloggable',      // اسم العلاقة Morph
+            'bloggables',     // اسم الجدول الوسيط
+            'bloggable_id',   // FK للموديل الحالي (Item, Service)
+            'blog_id'         // FK للمودونة
+        )->withPivot(['sort_number', 'is_active'])
+            ->orderByPivot('sort_number', 'asc');
     }
 }

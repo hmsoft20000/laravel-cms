@@ -67,7 +67,7 @@ class PermissionController extends Controller
         $permission = Permission::create($validated);
 
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: [
                 'id' => $permission->id,
                 'name' => $permission->name,
@@ -130,7 +130,7 @@ class PermissionController extends Controller
         $permission->update($validated);
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: [
                 'id' => $permission->id,
                 'name' => $permission->name,
@@ -170,7 +170,7 @@ class PermissionController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: $updatedPermissions
         );
     }
@@ -194,7 +194,7 @@ class PermissionController extends Controller
         $permission->delete();
 
         return successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 

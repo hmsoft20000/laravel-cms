@@ -15,12 +15,14 @@ class StoreUserRequest extends MyRequest
 
     public function messages()
     {
-        return trans('cms::user.validation.store.messages');
+        $file = 'cms.user.validation.store.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::user.validation.store.attributes');
+        $file = 'cms.user.validation.store.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     /**

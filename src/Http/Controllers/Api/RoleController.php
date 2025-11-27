@@ -102,7 +102,7 @@ class RoleController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: [
                 'id' => $role->id,
                 'name' => $role->name,
@@ -212,7 +212,7 @@ class RoleController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: [
                 'id' => $role->id,
                 'name' => $role->name,
@@ -267,7 +267,7 @@ class RoleController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: $updatedRoles
         );
     }
@@ -299,7 +299,7 @@ class RoleController extends Controller
         $role->delete();
 
         return successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 

@@ -130,6 +130,17 @@ class CmsRouteManager
     {
         $this->resource('statistics', 'statistics', $callback);
     }
+
+    public function downloadItems(string $pluralName = 'downloadItems', ?Closure $callback = null): void
+    {
+        $this->resource('downloadItem', $pluralName, $callback);
+    }
+
+    public function items(string $pluralName = 'items', ?Closure $callback = null): void
+    {
+        $this->resource('items', $pluralName, $callback);
+    }
+
     /**
      * Registers the core sector resource routes.
      * يقوم بتسجيل مسارات المورد الأساسية للقطاعات.
@@ -174,17 +185,22 @@ class CmsRouteManager
     /**
      * Registers nested blog routes for a parent resource.
      * يقوم بتسجيل مسارات المدونات المتداخلة لمورد أب.
-     * @param string $parent The plural name of the parent resource. | اسم الجمع للمورد الأب.
+     * * ملاحظة: في النظام الجديد، هذه المسارات تستخدم لإدارة "العلاقة"
+     * (عرض المرتبط، إضافة جديد وربطه، فك الارتباط).
+     * * @param string $parent The plural name of the parent resource.
      * @param \Closure|null $callback
      * @return void
      */
     public function nestedBlogs(string $parent, ?Closure $callback = null): void
     {
         $defaults = [
-            'file' => 'nested_blog.php',
+            'file' => 'nested_blog.php', // تأكد أن هذا الملف موجود في routes/modules
+            // المسار سيصبح مثلاً: api/items/{item}/blogs
             'prefix' => "{$parent}/{_OWNER_BINDING_}/blogs",
             'as' => "api.{$parent}.blogs.",
-            'middleware' => ['api']
+            'middleware' => ['api'],
+            // إضافة خيار لتحديد نوع الأب إذا احتجنا له لاحقاً
+            'options' => ['parent_resource' => $parent]
         ];
         $this->registerRouteGroup($defaults, $callback);
     }
@@ -230,6 +246,8 @@ class CmsRouteManager
     {
         $this->nestedResource('download', $parent, $callback);
     }
+
+
 
     /**
      * Registers nested FAQ routes for a parent resource.

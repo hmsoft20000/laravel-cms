@@ -29,10 +29,16 @@ trait ResolvesRouteOwner
         // $owner = $request->route('owner');
         $owner = $request->route('owner');
         $ownerKey = $route->parameter('_owner_binding_key');
+        // info([
+        //     'owner' => $owner,
+        //     'ownerKey' => $ownerKey,
+        // ]);
         if (is_null($owner)) {
 
             $binder = app('router')->getBindingCallback($ownerKey);
-
+            // info([
+            //     'binder' => $binder,
+            // ]);
             if ($binder) {
                 $value = $route->originalParameter($ownerKey);
                 $owner = $binder($value, $route);

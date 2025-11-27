@@ -49,7 +49,7 @@ class CategoryController extends Controller
 
         $category = $this->repository->store($request->validated());
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(CategoryResource::class, ['resource' => $this->repository->show($category)])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
@@ -70,7 +70,7 @@ class CategoryController extends Controller
 
         $updatedCategory = $this->repository->update($category, $request->validated());
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(CategoryResource::class, ['resource' => $updatedCategory])->withFields(request()->get('fields'))
         );
     }
@@ -89,7 +89,7 @@ class CategoryController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedCategories)->map(function ($item) {
                 return resolve(CategoryResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -114,7 +114,7 @@ class CategoryController extends Controller
         $updatedCategory = $this->repository->update($category, $validated);
 
         return successResponse(
-            message: translate('cms::messages.image_updated_successfully'),
+            message: translate('cms.messages.image_updated_successfully'),
             data: resolve(CategoryResource::class, ['resource' => $updatedCategory])->withFields(request()->get('fields')),
 
         );
@@ -125,6 +125,6 @@ class CategoryController extends Controller
         // $this->authorize('delete', $category);
 
         $this->repository->delete($category);
-        return successResponse(message: translate('cms::messages.deleted_successfully'));
+        return successResponse(message: translate('cms.messages.deleted_successfully'));
     }
 }

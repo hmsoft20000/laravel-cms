@@ -21,6 +21,9 @@ use HMsoft\Cms\Traits\Services\HasNestedServices;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Builder;
+use HMsoft\Cms\Models\Shared\Review;
+use HMsoft\Cms\Models\Shared\DownloadItem;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Portfolio extends GeneralModel
 {
@@ -91,6 +94,11 @@ class Portfolio extends GeneralModel
     public function translations(): HasMany
     {
         return $this->hasMany(PortfolioTranslation::class);
+    }
+
+    public function reviews(): MorphMany
+    {
+        return $this->morphMany(Review::class, 'owner');
     }
 
     /**

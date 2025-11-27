@@ -126,6 +126,11 @@ class ServiceRepository implements ServiceRepositoryInterface
         return $model->delete();
     }
 
+    public function attachDownloads(Service $service, array $downloadItemIds): void
+    {
+        $service->downloads()->sync($downloadItemIds);
+    }
+
     public function destroy(Model $model): bool
     {
         return $model->delete();

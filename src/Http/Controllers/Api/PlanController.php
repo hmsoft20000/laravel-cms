@@ -67,7 +67,7 @@ class PlanController extends Controller
         $validated = array_merge($validated, $ownerData);
         $plan = $this->repository->store($validated);
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(PlanResource::class, ['resource' => $plan])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
@@ -110,7 +110,7 @@ class PlanController extends Controller
         }
         $updatedPlan = $this->repository->update($plan, $request->validated());
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(PlanResource::class, ['resource' => $updatedPlan])->withFields(request()->get('fields'))
         );
     }
@@ -131,7 +131,7 @@ class PlanController extends Controller
             abort(404);
         }
         $this->repository->delete($plan);
-        return successResponse(message: translate('cms::messages.deleted_successfully'));
+        return successResponse(message: translate('cms.messages.deleted_successfully'));
     }
 
     /**
@@ -157,7 +157,7 @@ class PlanController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedPlans)->map(function ($item) {
                 return resolve(PlanResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),

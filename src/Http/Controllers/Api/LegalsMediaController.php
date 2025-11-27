@@ -78,7 +78,7 @@ class LegalsMediaController extends Controller
         $media = $this->repository->store($owner, $request->validated());
 
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: $media,
             code: Response::HTTP_CREATED
         );
@@ -97,7 +97,7 @@ class LegalsMediaController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.retrieved_successfully'),
+            message: translate('cms.messages.retrieved_successfully'),
             data: $this->repository->show($owner, $medium)
         );
     }
@@ -117,7 +117,7 @@ class LegalsMediaController extends Controller
         $updatedMedia = $this->repository->update($owner, $medium, $request->all());
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: $updatedMedia
         );
     }
@@ -137,7 +137,7 @@ class LegalsMediaController extends Controller
         $this->repository->delete($owner, $medium->id);
 
         return successResponse(
-            message: translate('cms::messages.deleted_successfully')
+            message: translate('cms.messages.deleted_successfully')
         );
     }
 
@@ -151,7 +151,7 @@ class LegalsMediaController extends Controller
         $media = $this->repository->updateAll($owner, $request->validated()['media']);
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: $media
         );
     }
@@ -166,7 +166,7 @@ class LegalsMediaController extends Controller
         $media = $this->repository->updateAll($owner, $request->validated()['media']);
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: $media
         );
     }

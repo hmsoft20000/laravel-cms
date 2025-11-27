@@ -49,7 +49,7 @@ class PagesMetaController extends Controller
         $pageMeta = $this->repo->store($validated);
         $pageMeta->load(['translations']);
         return  successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(PageMetaResource::class, ['resource' => $pageMeta])->withFields(request()->get('fields'))
         );
     }
@@ -59,7 +59,7 @@ class PagesMetaController extends Controller
         $validated = $request->validated();
         $pageMeta = $this->repo->update($pageMeta, $validated);
         return  successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(PageMetaResource::class, ['resource' => $pageMeta])->withFields(request()->get('fields'))
         );
     }
@@ -89,7 +89,7 @@ class PagesMetaController extends Controller
     {
         $this->repo->destroy($pageMeta);
         return  successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 }

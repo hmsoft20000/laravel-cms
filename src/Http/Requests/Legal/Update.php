@@ -13,12 +13,14 @@ class Update extends MyRequest
 
     public function messages()
     {
-        return trans("cms::legal.validation.update.messages");
+        $file = 'cms.legal.validation.update.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans("cms::legal.validation.update.attributes");
+        $file = 'cms.legal.validation.update.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
 

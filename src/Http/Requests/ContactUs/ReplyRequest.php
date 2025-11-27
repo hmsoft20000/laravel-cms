@@ -16,12 +16,14 @@ class ReplyRequest extends MyRequest
 
     public function messages()
     {
-        return trans('cms::contact.validation.reply.messages');
+        $file = 'cms.contact.validation.reply.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::contact.validation.reply.attributes');
+        $file = 'cms.contact.validation.reply.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     /**

@@ -26,12 +26,14 @@ class Delete extends MyRequest
 
     public function messages()
     {
-        return trans('cms::langs.validation.delete.messages');
+        $file = 'cms.langs.validation.delete.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::langs.validation.delete.attributes');
+        $file = 'cms.langs.validation.delete.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     /**

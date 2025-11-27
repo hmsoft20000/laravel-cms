@@ -10,6 +10,7 @@ use HMsoft\Cms\Models\Content\Service;
 use HMsoft\Cms\Repositories\Contracts\ServiceRepositoryInterface;
 use HMsoft\Cms\Services\Filters\AutoFilterAndSortService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
@@ -38,7 +39,6 @@ class ServiceController extends Controller
                     'keywords',
                     'categories.translations',
                     'features.translations',
-                    'downloads.translations',
                     'partners.translations',
                     'sponsors.translations',
                     'attributeValues.attribute.translations',
@@ -65,7 +65,7 @@ class ServiceController extends Controller
     {
         $service = $this->repo->store($request->validated());
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(ServiceResource::class, ['resource' => $this->repo->show($service)])->withFields(request()->get('fields')),
         );
     }
@@ -87,7 +87,7 @@ class ServiceController extends Controller
         $updatedService = $this->repo->update($service, $request->validated());
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(ServiceResource::class, ['resource' => $updatedService])->withFields(request()->get('fields'))
         );
     }
@@ -103,7 +103,7 @@ class ServiceController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedServices)->map(function ($item) {
                 return resolve(ServiceResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -117,7 +117,17 @@ class ServiceController extends Controller
     {
         $this->repo->delete($service);
         return successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
+        );
+    }
+
+    public function attachDownloads(Request $request, $id): JsonResponse
+    {
+        $service = Service::findOrFail($id);
+        $this->repo->attachDownloads($service, $request->input('download_item_ids', []));
+
+        return successResponse(
+            message: translate('cms.messages.updated_successfully'),
         );
     }
 }

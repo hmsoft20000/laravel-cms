@@ -38,6 +38,7 @@ class Attribute extends GeneralModel
         return [
             'sort_number' => 'integer',
             'is_active' => 'boolean',
+            'is_variant' => 'boolean',
             'is_required' => 'boolean',
             'is_sortable' => 'boolean',
             'is_fast_search' => 'boolean',

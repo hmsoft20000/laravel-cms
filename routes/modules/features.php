@@ -17,6 +17,7 @@ return [
         $registrar->get('/', 'index')->name('index');
         $registrar->post('/', 'store')->name('store');
         $registrar->post('/update-all', 'updateAll')->name('updateAll');
+        $registrar->put('/update-all', 'updateAll')->name('updateAll');
         $registrar->get('/{feature}', 'show')->name('show');
         $registrar->put('/{feature}', 'update')->name('update');
         $registrar->delete('/{feature}', 'destroy')->name('destroy');

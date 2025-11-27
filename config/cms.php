@@ -46,6 +46,7 @@ return [
         'ourStory' => \HMsoft\Cms\Models\Legal\Legal::class,
         'statistics' => \HMsoft\Cms\Models\Statistics\Statistics::class,
         'sectors' => \HMsoft\Cms\Models\Sector\Sector::class,
+        'items' => \HMsoft\Cms\Models\Shop\Item::class,
     ],
 
 ];

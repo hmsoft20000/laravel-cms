@@ -64,7 +64,7 @@ class OrganizationController extends Controller
         $organization = $this->repo->store($validated);
         $organization->load(['translations', 'image']);
         return  successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(OrganizationResource::class, ['resource' => $organization])->withFields(request()->get('fields'))
         );
     }
@@ -77,7 +77,7 @@ class OrganizationController extends Controller
         $organization = $this->repo->update($organization, $validated);
         $organization->load(['translations', 'image']);
         return  successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(OrganizationResource::class, ['resource' => $organization])->withFields(request()->get('fields'))
         );
     }
@@ -96,7 +96,7 @@ class OrganizationController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedModel)->map(function ($item) {
                 return resolve(OrganizationResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -108,14 +108,14 @@ class OrganizationController extends Controller
         // $this->authorize('manageImages', $organization);
 
         $validated = $request->validate([
-            'image' => ['required', 'image', 'max:2048'],
+            'image' => ['required'],
         ]);
 
         $updatedOrganization = $this->repo->update($organization, $validated);
         $updatedOrganization->load(['image']);
 
         return successResponse(
-            message: translate('cms::messages.image_updated_successfully'),
+            message: translate('cms.messages.image_updated_successfully'),
             data: resolve(OrganizationResource::class, ['resource' => $updatedOrganization])->withFields(request()->get('fields')),
         );
     }
@@ -126,7 +126,7 @@ class OrganizationController extends Controller
 
         $this->repo->destroy($organization);
         return  successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 }

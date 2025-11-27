@@ -2,6 +2,9 @@
 
 namespace HMsoft\Cms\Traits\Downloads;
 
+use HMsoft\Cms\Models\Shared\DownloadItem;
+use Illuminate\Validation\Rule;
+
 /**
  * Trait DownloadValidationRules
  *
@@ -17,29 +20,32 @@ trait DownloadValidationRules
      */
     protected function getDownloadRules(string $context = 'update'): array
     {
+        $downloadItem = resolve(DownloadItem::class);
+        $tableName = $downloadItem->getTable();
         $rules = [
-            'file'         => ['sometimes', 'nullable', 'file', 'max:10240'],
+            'download_item_id' => ['required', 'integer', Rule::exists($tableName, 'id')],
+            // 'file'         => ['sometimes', 'nullable', 'file', 'max:10240'],
 
-            // قواعد الترجمات
-            'locales.*.locale'      => ['required', 'string'],
-            'locales.*.title'       => ['required', 'string', 'max:255'],
-            'locales.*.description' => ['nullable', 'string'],
+            // // قواعد الترجمات
+            // 'locales.*.locale'      => ['nullable', 'string'],
+            // 'locales.*.title'       => ['nullable', 'string', 'max:255'],
+            // 'locales.*.description' => ['nullable', 'string'],
         ];
 
         switch ($context) {
             case 'create':
                 $rules['is_active']   = ['sometimes', 'boolean'];
                 $rules['sort_number'] = ['sometimes', 'integer'];
-                $rules['locales']     = ['required', 'array', 'min:1'];
-                $rules['file_path']    = ['required', 'nullable', 'string'];
+                // $rules['locales']     = ['required', 'array', 'min:1'];
+                // $rules['file_path']    = ['required', 'nullable', 'string'];
 
                 break;
             case 'update':
                 $rules['is_active']      = ['sometimes', 'boolean'];
                 $rules['sort_number']    = ['sometimes', 'integer'];
-                $rules['locales']        = ['sometimes', 'array', 'min:1'];
-                $rules['delete_file']   = ['sometimes', 'boolean'];
-                $rules['file_path']    = ['sometimes', 'nullable', 'string'];
+                // $rules['locales']        = ['sometimes', 'array', 'min:1'];
+                // $rules['delete_file']   = ['sometimes', 'boolean'];
+                // $rules['file_path']    = ['sometimes', 'nullable', 'string'];
                 break;
         }
 
@@ -60,5 +66,16 @@ trait DownloadValidationRules
         }
 
         return $nestedRules;
+    }
+
+
+    protected function getAttachedDownloadRules(string $field): array
+    {
+        $downloadItem = resolve(DownloadItem::class);
+        $tableName = $downloadItem->getTable();
+        return [
+            $field => 'sometimes|array',
+            $field . '.*' => 'required|integer|exists:' . $tableName . ',id',
+        ];
     }
 }

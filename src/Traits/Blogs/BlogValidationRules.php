@@ -2,6 +2,7 @@
 
 namespace HMsoft\Cms\Traits\Blogs;
 
+use HMsoft\Cms\Models\Content\Blog;
 
 /**
  * Trait BlogValidationRules
@@ -74,5 +75,15 @@ trait BlogValidationRules
         }
 
         return $nestedRules;
+    }
+
+    protected function getAttachedBlogsRules(string $inputName = 'attached_blogs_ids'): array
+    {
+        $blog = resolve(Blog::class);
+        $tableName = $blog->getTable();
+        return [
+            $inputName => 'sometimes|array',
+            $inputName . '.*' => 'required|integer|exists:' . $tableName . ',id',
+        ];
     }
 }

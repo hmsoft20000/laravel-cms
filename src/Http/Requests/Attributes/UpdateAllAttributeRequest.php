@@ -23,7 +23,7 @@ class UpdateAllAttributeRequest extends MyRequest
     {
         $data = $this->all();
         $scope = $this->route('type');
-        
+
         foreach ($data as $index => $item) {
             $booleanFields = ['is_active', 'delete_image'];
             foreach ($booleanFields as $field) {
@@ -31,7 +31,7 @@ class UpdateAllAttributeRequest extends MyRequest
                     $data[$index][$field] = filter_var($item[$field], FILTER_VALIDATE_BOOLEAN);
                 }
             }
-            
+
             // Add scope to each item if not already present
             if ($scope && !isset($item['scope'])) {
                 $data[$index]['scope'] = $scope;
@@ -67,11 +67,13 @@ class UpdateAllAttributeRequest extends MyRequest
 
     public function messages()
     {
-        return trans('cms::attributes.validation.update_all.messages');
+        $file = 'cms.attributes.validation.update_all.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::attributes.validation.update_all.attributes');
+        $file = 'cms.attributes.validation.update_all.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 }

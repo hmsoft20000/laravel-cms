@@ -21,5 +21,6 @@ return [
         $registrar->get('/{blog}', 'show')->name('show');
         $registrar->post('/{blog}', 'update')->name('update');
         $registrar->delete('/{blog}', 'destroy')->name('destroy');
+        $registrar->post('/{id}/attach-downloads', 'attachDownloads')->name('attachDownloads');
     }
 ];

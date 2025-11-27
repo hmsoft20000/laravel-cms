@@ -29,6 +29,7 @@ class SetLocale
         /* get supported locales */
         $supportedLocales = array_keys(config('cms.locales', []));
 
+
         /* get fallback locale */
         $fallbackLocale = config('app.fallback_locale', 'en');
 

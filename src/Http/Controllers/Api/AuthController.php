@@ -21,14 +21,14 @@ class AuthController extends Controller
         try {
             $user = $this->repo->register($request->validated());
             return successResponse(
-                __('cms::auth.registered'),
+                __('cms.auth.registered'),
                 [
                     'user' => resolve(UserResource::class, ['resource' => $user])->withFields(request()->get('fields')),
                 ],
                 201
             );
         } catch (\Exception $e) {
-            return errorResponse(__('cms::auth.registration_failed'), 500);
+            return errorResponse(__('cms.auth.registration_failed'), 500);
         }
     }
 
@@ -37,7 +37,7 @@ class AuthController extends Controller
         try {
             $result = $this->repo->login($request->validated());
             $user = $result['user'];
-            return successResponse(__('cms::auth.logged_in_successfully'), [
+            return successResponse(__('cms.auth.logged_in_successfully'), [
                 'user' => resolve(UserResource::class, ['resource' => $user])->withFields(request()->get('fields')),
                 'token' => $result['token'],
             ]);
@@ -45,7 +45,7 @@ class AuthController extends Controller
             return errorResponse($e->getMessage(), 422);
         } catch (\Exception $e) {
             throw $e;
-            return errorResponse(__('cms::auth.login_failed'), 500);
+            return errorResponse(__('cms.auth.login_failed'), 500);
         }
     }
 
@@ -53,9 +53,9 @@ class AuthController extends Controller
     {
         try {
             $this->repo->logout($request);
-            return successResponse(__('cms::auth.logged_out_successfully'));
+            return successResponse(__('cms.auth.logged_out_successfully'));
         } catch (\Exception $e) {
-            return errorResponse(__('cms::auth.logout_failed'), 500);
+            return errorResponse(__('cms.auth.logout_failed'), 500);
         }
     }
 
@@ -63,13 +63,13 @@ class AuthController extends Controller
     {
         try {
             $user = $this->repo->user($request);
-            return successResponse(__('cms::auth.user_retrieved'), [
+            return successResponse(__('cms.auth.user_retrieved'), [
                 'user' => resolve(UserResource::class, ['resource' => $user])->withFields(request()->get('fields')),
                 'token' => $request->bearerToken(),
             ]);
         } catch (\Exception $e) {
             throw $e;
-            return errorResponse(__('cms::auth.user_retrieval_failed'), 500);
+            return errorResponse(__('cms.auth.user_retrieval_failed'), 500);
         }
     }
 
@@ -77,9 +77,9 @@ class AuthController extends Controller
     {
         try {
             $this->repo->sendResetLinkEmail($request->validated());
-            return successResponse(__('cms::auth.password_reset_code_sent'));
+            return successResponse(__('cms.auth.password_reset_code_sent'));
         } catch (\Exception $e) {
-            return errorResponse(__('cms::auth.password_reset_failed'), 500);
+            return errorResponse(__('cms.auth.password_reset_failed'), 500);
         }
     }
 
@@ -87,9 +87,9 @@ class AuthController extends Controller
     {
         try {
             $this->repo->sendResetLinkEmail($request->validated());
-            return successResponse(__('cms::auth.password_reset_code_sent'));
+            return successResponse(__('cms.auth.password_reset_code_sent'));
         } catch (\Exception $e) {
-            return errorResponse(__('cms::auth.password_reset_failed'), 500);
+            return errorResponse(__('cms.auth.password_reset_failed'), 500);
         }
     }
 
@@ -97,9 +97,9 @@ class AuthController extends Controller
     {
         try {
             $this->repo->resetPassword($request->validated());
-            return successResponse(__('cms::auth.password_reset_successful'));
+            return successResponse(__('cms.auth.password_reset_successful'));
         } catch (\Exception $e) {
-            return errorResponse(__('cms::auth.password_reset_failed'), 500);
+            return errorResponse(__('cms.auth.password_reset_failed'), 500);
         }
     }
 
@@ -107,12 +107,12 @@ class AuthController extends Controller
     {
         try {
             $user = $this->repo->user($request);
-            return successResponse(__('cms::auth.profile_retrieved'), [
+            return successResponse(__('cms.auth.profile_retrieved'), [
                 'user' => resolve(UserResource::class, ['resource' => $user])->withFields(request()->get('fields')),
                 'token' => $request->bearerToken(),
             ]);
         } catch (\Exception $e) {
-            return errorResponse(__('cms::auth.profile_retrieval_failed'), 500);
+            return errorResponse(__('cms.auth.profile_retrieval_failed'), 500);
         }
     }
 
@@ -127,13 +127,13 @@ class AuthController extends Controller
             $data['id'] = $request->user()->getKey();
             $user = $this->repo->updateProfile($data);
             return successResponse(
-                __('cms::auth.profile_updated'),
+                __('cms.auth.profile_updated'),
                 [
                     'user' => resolve(UserResource::class, ['resource' => $user])->withFields(request()->get('fields')),
                 ]
             );
         } catch (\Exception $e) {
-            return errorResponse(__('cms::auth.profile_update_failed'), 500);
+            return errorResponse(__('cms.auth.profile_update_failed'), 500);
         }
     }
 
@@ -141,9 +141,9 @@ class AuthController extends Controller
     {
         try {
             $this->repo->verifyOtp($request->validated());
-            return successResponse(__('cms::auth.otp_verified_successfully'));
+            return successResponse(__('cms.auth.otp_verified_successfully'));
         } catch (\Exception $e) {
-            return errorResponse(__('cms::auth.otp_verification_failed'), 400);
+            return errorResponse(__('cms.auth.otp_verification_failed'), 400);
         }
     }
 }

@@ -24,7 +24,6 @@ trait PlanValidationRules
         $rules = [
             'price'         => ['sometimes', 'numeric', 'min:0'],
             'image'         => ['sometimes', 'nullable', 'image', 'max:2048'],
-            'currency_code' => ['sometimes', 'string', 'max:3'],
 
             // قواعد الترجمات
             'locales.*.locale'      => ['required', 'string'],
@@ -34,6 +33,7 @@ trait PlanValidationRules
             // قواعد الميزات (features) الخاصة بالخطة
             'features'                          => ['sometimes', 'array'],
             'features.*.price'                  => ['required_with:features', 'numeric', 'min:0'],
+            'features.*.currency_code'          => ['sometimes', 'string'],
             'features.*.locales'                => ['required_with:features', 'array'],
             'features.*.locales.*.locale'       => ['required_with:features', 'string'],
             'features.*.locales.*.name'         => ['required_with:features', 'string', 'max:255'],

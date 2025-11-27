@@ -39,11 +39,13 @@ class UpdateServiceRequest extends MyRequest
 
     public function messages()
     {
-        return trans("cms::services.validation.update.messages");
+        $file = 'cms.services.validation.update.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
     public function attributes()
     {
-        return trans("cms::services.validation.update.attributes");
+        $file = 'cms.services.validation.update.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
     public function rules(): array
     {

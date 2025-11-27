@@ -40,11 +40,13 @@ class StorePortfolioRequest extends MyRequest
 
     public function messages()
     {
-        return trans("cms::portfolios.validation.store.messages");
+        $file = 'cms.portfolios.validation.store.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
     public function attributes()
     {
-        return trans("cms::portfolios.validation.store.attributes");
+        $file = 'cms.portfolios.validation.store.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
     public function rules(): array
     {

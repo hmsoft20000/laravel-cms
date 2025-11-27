@@ -56,7 +56,7 @@ class LanguageController extends Controller
         $lang = $this->repo->store($validated);
         $lang->load(['translations']);
         return  successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(LangResource::class, ['resource' => $lang])->withFields(request()->get('fields'))
         );
     }
@@ -69,7 +69,7 @@ class LanguageController extends Controller
         $lang = $this->repo->update($lang, $validated);
         $lang->load(['translations']);
         return  successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(LangResource::class, ['resource' => $lang])->withFields(request()->get('fields'))
         );
     }
@@ -94,7 +94,7 @@ class LanguageController extends Controller
         });
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedLangs)->map(function ($item) {
                 return resolve(LangResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -112,7 +112,7 @@ class LanguageController extends Controller
         $updatedLang = $this->repo->update($lang, $validated);
 
         return successResponse(
-            message: translate('cms::messages.image_updated_successfully'),
+            message: translate('cms.messages.image_updated_successfully'),
             data: resolve(LangResource::class, ['resource' => $updatedLang])->withFields(request()->get('fields')),
         );
     }
@@ -123,7 +123,7 @@ class LanguageController extends Controller
 
         $this->repo->destroy($lang);
         return  successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 }

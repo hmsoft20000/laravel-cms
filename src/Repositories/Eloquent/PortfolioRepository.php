@@ -126,6 +126,11 @@ class PortfolioRepository implements PortfolioRepositoryInterface
         return $model->delete();
     }
 
+    public function attachDownloads(Portfolio $portfolio, array $downloadItemIds): void
+    {
+        $portfolio->downloads()->sync($downloadItemIds);
+    }
+
     public function destroy(Model $model): bool
     {
         return $model->delete();

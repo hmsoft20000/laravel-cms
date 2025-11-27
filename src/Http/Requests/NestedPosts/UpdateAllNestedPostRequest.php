@@ -40,12 +40,14 @@ class UpdateAllNestedPostRequest extends MyRequest
 
     public function messages()
     {
-        return trans("cms::posts.validation.updateAll.messages");
+        $file = 'cms.posts.validation.updateAll.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans("cms::posts.validation.updateAll.attributes");
+        $file = 'cms.posts.validation.updateAll.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function rules(): array

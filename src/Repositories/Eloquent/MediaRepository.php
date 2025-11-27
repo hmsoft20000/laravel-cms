@@ -27,7 +27,7 @@ class MediaRepository implements MediaRepositoryInterface
         $mediaCollection = new Collection();
 
         $lastDefaultIndex = collect($mediaItems)->last(function ($item) {
-            return !empty($item['is_default']);
+            return $item['is_default'] == true;
         });
 
         DB::transaction(function () use ($owner, $mediaItems, &$mediaCollection, $lastDefaultIndex) {

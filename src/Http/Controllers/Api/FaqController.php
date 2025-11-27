@@ -69,7 +69,7 @@ class FaqController extends Controller
         $validated = array_merge($validated, $ownerData);
         $faq = $this->repository->store($validated);
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(FaqResource::class, ['resource' => $faq])->withFields(request()->get('fields')),
             code: Response::HTTP_CREATED
         );
@@ -110,7 +110,7 @@ class FaqController extends Controller
         }
         $updatedFaq = $this->repository->update($faq, $request->validated());
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(FaqResource::class, ['resource' => $updatedFaq])->withFields(request()->get('fields'))
         );
     }
@@ -131,7 +131,7 @@ class FaqController extends Controller
             abort(404);
         }
         $this->repository->delete($faq);
-        return successResponse(message: translate('cms::messages.deleted_successfully'));
+        return successResponse(message: translate('cms.messages.deleted_successfully'));
     }
 
     /**
@@ -157,7 +157,7 @@ class FaqController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedFaqs)->map(function ($item) {
                 return resolve(FaqResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),

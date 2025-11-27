@@ -14,12 +14,14 @@ class Update extends MyRequest
 
     public function messages(): array
     {
-        return trans('cms::sectors.validation.update.messages');
+        $file = 'cms.sectors.validation.update.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes(): array
     {
-        return trans('cms::sectors.validation.update.attributes');
+        $file = 'cms.sectors.validation.update.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function rules(): array
@@ -58,7 +60,7 @@ class Update extends MyRequest
             if (! $hasAtLeastOneName) {
                 $validator->errors()->add(
                     'locales.*.name',
-                    __('cms::sectors.validation.update.at_least_one_name')
+                    trans('sectors.validation.update.at_least_one_name')
                 );
             }
         });

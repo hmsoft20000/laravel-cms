@@ -35,12 +35,14 @@ class UpdateAll extends MyRequest
 
     public function messages()
     {
-        return trans('cms::statistics.validation.update_all.messages');
+        $file = 'cms.statistics.validation.update_all.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::statistics.validation.update_all.attributes');
+        $file = 'cms.statistics.validation.update_all.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function rules(): array
@@ -75,7 +77,7 @@ class UpdateAll extends MyRequest
                     if (! $hasAtLeastOneName) {
                         $validator->errors()->add(
                             "{$index}.locales.*.title",
-                            __('cms::statistics.validation.update_all.at_least_one_title')
+                            trans('statistics.validation.update_all.at_least_one_title')
                         );
                     }
                 }

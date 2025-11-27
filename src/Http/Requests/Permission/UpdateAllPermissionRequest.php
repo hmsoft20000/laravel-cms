@@ -44,11 +44,13 @@ class UpdateAllPermissionRequest extends MyRequest
 
     public function messages()
     {
-        return trans('cms::permissions.validation.update_all.messages');
+        $file = 'cms.permissions.validation.update_all.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::permissions.validation.update_all.attributes');
+        $file = 'cms.permissions.validation.update_all.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 }

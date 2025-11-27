@@ -18,12 +18,14 @@ class Store extends MyRequest
 
     public function messages()
     {
-        return trans('cms::langs.validation.store.messages');
+        $file = 'cms.langs.validation.store.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     public function attributes()
     {
-        return trans('cms::langs.validation.store.attributes');
+        $file = 'cms.langs.validation.store.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
 
     /**

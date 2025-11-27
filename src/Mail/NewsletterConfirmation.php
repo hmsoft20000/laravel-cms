@@ -20,7 +20,7 @@ class NewsletterConfirmation extends Mailable
 
     public function build()
     {
-        return $this->subject(__('cms::emails.newsletter_confirmation.subject'))
+        return $this->subject(__('cms.emails.newsletter_confirmation.subject'))
             ->view('emails.newsletter-confirmation');
     }
 }

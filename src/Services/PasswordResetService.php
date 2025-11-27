@@ -40,12 +40,12 @@ class PasswordResetService
 
         // Check rate limit for email
         if (Cache::get($emailKey, 0) >= $this->maxOtpRequests) {
-            throw new Exception(__('cms::auth.too_many_otp_requests_email'));
+            throw new Exception(__('cms.auth.too_many_otp_requests_email'));
         }
 
         // Check rate limit for IP
         if (Cache::get($ipKey, 0) >= $this->maxOtpRequests) {
-            throw new Exception(__('cms::auth.too_many_otp_requests_ip'));
+            throw new Exception(__('cms.auth.too_many_otp_requests_ip'));
         }
 
         // Generate Otp
@@ -86,26 +86,26 @@ class PasswordResetService
         $record = DB::table('password_reset_tokens')->where('email', $email)->first();
 
         if (! $record) {
-            throw new Exception(__('cms::auth.otp_invalid_or_expired'));
+            throw new Exception(__('cms.auth.otp_invalid_or_expired'));
         }
 
         // Check expiry
         $createdAt = Carbon::parse($record->created_at);
         if ($createdAt->addMinutes($this->otpExpiryMinutes)->isPast()) {
             $this->deleteToken($email);
-            throw new Exception(__('cms::auth.otp_invalid_or_expired'));
+            throw new Exception(__('cms.auth.otp_invalid_or_expired'));
         }
 
         // Check wrong attempts
         if ($this->getWrongAttempts($email) >= $this->maxWrongOtpAttempts) {
             $this->deleteToken($email);
-            throw new Exception(__('cms::auth.too_many_wrong_otp_attempts'));
+            throw new Exception(__('cms.auth.too_many_wrong_otp_attempts'));
         }
 
         // Check Otp hash
         if (! Hash::check($otp, $record->token)) {
             $this->incrementWrongAttempts($email);
-            throw new Exception(__('cms::auth.otp_invalid_or_expired'));
+            throw new Exception(__('cms.auth.otp_invalid_or_expired'));
         }
 
         return true;
@@ -124,7 +124,7 @@ class PasswordResetService
         $user = DB::table('tbUsers')->where('Email', $email)->first();
 
         if (! $user) {
-            throw new Exception(__('cms::auth.password_reset_failed'));
+            throw new Exception(__('cms.auth.password_reset_failed'));
         }
 
         DB::table('tbUsers')->where('Email', $email)->update([

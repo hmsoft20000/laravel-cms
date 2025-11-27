@@ -3,31 +3,25 @@
 use HMsoft\Cms\Http\Controllers\Api\NestedBlogController;
 use HMsoft\Cms\Routing\RouteRegistrar;
 
-/*
-|--------------------------------------------------------------------------
-| Nested Blog CRUD Routes
-|--------------------------------------------------------------------------
-|
-| The {blog} parameter will be automatically resolved to the Blog model
-| thanks to the type-hinting in the NestedBlogController methods.
-|
-*/
-
 return [
-    /**
-     * Controller for this module's routes.
-     */
     'controller' => NestedBlogController::class,
+    'routes' => function (RouteRegistrar $route) {
+        // List associated blogs
+        $route->get('/', 'index')->name('index');
 
-    /**
-     * Routes for this module.
-     */
-    'routes' => function (RouteRegistrar $registrar) {
-        $registrar->get('/', 'index')->name('index');
-        $registrar->post('/', 'store')->name('store');
-        $registrar->put('/update-all', 'updateAll')->name('updateAll');
-        $registrar->get('/{blog}', 'show')->name('show');
-        $registrar->put('/{blog}', 'update')->name('update');
-        $registrar->delete('/{blog}', 'destroy')->name('destroy');
-    }
+        // Create new blog AND attach it
+        $route->post('/', 'store')->name('store');
+
+        // Show specific associated blog
+        $route->get('/{blog}', 'show')->name('show');
+
+        // Update blog (globally)
+        $route->post('/{blog}', 'update')->name('update'); // Using POST for update as per your pattern
+
+        // Detach blog (Remove from list)
+        $route->delete('/{blog}', 'destroy')->name('destroy');
+
+        // Bulk Update (Optional)
+        $route->post('/update-all', 'updateAll')->name('updateAll');
+    },
 ];

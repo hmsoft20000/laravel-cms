@@ -39,11 +39,13 @@ class UpdateBlogRequest extends MyRequest
 
     public function messages()
     {
-        return trans("cms::blogs.validation.update.messages");
+        $file = 'cms.blogs.validation.update.messages';
+        return is_array(trans($file)) ? trans($file) : [];
     }
     public function attributes()
     {
-        return trans("cms::blogs.validation.update.attributes");
+        $file = 'cms.blogs.validation.update.attributes';
+        return is_array(trans($file)) ? trans($file) : [];
     }
     public function rules(): array
     {

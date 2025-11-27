@@ -59,7 +59,7 @@ class NestedServiceController extends Controller
         $service = $this->repo->store($validated);
 
         return successResponse(
-            message: translate('cms::messages.added_successfully'),
+            message: translate('cms.messages.added_successfully'),
             data: resolve(ServiceResource::class, ['resource' => $service])->withFields(request()->get('fields')),
         );
     }
@@ -90,7 +90,7 @@ class NestedServiceController extends Controller
         $updatedService = $this->repo->update($service, $request->validated());
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: resolve(ServiceResource::class, ['resource' => $updatedService])->withFields(request()->get('fields'))
         );
     }
@@ -109,7 +109,7 @@ class NestedServiceController extends Controller
         }
 
         return successResponse(
-            message: translate('cms::messages.updated_successfully'),
+            message: translate('cms.messages.updated_successfully'),
             data: collect($updatedServices)->map(function ($item) {
                 return resolve(ServiceResource::class, ['resource' => $item])->withFields(request()->get('fields'));
             })->all(),
@@ -128,7 +128,7 @@ class NestedServiceController extends Controller
         $this->repo->delete($service);
 
         return successResponse(
-            message: translate('cms::messages.deleted_successfully'),
+            message: translate('cms.messages.deleted_successfully'),
         );
     }
 }
