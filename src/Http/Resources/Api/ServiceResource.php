@@ -86,7 +86,7 @@ class ServiceResource extends BaseJsonResource
             }),
             'downloads' => $this->whenLoaded('downloads', function () use ($request) {
                 return collect($this->downloads)->map(function ($item) use ($request) {
-                    return  resolve(DownloadResource::class, ['resource' => $item])->toArray($request);
+                    return resolve(DownloadItemResource::class, ['resource' => $item])->toArray($request);
                 });
             }),
             'plans' => $this->whenLoaded('plans', function () use ($request) {

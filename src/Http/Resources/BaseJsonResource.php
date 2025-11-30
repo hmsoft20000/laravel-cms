@@ -88,7 +88,10 @@ class BaseJsonResource extends JsonResource
         }
 
         $ignoredKeys = ['id', 'locale', 'created_at', 'updated_at', 'deleted_at', 'created_by', 'updated_by', 'deleted_by'];
-
+        
+        // Fields that we can't find from the first translation (dangerous fields)
+        $ignoredFieldsToFindFromFirstTranslation = ['slug'];
+        
         foreach ($allTranslatableFields as $field) {
             if (in_array($field, $ignoredKeys) || str_ends_with($field, '_id')) {
                 continue;
@@ -98,7 +101,7 @@ class BaseJsonResource extends JsonResource
             if (!array_key_exists($field, $data) || empty($data[$field])) {
                 if (isset($data['translations'][$currentLocale]) && array_key_exists($field, $data['translations'][$currentLocale]) && !empty($data['translations'][$currentLocale][$field])) {
                     $data[$field] = $data['translations'][$currentLocale][$field];
-                } else {
+                } elseif (!in_array($field, $ignoredFieldsToFindFromFirstTranslation)) {
                     foreach ($data['translations'] as $locale => $trans) {
                         if ($locale !== $currentLocale && array_key_exists($field, $trans) && !empty($trans[$field])) {
                             $data[$field] = $trans[$field];

@@ -111,8 +111,11 @@ class ServiceRepository implements ServiceRepositoryInterface
             'plans.features.translations',
             'features.owner',
             'features.translations',
-            'downloads.owner',
             'downloads.translations',
+            'downloads.categories',
+            'downloads.media',
+            'downloads.links',
+
             'partners.translations',
             'sponsors.translations',
             'attributeValues.attribute.translations',

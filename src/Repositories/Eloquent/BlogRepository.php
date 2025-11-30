@@ -33,9 +33,7 @@ class BlogRepository implements BlogRepositoryInterface
         HandlesPlanSyncing,
         HandlesFaqSyncing;
 
-    public function __construct(private readonly Blog $model)
-    {
-    }
+    public function __construct(private readonly Blog $model) {}
 
     public function store(array $data): Model
     {
@@ -61,7 +59,7 @@ class BlogRepository implements BlogRepositoryInterface
             $this->syncFaqs($blog, $data['faqs'] ?? null);
             $this->syncDownloads($blog, $data['downloads'] ?? null);
             $this->syncKeywords($blog, $data['keywords'] ?? null);
-            $this->syncAttributeValues($blog,$data['attribute_values'] ?? null);
+            $this->syncAttributeValues($blog, $data['attribute_values'] ?? null);
             $this->syncOrganizations($blog, $data);
 
             return $this->show($blog);
@@ -111,8 +109,13 @@ class BlogRepository implements BlogRepositoryInterface
             'plans.features.translations',
             'features.owner',
             'features.translations',
-            'downloads.owner',
+
             'downloads.translations',
+            'downloads.categories',
+            'downloads.media',
+            'downloads.links',
+
+
             'partners.translations',
             'sponsors.translations',
             'attributeValues.attribute.translations',
