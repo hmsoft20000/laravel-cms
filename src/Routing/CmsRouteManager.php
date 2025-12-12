@@ -121,6 +121,42 @@ class CmsRouteManager
     }
 
     /**
+     * Registers nested organization routes based on dynamic types.
+     * تسجيل مسارات المنظمات المتداخلة (مثل: sponsors, partners, agents).
+     *
+     * @param string $parentResource اسم المورد الأب (مثال: 'items', 'blogs')
+     * @param string $type نوع المنظمة/الدور (مثال: 'sponsor', 'partner', 'agent')
+     */
+    public function nestedOrganizations(string $parentResource, string $type, ?Closure $callback = null): void
+    {
+        $pluralType = \Illuminate\Support\Str::plural($type); // e.g. 'sponsor' -> 'sponsors'
+        $defaults = [
+            'file' => 'nested_organization.php', // اسم الملف الذي أنشأناه في الخطوة 2
+            // شكل المسار النهائي: api/items/{item}/sponsors
+            'prefix' => "{$parentResource}/{_OWNER_BINDING_}/{$pluralType}",
+            'as' => "api.{$parentResource}.{$pluralType}.",
+            'middleware' => ['api'],
+            'options' => [
+                'type' => $type, // هذا المتغير سيصل للكونترولر لتحديد الـ role
+                'parent_resource' => $parentResource
+            ]
+        ];
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    // دوال مساعدة للاستخدام السريع (Shortcuts)
+
+    public function nestedSponsors(string $parentResource, ?Closure $callback = null): void
+    {
+        $this->nestedOrganizations($parentResource, 'sponsor', $callback);
+    }
+
+    public function nestedPartners(string $parentResource, ?Closure $callback = null): void
+    {
+        $this->nestedOrganizations($parentResource, 'partner', $callback);
+    }
+
+    /**
      * Registers the core statistics resource routes.
      * يقوم بتسجيل مسارات المورد الأساسية للإحصائيات.
      * @param \Closure|null $callback

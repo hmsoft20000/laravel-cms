@@ -85,27 +85,29 @@ trait IsAutoFilterable
         if (!$this->autoIncludeAllColumns) {
             return [];
         }
+        
+        // التحقق من الكاش الثابت (داخل نفس الـ Request)
         if (isset(self::$tableColumnsCache[$table])) {
             return self::$tableColumnsCache[$table];
         }
 
+        // [تحسين] استخدام Cache Laravel لتخزين الهيكلية لمدة يوم كامل
+        // المفتاح يعتمد على اسم الجدول
+        $cacheKey = "schema_columns_{$table}";
+
+        $finalColumns = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addDay(), function () use ($table) {
         $excludedColumns = [
-            'password',
-            'remember_token',
-            'api_token',
-            'access_token',
-            'secret_key',
-            'credit_card',
-            'ssn',
-            'encrypted',
-            'salt'
+                'password', 'remember_token', 'api_token', 'access_token', 
+                'secret_key', 'credit_card', 'ssn', 'encrypted', 'salt'
         ];
 
         $columns = Schema::getColumnListing($table);
         $filteredColumns = array_diff($columns, $excludedColumns);
 
         $extraColumns = $this->getAdditionalColumns($table);
-        $finalColumns = array_unique(array_merge($filteredColumns, $extraColumns));
+            return array_unique(array_merge($filteredColumns, $extraColumns));
+        });
+
         self::$tableColumnsCache[$table] = $finalColumns;
 
         return $finalColumns;

@@ -36,6 +36,10 @@ class ColumnFilterData extends Data
         $columnName = $columnFilterData->id;
         $value = $columnFilterData->value;
 
+        // [NEW] Helper function to escape special characters for LIKE queries
+        // This ensures that %, _, and \ are treated as literals, not wildcards.
+        // It allows searching for "50%" without breaking the query.
+        $escapeLike = fn($val) => addcslashes((string)$val, '%_\\');
 
         $whereMethod = $conditionType === 'OR' ? 'orWhere' : 'where';
 
@@ -58,7 +62,9 @@ class ColumnFilterData extends Data
                 $queryBuilder->{$whereMethod}($columnName, '=', $value);
                 break;
             case FilterFnsEnum::notEquals:
-                $queryBuilder->{$whereMethod}($columnName, 'NOT LIKE', $value);
+                // We use NOT LIKE here but usually for exact mismatch.
+                // Escaping ensures we don't accidentally wildcard match.
+                $queryBuilder->{$whereMethod}($columnName, 'NOT LIKE', $escapeLike($value));
                 break;
             case FilterFnsEnum::greaterThan:
                 $queryBuilder->{$whereMethod}($columnName, '>', $value);
@@ -104,26 +110,30 @@ class ColumnFilterData extends Data
                     });
                 }
                 break;
+
+            // --- Escaping Applied Here ---
             case FilterFnsEnum::contains:
             case FilterFnsEnum::fuzzy:
             case FilterFnsEnum::includesString:
-                $queryBuilder->{$whereMethod}($columnName, 'LIKE', "%$value%");
+                $queryBuilder->{$whereMethod}($columnName, 'LIKE', "%" . $escapeLike($value) . "%");
                 break;
             case FilterFnsEnum::notContains:
-                $queryBuilder->{$whereMethod}($columnName, 'NOT LIKE', "%$value%");
+                $queryBuilder->{$whereMethod}($columnName, 'NOT LIKE', "%" . $escapeLike($value) . "%");
                 break;
             case FilterFnsEnum::startsWith:
-                $queryBuilder->{$whereMethod}($columnName, 'LIKE', "$value%");
+                $queryBuilder->{$whereMethod}($columnName, 'LIKE', $escapeLike($value) . "%");
                 break;
             case FilterFnsEnum::notStartsWith:
-                $queryBuilder->{$whereMethod}($columnName, 'NOT LIKE', "$value%");
+                $queryBuilder->{$whereMethod}($columnName, 'NOT LIKE', $escapeLike($value) . "%");
                 break;
             case FilterFnsEnum::endsWith:
-                $queryBuilder->{$whereMethod}($columnName, 'LIKE', "%$value");
+                $queryBuilder->{$whereMethod}($columnName, 'LIKE', "%" . $escapeLike($value));
                 break;
             case FilterFnsEnum::notEndsWith:
-                $queryBuilder->{$whereMethod}($columnName, 'NOT LIKE', "%$value");
+                $queryBuilder->{$whereMethod}($columnName, 'NOT LIKE', "%" . $escapeLike($value));
                 break;
+            // -----------------------------
+
             case FilterFnsEnum::empty:
                 $queryBuilder->{$whereMethod}($columnName, '=', '');
                 break;
@@ -131,7 +141,9 @@ class ColumnFilterData extends Data
                 $queryBuilder->{$whereMethod}($columnName, '<>', '');
                 break;
             case FilterFnsEnum::includesStringSensitive:
-                $queryBuilder->{$whereMethod . 'Raw'}("UPPER($columnName) LIKE '%" . strtoupper($value) . "%'");
+                // Escape first, then uppercase, to be safe.
+                $escapedValue = strtoupper($escapeLike($value));
+                $queryBuilder->{$whereMethod . 'Raw'}("UPPER($columnName) LIKE '%" . $escapedValue . "%'");
                 break;
         }
         return $queryBuilder;

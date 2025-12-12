@@ -33,9 +33,7 @@ class PortfolioRepository implements PortfolioRepositoryInterface
         HandlesPlanSyncing,
         HandlesFaqSyncing;
 
-    public function __construct(private readonly Portfolio $model)
-    {
-    }
+    public function __construct(private readonly Portfolio $model) {}
 
     public function store(array $data): Model
     {
@@ -111,8 +109,13 @@ class PortfolioRepository implements PortfolioRepositoryInterface
             'plans.features.translations',
             'features.owner',
             'features.translations',
-            'downloads.owner',
+
             'downloads.translations',
+            'downloads.categories',
+            'downloads.media',
+            'downloads.links',
+
+
             'partners.translations',
             'sponsors.translations',
             'attributeValues.attribute.translations',

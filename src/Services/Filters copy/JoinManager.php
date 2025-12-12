@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
@@ -58,17 +56,12 @@ class JoinManager
 
             if (isset($this->aliases[$currentPath])) {
                 $parentAlias = $this->aliases[$currentPath];
-                // Resolve the related model for the next iteration
                 $eloquentMethod = Str::camel($relationName);
-                if (method_exists($currentModel, $eloquentMethod)) {
-                    $currentModel = $currentModel->$eloquentMethod()->getRelated();
-                }
+                $currentModel = $currentModel->$eloquentMethod()->getRelated();
                 continue;
             }
 
             $alias = 't_' . Str::snake(str_replace('.', '_', $currentPath));
-            // Ensure alias is unique enough or manageable. 
-            // Ideally, handle excessively long aliases if DB has limits, but this suffices for most cases.
 
             $eloquentMethod = Str::camel($relationName);
             if (!method_exists($currentModel, $eloquentMethod)) {
@@ -94,49 +87,23 @@ class JoinManager
      */
     private function performJoin(Relation $relation, string $relatedTable, string $alias, string $parentAlias): void
     {
-        // 1. Handle MorphOne / MorphMany (Polymorphic Support)
-        if ($relation instanceof MorphOne || $relation instanceof MorphMany) {
-            $this->query->leftJoin(
-                "{$relatedTable} as {$alias}",
-                function ($join) use ($relation, $parentAlias, $alias) {
-                    $join->on(
-                        "{$parentAlias}." . $relation->getLocalKeyName(),
-                        '=',
-                        "{$alias}." . $relation->getForeignKeyName()
-                    );
-                    // Critical: Add the Morph Type clause
-                    $join->where(
-                        "{$alias}." . $relation->getMorphType(),
-                        '=',
-                        $relation->getMorphClass()
-                    );
-                }
-            );
-        } 
-        // 2. Handle HasOne / HasMany
-        elseif ($relation instanceof HasOne || $relation instanceof HasMany) {
+        if ($relation instanceof HasOne || $relation instanceof HasMany) {
             $this->query->leftJoin(
                 "{$relatedTable} as {$alias}",
                 "{$parentAlias}." . $relation->getLocalKeyName(),
                 '=',
                 "{$alias}." . $relation->getForeignKeyName()
             );
-        } 
-        // 3. Handle BelongsTo
-        elseif ($relation instanceof BelongsTo) {
+        } elseif ($relation instanceof BelongsTo) {
             $this->query->leftJoin(
-                "{$relatedTable} as {$alias}",
                 "{$parentAlias}." . $relation->getForeignKeyName(),
                 '=',
                 "{$alias}." . $relation->getOwnerKeyName()
             );
-        } 
-        // 4. Handle BelongsToMany (Pivot Table)
-        elseif ($relation instanceof BelongsToMany) {
+        } elseif ($relation instanceof BelongsToMany) {
             $pivotTable = $relation->getTable();
-            $pivotAlias = 'pivot_' . $alias; // Simplier pivot alias
+            $pivotAlias = 'pivot_' . Str::snake(str_replace('.', '_', $alias));
 
-            // Join Pivot
             $this->query->leftJoin(
                 "{$pivotTable} as {$pivotAlias}",
                 function ($join) use ($relation, $parentAlias, $pivotAlias) {
@@ -152,16 +119,13 @@ class JoinManager
                 }
             );
 
-            // Join Related Table
             $this->query->leftJoin(
                 "{$relatedTable} as {$alias}",
                 "{$pivotAlias}." . $relation->getRelatedPivotKeyName(),
                 '=',
                 "{$alias}." . $relation->getRelatedKeyName()
             );
-        } 
-        else {
-            // Optional: Support HasManyThrough if needed, though usually complex to auto-join manually.
+        } else {
             throw new \Exception("Unsupported relationship type for JoinManager: " . get_class($relation));
         }
     }
