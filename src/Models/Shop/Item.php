@@ -178,6 +178,8 @@ class Item extends GeneralModel
             'title' => 'translations.title',
             'content' => 'translations.content',
             'short_content' => 'translations.short_content',
+            'category_id' => 'categories.id',
+            'sector_id' => 'categories.sector.id'
         ]);
     }
 
@@ -188,9 +190,11 @@ class Item extends GeneralModel
         $relatedAttributes = [
             'translations.title',
             'categories.id',
+            'category_id',
             'type',
             'price',
             'is_active',
+            'sector_id',
         ];
 
         $customAttributeIds = CustomAttribute::ofScope($this->getMorphClass())->where('is_filterable', true)

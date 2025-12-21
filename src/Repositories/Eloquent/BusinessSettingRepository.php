@@ -26,7 +26,6 @@ class BusinessSettingRepository implements BusinessSettingRepositoryInterface
         'default_blog_image',
         'default_rewad_image',
         'default_partner_image',
-        'default_portfolio_image',
         'default_organization_image',
         'default_team_image',
         'default_slider_image',

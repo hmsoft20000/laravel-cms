@@ -3,6 +3,7 @@
 namespace HMsoft\Cms\Http\Resources\Api;
 
 use HMsoft\Cms\Http\Resources\BaseJsonResource;
+use HMsoft\Cms\Http\Resources\Api\SectorResource;
 use Illuminate\Http\Request;
 
 class ServiceResource extends BaseJsonResource
@@ -93,6 +94,14 @@ class ServiceResource extends BaseJsonResource
                 return collect($this->plans)->map(function ($item) use ($request) {
                     return  resolve(PlanResource::class, ['resource' => $item])->toArray($request);
                 });
+            }),
+            'faqs' => $this->whenLoaded('faqs', function () use ($request) {
+                return collect($this->faqs)->map(function ($item) use ($request) {
+                    return resolve(FaqResource::class, ['resource' => $item])->toArray($request);
+                });
+            }),
+            'sector' => $this->whenLoaded('sector', function () use ($request) {
+                return resolve(SectorResource::class, ['resource' => $this->sector])->toArray($request);
             }),
             'attribute_values' => $this->whenLoaded('attributeValues', function () {
                 return $this->formatAndGroupAttributeValues($this->resource);

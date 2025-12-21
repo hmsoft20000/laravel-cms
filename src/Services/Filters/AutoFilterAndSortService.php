@@ -57,7 +57,7 @@ class AutoFilterAndSortService
         $beforeOperation = null,
         array $filterKeyMap = [],
         array $sortKeyMap = [],
-        $fields = null,
+        $columns = null, // [CHANGED] Renamed from fields to columns
         $count_only = null
     ): DynamicFilterData {
         if ($dynamicFilterData) {
@@ -68,7 +68,6 @@ class AutoFilterAndSortService
 
         $finalPage = $page ?? $request->input('page');
         $finalPerPage = $perPage ?? $request->input('perPage', $request->input('per_page', $request->input('limit')));
-
         $finalCountOnly = $count_only !== null ? (bool) $count_only : (bool) $request->input('count_only', false);
 
         $finalPaginationFormate = is_null($paginationFormate)
@@ -85,7 +84,9 @@ class AutoFilterAndSortService
         $finalSorting = $sorting ?? self::getSortingValuesFromRequest($request);
         $finalAdvanceFilter = $advanceFilter ?? self::getAdvanceFilterFromRequest($request);
         $finalGlobalFilter = $globalFilter ?? $request->input('globalFilter');
-        $finalFields = $fields ?? $request->input('fields');
+
+        // [CHANGED] Read columns from request instead of fields
+        $finalColumns = $columns ?? $request->input('columns');
 
         if (!empty($filterKeyMap)) {
             $finalFilters = $finalFilters->map(function ($filter) use ($filterKeyMap) {
@@ -116,11 +117,165 @@ class AutoFilterAndSortService
             globaleFilterExtraOperation: $globaleFilterExtraOperation,
             extraOperation: $extraOperation,
             beforeOperation: $beforeOperation,
-            fields: $finalFields,
+            columns: $finalColumns, // [CHANGED] Pass columns
             count_only: $finalCountOnly
         );
     }
 
+    // public function buildQuery(?DynamicFilterData $dynamicFilterData = null, bool $applySorting = true): Builder
+    // {
+    //     if (!($this->model instanceof AutoFilterable)) {
+    //         throw new \Exception('Model ' . get_class($this->model) . ' must implement the AutoFilterable interface.');
+    //     }
+
+    //     if (!$dynamicFilterData) {
+    //         $dynamicFilterData = $this->initializeDynamicFilterData();
+    //     }
+
+    //     $query = $this->model->query();
+    //     $tableName = $this->model->getTable();
+    //     $mainTableAlias = $tableName;
+    //     $query->from($tableName, $mainTableAlias);
+
+    //     $this->joinManager = new JoinManager($query, $mainTableAlias);
+
+    //     // 1. Build dynamic SELECT clause.
+    //     if (!$dynamicFilterData->count_only) {
+    //         $this->buildSelectClause($query, $dynamicFilterData->columns);
+    //     }
+
+    //     $extraOperation = $dynamicFilterData->extraOperation;
+    //     $globaleFilterExtraOperation = $dynamicFilterData->globaleFilterExtraOperation;
+    //     $beforeOperation = $dynamicFilterData->beforeOperation;
+
+    //     $allowedFilters = $this->model->defineFilterableAttributes();
+    //     $allowedSorts = $this->model->defineSortableAttributes();
+
+    //     $dynamicFilterData->filters = collect($dynamicFilterData->filters)
+    //         ->filter(fn(ColumnFilterData $filter) => in_array($filter->id, $allowedFilters))
+    //         ->values();
+
+    //     $dynamicFilterData->sorting = collect($dynamicFilterData->sorting)
+    //         ->filter(fn(ColumnSortData $sort) => in_array($sort->id, $allowedSorts))
+    //         ->values();
+
+    //     // [REMOVED] Priority Sorting Logic (definePrioritizedAttributes) was here.
+    //     // Filters are now processed in the order they were received.
+
+    //     $pFilterKeys = collect($dynamicFilterData->filters)->groupBy('id');
+    //     $sortingKeys = collect($dynamicFilterData->sorting)->groupBy('id');
+
+    //     if (isset($beforeOperation)) {
+    //         $beforeOperation(
+    //             $query,
+    //             ['filterKeys' => $pFilterKeys, 'sortingKeys' => $sortingKeys, 'mainTableAlias' => $mainTableAlias]
+    //         );
+    //     }
+
+    //     // if (!empty($dynamicFilterData->advanceFilter)) {
+    //     //     $attributeIds = self::extractAttributeIdsFromGroup($dynamicFilterData->advanceFilter);
+    //     //     $attributes = !empty($attributeIds)
+    //     //         ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
+    //     //         : collect();
+
+    //     //     $query->where(function (Builder $builder) use ($dynamicFilterData, $allowedFilters, $attributes) {
+    //     //         self::applyAdvancedFilterGroup($builder, $dynamicFilterData->advanceFilter, $allowedFilters, $attributes);
+    //     //     });
+    //     // } else {
+    //     //     $customAttributeFilters = collect($dynamicFilterData->filters)->filter(
+    //     //         fn($filter) => CustomAttributeFilter::isCustomAttribute($filter)
+    //     //     );
+
+    //     //     $attributeIds = $customAttributeFilters->map(
+    //     //         fn($filter) => (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id)
+    //     //     )->unique()->toArray();
+
+    //     //     $attributes = !empty($attributeIds)
+    //     //         ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
+    //     //         : collect();
+
+
+    //     //     foreach ($dynamicFilterData->filters as $filter) {
+    //     //         if (CustomAttributeFilter::isCustomAttribute($filter)) {
+    //     //             $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id);
+    //     //             $attribute = $attributes->get($attributeId);
+    //     //             if ($attribute) {
+    //     //                 CustomAttributeFilter::apply($query, $attribute, $filter, $this->model);
+    //     //             }
+    //     //         } else {
+    //     //             if (isset($pFilterKeys[$filter->id])) {
+    //     //                 self::handelFilterOne($query, collect($pFilterKeys[$filter->id])->toArray(), $filter->id);
+    //     //             }
+    //     //         }
+    //     //     }
+    //     // }
+
+    //     if (!empty($dynamicFilterData->advanceFilter)) {
+    //         $attributeIds = self::extractAttributeIdsFromGroup($dynamicFilterData->advanceFilter);
+    //         $attributes = !empty($attributeIds)
+    //             ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
+    //             : collect();
+
+    //         // نستخدم where هنا لضمان دمجها مع الشروط الأخرى بـ AND
+    //         $query->where(function (Builder $builder) use ($dynamicFilterData, $allowedFilters, $attributes) {
+    //             self::applyAdvancedFilterGroup($builder, $dynamicFilterData->advanceFilter, $allowedFilters, $attributes);
+    //         });
+    //     }
+
+    //     if ($dynamicFilterData->filters->isNotEmpty()) {
+    //         $customAttributeFilters = collect($dynamicFilterData->filters)->filter(
+    //             fn($filter) => CustomAttributeFilter::isCustomAttribute($filter)
+    //         );
+
+    //         $attributeIds = $customAttributeFilters->map(
+    //             fn($filter) => (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id)
+    //         )->unique()->toArray();
+
+    //         $attributes = !empty($attributeIds)
+    //             ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
+    //             : collect();
+
+    //         // تطبيق الفلاتر العادية حلقة تلو الأخرى
+    //         // بما أنها تطبق مباشرة على الـ query، فهي تعمل كـ AND بشكل افتراضي مع ما سبق
+    //         foreach ($dynamicFilterData->filters as $filter) {
+    //             if (CustomAttributeFilter::isCustomAttribute($filter)) {
+    //                 $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id);
+    //                 $attribute = $attributes->get($attributeId);
+    //                 if ($attribute) {
+    //                     CustomAttributeFilter::apply($query, $attribute, $filter, $this->model);
+    //                 }
+    //             } else {
+    //                 if (isset($pFilterKeys[$filter->id])) {
+    //                     // تمرير المصفوفة كاملة للدالة لضمان التوافق
+    //                     self::handelFilterOne($query, collect($pFilterKeys[$filter->id])->toArray(), $filter->id);
+    //                 }
+    //             }
+    //         }
+    //     }
+
+
+    //     if (isset($dynamicFilterData->globalFilter) && !empty($dynamicFilterData->globalFilter)) {
+    //         $this->applyGlobalFilter($query, $dynamicFilterData->globalFilter);
+    //     }
+
+    //     if (isset($extraOperation)) {
+    //         $extraOperation(
+    //             $query,
+    //             [
+    //                 'filterKeys' => $pFilterKeys,
+    //                 'sortingKeys' => $sortingKeys,
+    //                 'globalFilter' => $dynamicFilterData->globalFilter,
+    //                 'mainTableAlias'    => $mainTableAlias
+    //             ]
+    //         );
+    //     }
+
+    //     if ($applySorting && !$dynamicFilterData->count_only) {
+    //         self::handelSorting($query, $sortingKeys, $this->joinManager);
+    //     }
+
+    //     return $query;
+    // }
     public function buildQuery(?DynamicFilterData $dynamicFilterData = null, bool $applySorting = true): Builder
     {
         if (!($this->model instanceof AutoFilterable)) {
@@ -136,19 +291,17 @@ class AutoFilterAndSortService
         $mainTableAlias = $tableName;
         $query->from($tableName, $mainTableAlias);
 
-        // JoinManager is initialized here
         $this->joinManager = new JoinManager($query, $mainTableAlias);
 
         // 1. Build dynamic SELECT clause.
         if (!$dynamicFilterData->count_only) {
-            $this->buildSelectClause($query, $dynamicFilterData->fields);
+            $this->buildSelectClause($query, $dynamicFilterData->columns);
         }
 
         $extraOperation = $dynamicFilterData->extraOperation;
         $globaleFilterExtraOperation = $dynamicFilterData->globaleFilterExtraOperation;
         $beforeOperation = $dynamicFilterData->beforeOperation;
 
-        // 2. Whitelisting Logic
         $allowedFilters = $this->model->defineFilterableAttributes();
         $allowedSorts = $this->model->defineSortableAttributes();
 
@@ -160,19 +313,9 @@ class AutoFilterAndSortService
             ->filter(fn(ColumnSortData $sort) => in_array($sort->id, $allowedSorts))
             ->values();
 
-        // [New Priority Sorting Logic - Optional if you skipped it, but safe to keep]
-        $prioritized = method_exists($this->model, 'definePrioritizedAttributes')
-            ? $this->model->definePrioritizedAttributes()
-            : ['id', 'status', 'is_active'];
-
-        $dynamicFilterData->filters = collect($dynamicFilterData->filters)
-            ->sortByDesc(fn($filter) => (in_array($filter->id, $prioritized) || str_ends_with($filter->id, '_id')) ? 1 : 0)
-            ->values();
-
         $pFilterKeys = collect($dynamicFilterData->filters)->groupBy('id');
         $sortingKeys = collect($dynamicFilterData->sorting)->groupBy('id');
 
-        // 3. Apply "before" hook
         if (isset($beforeOperation)) {
             $beforeOperation(
                 $query,
@@ -180,17 +323,25 @@ class AutoFilterAndSortService
             );
         }
 
-        // 4. Apply Filters (Using the optimized whereHas logic)
+        // ---------------------------------------------------------
+        // التعديل يبدأ هنا: تطبيق Advanced Filters أولاً
+        // ---------------------------------------------------------
         if (!empty($dynamicFilterData->advanceFilter)) {
             $attributeIds = self::extractAttributeIdsFromGroup($dynamicFilterData->advanceFilter);
             $attributes = !empty($attributeIds)
                 ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
                 : collect();
 
+            // نستخدم where هنا لضمان دمجها مع الشروط الأخرى بـ AND
             $query->where(function (Builder $builder) use ($dynamicFilterData, $allowedFilters, $attributes) {
                 self::applyAdvancedFilterGroup($builder, $dynamicFilterData->advanceFilter, $allowedFilters, $attributes);
             });
-        } else {
+        }
+
+        // ---------------------------------------------------------
+        // تطبيق الفلاتر العادية (Standard Filters) دائماً (تم إزالة else)
+        // ---------------------------------------------------------
+        if ($dynamicFilterData->filters->isNotEmpty()) {
             $customAttributeFilters = collect($dynamicFilterData->filters)->filter(
                 fn($filter) => CustomAttributeFilter::isCustomAttribute($filter)
             );
@@ -203,6 +354,8 @@ class AutoFilterAndSortService
                 ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
                 : collect();
 
+            // تطبيق الفلاتر العادية حلقة تلو الأخرى
+            // بما أنها تطبق مباشرة على الـ query، فهي تعمل كـ AND بشكل افتراضي مع ما سبق
             foreach ($dynamicFilterData->filters as $filter) {
                 if (CustomAttributeFilter::isCustomAttribute($filter)) {
                     $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id);
@@ -212,18 +365,20 @@ class AutoFilterAndSortService
                     }
                 } else {
                     if (isset($pFilterKeys[$filter->id])) {
+                        // تمرير المصفوفة كاملة للدالة لضمان التوافق
                         self::handelFilterOne($query, collect($pFilterKeys[$filter->id])->toArray(), $filter->id);
                     }
                 }
             }
         }
+        // ---------------------------------------------------------
+        // نهاية التعديل
+        // ---------------------------------------------------------
 
-        // 5. Apply Global Filter
         if (isset($dynamicFilterData->globalFilter) && !empty($dynamicFilterData->globalFilter)) {
             $this->applyGlobalFilter($query, $dynamicFilterData->globalFilter);
         }
 
-        // 6. Apply "extra" hook
         if (isset($extraOperation)) {
             $extraOperation(
                 $query,
@@ -236,8 +391,6 @@ class AutoFilterAndSortService
             );
         }
 
-        // 7. Apply Sorting (CONDITIONAL NOW)
-        // We only apply sorting if explicitly requested AND not in count_only mode
         if ($applySorting && !$dynamicFilterData->count_only) {
             self::handelSorting($query, $sortingKeys, $this->joinManager);
         }
@@ -245,48 +398,113 @@ class AutoFilterAndSortService
         return $query;
     }
 
+
     /**
      * Applies the global filter using separate MATCH clauses for each column.
      * Allows using separate Full-Text indexes instead of a single composite index.
+     */
+    // private function applyGlobalFilter(Builder $query, string $globalFilterValue): void
+    // {
+    //     $mainTableAlias = $this->joinManager->getMainTableAlias();
+
+    //     // تهيئة النص للبحث (Boolean Mode)
+    //     // إضافة '*' للبحث الجزئي
+    //     $formattedValue = trim($globalFilterValue) . '*';
+
+    //     $query->where(function (Builder $builder) use ($formattedValue, $mainTableAlias) {
+
+    //         // 1. البحث في الجدول الأساسي (Base Attributes)
+    //         $baseAttributes = $this->model->defineGlobalSearchBaseAttributes();
+
+    //         foreach ($baseAttributes as $col) {
+    //             // نستخدم MATCH لكل عمود بشكل منفصل
+    //             $builder->orWhereRaw(
+    //                 "MATCH({$mainTableAlias}.{$col}) AGAINST(? IN BOOLEAN MODE)",
+    //                 [$formattedValue]
+    //             );
+    //         }
+
+    //         // 2. البحث في العلاقات (Related Attributes)
+    //         if (method_exists($this->model, 'defineGlobalSearchRelatedAttributes')) {
+    //             $relatedSearchAttrs = $this->model->defineGlobalSearchRelatedAttributes();
+
+    //             foreach ($relatedSearchAttrs as $relationPath => $columns) {
+
+    //                 // البحث داخل العلاقة
+    //                 $builder->orWhereHas($relationPath, function ($q) use ($columns, $formattedValue) {
+
+    //                     // نفتح قوساً جديداً داخل العلاقة (Grouping)
+    //                     $q->where(function ($subQ) use ($columns, $formattedValue) {
+    //                         foreach ($columns as $column) {
+    //                             // تطبيق MATCH لكل عمود داخل الجدول المرتبط
+    //                             $subQ->orWhereRaw(
+    //                                 "MATCH({$column}) AGAINST(? IN BOOLEAN MODE)",
+    //                                 [$formattedValue]
+    //                             );
+    //                         }
+    //                     });
+    //                 });
+    //             }
+    //         }
+    //     });
+    // }
+
+
+    /**
+     * Hybrid Search: Uses MATCH for indexed columns and LIKE for others.
      */
     private function applyGlobalFilter(Builder $query, string $globalFilterValue): void
     {
         $mainTableAlias = $this->joinManager->getMainTableAlias();
 
-        // تهيئة النص للبحث (Boolean Mode)
-        // إضافة '*' للبحث الجزئي
-        $formattedValue = trim($globalFilterValue) . '*';
+        // 1. جلب قائمة الأعمدة المفهرسة (Full-Text Whitelist)
+        $fullTextColumns = method_exists($this->model, 'defineFullTextSearchableAttributes')
+            ? $this->model->defineFullTextSearchableAttributes()
+            : [];
 
-        $query->where(function (Builder $builder) use ($formattedValue, $mainTableAlias) {
+        // 2. تجهيز القيم للبحثين
+        $matchValue = trim($globalFilterValue) . '*';      // لـ Full-Text
+        $likeValue  = '%' . trim($globalFilterValue) . '%'; // لـ LIKE
 
-            // 1. البحث في الجدول الأساسي (Base Attributes)
+        $query->where(function (Builder $builder) use ($matchValue, $likeValue, $mainTableAlias, $fullTextColumns) {
+
+            // --- A. البحث في الجدول الأساسي ---
             $baseAttributes = $this->model->defineGlobalSearchBaseAttributes();
 
             foreach ($baseAttributes as $col) {
-                // نستخدم MATCH لكل عمود بشكل منفصل
-                $builder->orWhereRaw(
-                    "MATCH({$mainTableAlias}.{$col}) AGAINST(? IN BOOLEAN MODE)",
-                    [$formattedValue]
-                );
+                // هل العمود موجود في قائمة الـ Full-Text؟
+                if (in_array($col, $fullTextColumns)) {
+                    $builder->orWhereRaw(
+                        "MATCH({$mainTableAlias}.{$col}) AGAINST(? IN BOOLEAN MODE)",
+                        [$matchValue]
+                    );
+                } else {
+                    // إذا لم يكن مفهرساً، نستخدم LIKE
+                    $builder->orWhere($mainTableAlias . '.' . $col, 'LIKE', $likeValue);
+                }
             }
 
-            // 2. البحث في العلاقات (Related Attributes)
+            // --- B. البحث في العلاقات ---
             if (method_exists($this->model, 'defineGlobalSearchRelatedAttributes')) {
                 $relatedSearchAttrs = $this->model->defineGlobalSearchRelatedAttributes();
 
                 foreach ($relatedSearchAttrs as $relationPath => $columns) {
+                    $builder->orWhereHas($relationPath, function ($q) use ($columns, $matchValue, $likeValue, $relationPath, $fullTextColumns) {
 
-                    // البحث داخل العلاقة
-                    $builder->orWhereHas($relationPath, function ($q) use ($columns, $formattedValue) {
-
-                        // نفتح قوساً جديداً داخل العلاقة (Grouping)
-                        $q->where(function ($subQ) use ($columns, $formattedValue) {
+                        $q->where(function ($subQ) use ($columns, $matchValue, $likeValue, $relationPath, $fullTextColumns) {
                             foreach ($columns as $column) {
-                                // تطبيق MATCH لكل عمود داخل الجدول المرتبط
-                                $subQ->orWhereRaw(
-                                    "MATCH({$column}) AGAINST(? IN BOOLEAN MODE)",
-                                    [$formattedValue]
-                                );
+                                // مفتاح البحث للعلاقات يكون: اسم_العلاقة.اسم_العمود
+                                // مثال: translations.title
+                                $configKey = $relationPath . '.' . $column;
+
+                                if (in_array($configKey, $fullTextColumns)) {
+                                    $subQ->orWhereRaw(
+                                        "MATCH({$column}) AGAINST(? IN BOOLEAN MODE)",
+                                        [$matchValue]
+                                    );
+                                } else {
+                                    $subQ->orWhere($column, 'LIKE', $likeValue);
+                                }
                             }
                         });
                     });
@@ -305,14 +523,11 @@ class AutoFilterAndSortService
      */
     public function dynamicFilter(DynamicFilterData $dynamicFilterData): array
     {
-        // 1. Build query WITHOUT sorting first.
-        // This gives us a clean query optimized for counting (no unnecessary joins).
+        // 1. Build Query (Without Sorting) for Counting
         $query = $this->buildQuery($dynamicFilterData, false);
 
-        // Prepare sorting keys for later use
         $sortingKeys = collect($dynamicFilterData->sorting)->groupBy('id');
 
-        // CASE A: Count Only requested
         if ($dynamicFilterData->count_only) {
             $countQuery = clone $query;
             $countQuery->getQuery()->orders = null;
@@ -330,13 +545,11 @@ class AutoFilterAndSortService
             ];
         }
 
-        // CASE B: Simple Pagination (No Total Count needed)
-        // We check for the simple types we added
+        // Handle Simple Pagination Types (Skip Count)
         if (in_array($dynamicFilterData->paginationFormate, [
             PaginationFormateEnum::normal_simple,
             PaginationFormateEnum::separated_simple,
         ])) {
-            // Since we need to fetch data now, we MUST apply sorting
             self::handelSorting($query, $sortingKeys, $this->joinManager);
 
             return $this->handelResultFormate(
@@ -347,9 +560,7 @@ class AutoFilterAndSortService
             );
         }
 
-        // CASE C: Normal Pagination (Needs Total Count + Data)
-
-        // 1. Calculate Count (Fast! because $query has no sort joins yet)
+        // Handle Normal Pagination (With Count)
         $countQuery = clone $query;
         $countQuery->getQuery()->orders = null;
         $countQuery->getQuery()->columns = null;
@@ -360,11 +571,9 @@ class AutoFilterAndSortService
             ->mergeBindings($countQuery->getQuery())
             ->count();
 
-        // 2. Apply Sorting for Data Retrieval
-        // Now we attach the sorting (and any required Joins) to the main query
+        // Apply Sorting for final data retrieval
         self::handelSorting($query, $sortingKeys, $this->joinManager);
 
-        // 3. Fetch Data with Pagination
         $paginationData = $this->handelPageAndPerPage($dynamicFilterData->page, $dynamicFilterData->perPage, $totalRecords);
 
         return $this->handelResultFormate($dynamicFilterData->paginationFormate, $paginationData['page'], $paginationData['perPage'], $query);
@@ -588,13 +797,13 @@ class AutoFilterAndSortService
         $finalResult = ['data' => null, 'pagination' => null];
 
         switch ($paginationFormate) {
-            // --- Standard Pagination (With Count) ---
             case PaginationFormateEnum::normal:
                 $finalResult = [
                     'data' => $query->paginate(perPage: (int)$perPage, page: (int)$page),
                     'pagination' => null
                 ];
                 break;
+
             case PaginationFormateEnum::separated:
                 $result = $query->paginate(perPage: (int)$perPage, page: (int)$page);
                 $finalResult = self::separatedPaginate($result);
@@ -704,14 +913,40 @@ class AutoFilterAndSortService
         return $sorting;
     }
 
-    public static function getAdvanceFilterFromRequest($request): ?array
+    public static function getAdvanceFilterFromRequest($request): ?object
     {
         $encodedAdvanceFilter = $request->input('advanceFilter');
+
         if (empty($encodedAdvanceFilter)) {
             return null;
         }
-        return self::smartDecode($encodedAdvanceFilter, 'AdvanceFilter');
+
+        // info(['encodedAdvanceFilter' => $encodedAdvanceFilter]); // يمكنك تفعيل الـ Log إذا أردت
+
+        $advanceFilter = self::smartDecode($encodedAdvanceFilter, 'AdvanceFilter');
+
+        if ($advanceFilter === null) {
+            return null;
+        }
+
+        // التعديل هنا: إزالة true ليتم التحويل إلى object بدلاً من associative array
+        return json_decode(json_encode($advanceFilter), false);
     }
+
+    // public static function getAdvanceFilterFromRequest($request): ?object
+    // {
+    //     $encodedAdvanceFilter = $request->input('advanceFilter');
+    //     if (empty($encodedAdvanceFilter)) {
+    //         return null;
+    //     }
+    //     info(['encodedAdvanceFilter' => $encodedAdvanceFilter]);
+    //     // convert to object
+    //     $advanceFilter = self::smartDecode($encodedAdvanceFilter, 'AdvanceFilter');
+    //     if ($advanceFilter === null) {
+    //         return null;
+    //     }
+    //     return json_decode(json_encode($advanceFilter), true);
+    // }
 
     private static function smartDecode(string $encodedData, string $paramName = 'data'): ?array
     {
@@ -726,9 +961,6 @@ class AutoFilterAndSortService
             return $jsonAttempt;
         }
 
-        // المرحلة 3: اختبار التنسيق المضغوط (Compressed)
-
-        // 3أ: محاولة Deflate
         $inflateAttempt = @gzinflate($step1);
         if ($inflateAttempt !== false) {
             $jsonAttempt = json_decode($inflateAttempt, true);
@@ -737,7 +969,6 @@ class AutoFilterAndSortService
             }
         }
 
-        // 3ب: محاولة Gzip
         $gzipAttempt = @gzdecode($step1);
         if ($gzipAttempt !== false) {
             $jsonAttempt = json_decode($gzipAttempt, true);
@@ -766,44 +997,63 @@ class AutoFilterAndSortService
         return null;
     }
 
-
-    private function buildSelectClause(Builder $query, ?string $fields): void
+    /**
+     * [CHANGED] Builds the SELECT clause using aliases from the JoinManager.
+     * Supports selecting columns from related tables dynamically (e.g. category.name).
+     */
+    private function buildSelectClause(Builder $query, ?string $columns): void
     {
         $model = $query->getModel();
         $mainTableAlias = $this->joinManager->getMainTableAlias();
         $primaryKey = $model->definePrimaryKeyName();
         $selectColumns = ["{$mainTableAlias}.{$primaryKey}"];
 
-        if (empty($fields)) {
+        if (empty($columns)) {
             $query->select("{$mainTableAlias}.*");
             return;
         }
 
-        $requestedFields = array_filter(explode(',', $fields));
+        $requestedColumns = array_filter(explode(',', $columns));
         $columnsMap = $model->defineFieldSelectionMap();
-        $relationships = $model->defineRelationships();
 
-        foreach ($requestedFields as $field) {
-            $trimmedField = trim($field);
-            if (!isset($columnsMap[$trimmedField])) continue;
+        foreach ($requestedColumns as $column) {
+            $trimmedColumn = trim($column);
 
-            $dbColumnIdentifier = $columnsMap[$trimmedField];
+            // Check Map
+            $dbPath = isset($columnsMap[$trimmedColumn]) ? $columnsMap[$trimmedColumn] : $trimmedColumn;
 
-            if (str_contains($dbColumnIdentifier, '.')) {
-                [$relationName, $columnName] = explode('.', $dbColumnIdentifier, 2);
+            // Check if it involves a relationship (dot notation)
+            if (str_contains($dbPath, '.')) {
+                $relationPath = Str::beforeLast($dbPath, '.');
+                $columnName   = Str::afterLast($dbPath, '.');
 
-                if (isset($relationships[$relationName])) {
-                    $relationMethod = $relationships[$relationName];
-                    $alias = $this->joinManager->ensureJoin($relationMethod);
-                    $selectColumns[] = "{$alias}.{$columnName} as {$relationName}_{$columnName}";
+                try {
+                    // Use JoinManager to get or create the join alias
+                    $tableAlias = $this->joinManager->ensureJoin($relationPath);
+
+                    // Create a unique alias for the result column
+                    // e.g. category.sector.slug -> category_sector_slug
+                    $resultAlias = str_replace('.', '_', $relationPath) . '_' . $columnName;
+
+                    $selectColumns[] = "{$tableAlias}.{$columnName} as {$resultAlias}";
+                } catch (\Exception $e) {
+                    // Ignore invalid relations
                 }
             } else {
-                $selectColumns[] = "{$mainTableAlias}.{$dbColumnIdentifier}";
+                // Main table column
+                $selectColumns[] = "{$mainTableAlias}.{$dbPath}";
             }
         }
+
         $query->select(array_unique($selectColumns));
     }
 
+    /**
+     * Perform a dynamic search with smart caching based on SQL Signature.
+     *
+     * @param mixed $model Class name or instance
+     * @param int $cacheDuration Duration in minutes (0 to disable)
+     */
     public static function dynamicSearchFromRequest(
         $model,
         $page = null,
@@ -818,57 +1068,79 @@ class AutoFilterAndSortService
         $beforeOperation = null,
         array $filterKeyMap = [],
         array $sortKeyMap = [],
-        $fields = null,
+        $columns = null, // [CHANGED] Renamed from fields to columns
         $count_only = null,
         int $cacheDuration = 0
     ) {
         $request = request();
 
+        // 1. تجهيز المعطيات الأساسية
         $modelInstance = is_string($model) ? new $model : $model;
         $tableName = $modelInstance->getTable();
-
-        // 1. تحديد الـ Prefix الخاص بالجدول
-        // مثال: "search_results_products_"
         $keyPrefix = "search_results_{$tableName}_";
 
-        // 2. توليد الهاش الفريد للطلب
-        $cacheKeyParams = [
-            'url' => $request->fullUrl(),
-            'body' => $request->all(),
-            'model' => get_class($modelInstance),
-        ];
+        // 2. إنشاء السيرفس وتجهيز بيانات الفلترة
+        $service = new AutoFilterAndSortService($model);
 
-        // المفتاح النهائي: "search_results_products_a1b2c3d4..."
-        $cacheKey = $keyPrefix . md5(json_encode($cacheKeyParams));
 
-        $executionLogic = function () use ($model, $page, $perPage, $paginationFormate, $filters, $sorting, $globalFilter, $advanceFilter, $globaleFilterExtraOperation, $extraOperation, $beforeOperation, $filterKeyMap, $sortKeyMap, $fields, $count_only) {
-            $service = new AutoFilterAndSortService($model);
-            $dynamicFilterData = $service->initializeDynamicFilterData(
-                request: request(), // Use request() helper to ensure scope
-                page: $page,
-                perPage: $perPage,
-                paginationFormate: $paginationFormate,
-                filters: $filters,
-                sorting: $sorting,
-                globalFilter: $globalFilter,
-                advanceFilter: $advanceFilter,
-                globaleFilterExtraOperation: $globaleFilterExtraOperation,
-                extraOperation: $extraOperation,
-                beforeOperation: $beforeOperation,
-                filterKeyMap: $filterKeyMap,
-                sortKeyMap: $sortKeyMap,
-                fields: $fields,
-                count_only: $count_only
-            );
+
+        $dynamicFilterData = $service->initializeDynamicFilterData(
+            request: $request,
+            page: $page,
+            perPage: $perPage,
+            paginationFormate: $paginationFormate,
+            filters: $filters,
+            sorting: $sorting,
+            globalFilter: $globalFilter,
+            advanceFilter: $advanceFilter,
+            globaleFilterExtraOperation: $globaleFilterExtraOperation,
+            extraOperation: $extraOperation,
+            beforeOperation: $beforeOperation,
+            filterKeyMap: $filterKeyMap,
+            sortKeyMap: $sortKeyMap,
+            columns: $columns, // [CHANGED] Pass columns for DB Select
+            count_only: $count_only
+        );
+
+        // 3. تعريف منطق التنفيذ (Closure)
+        $executionLogic = function () use ($service, $dynamicFilterData) {
             return $service->dynamicFilter($dynamicFilterData);
         };
 
-        if ($cacheDuration > 0) {
-            // نستخدم remember العادية (بدون tags)
-            return \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addMinutes($cacheDuration), $executionLogic);
-        }
+        // 4. إذا لم يتم طلب الكاش، نفذ فوراً وأعد النتيجة
+        // if ($cacheDuration <= 0) {
+        //     return $executionLogic();
+        // }
 
-        return $executionLogic();
+        // ---------------------------------------------------------
+        // 5. بناء مفتاح الكاش الذكي (SQL Signature Strategy)
+        // ---------------------------------------------------------
+
+        // نقوم ببناء الكويري "مؤقتاً" لاستخراج الـ SQL
+        // نمرر true للترتيب لأن تغيير الترتيب يجب أن يغير مفتاح الكاش
+        $queryDraft = $service->buildQuery($dynamicFilterData, true);
+        info($queryDraft->toRawSql());
+
+        // أ. بصمة جملة الـ SQL (تتغير بتغير الفلاتر أو الكود)
+        $sqlSignature = $queryDraft->toSql();
+
+        // ب. بصمة القيم (Bindings) (تتغير بتغير قيم البحث)
+        $bindingsSignature = serialize($queryDraft->getBindings());
+
+        // ج. بصمة التصفح (Pagination) (لأن الـ Limit/Offset لا يظهران في toSql)
+        $paginationSignature = json_encode([
+            'page' => $dynamicFilterData->page,
+            'perPage' => $dynamicFilterData->perPage,
+            'format' => $dynamicFilterData->paginationFormate->value, // Enum value
+            'count_only' => $dynamicFilterData->count_only
+        ]);
+
+        // المفتاح النهائي: يعتمد على الجدول + جملة الاستعلام + القيم + إعدادات الصفحة
+        // مثال: search_results_items_a1b2c3d4...
+        $cacheKey = $keyPrefix . md5($sqlSignature . $bindingsSignature . $paginationSignature);
+
+        // 6. التخزين والاسترجاع من الكاش
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addMinutes($cacheDuration), $executionLogic);
     }
 
 

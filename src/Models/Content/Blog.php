@@ -6,6 +6,7 @@ use App\Models\Item\Item;
 use HMsoft\Cms\Models\GeneralModel;
 use HMsoft\Cms\Models\Shared\Attribute as CustomAttribute;
 use HMsoft\Cms\Models\Shared\Category;
+use HMsoft\Cms\Models\Sector\Sector;
 use HMsoft\Cms\Traits\Attributes\HasAttributeValues;
 use HMsoft\Cms\Traits\Categories\Categorizable;
 use HMsoft\Cms\Traits\Downloads\HasDownloads;
@@ -20,10 +21,7 @@ use HMsoft\Cms\Traits\Plans\HasPlans;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Builder;
-use HMsoft\Cms\Models\Shared\Review;
-use HMsoft\Cms\Models\Shared\DownloadItem;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Blog extends GeneralModel
 {
@@ -95,6 +93,11 @@ class Blog extends GeneralModel
         return $this->morphTo('owner');
     }
 
+    public function sector(): BelongsTo
+    {
+        return $this->belongsTo(Sector::class);
+    }
+
     /**
      * Get all translations for the Post.
      */
@@ -128,6 +131,7 @@ class Blog extends GeneralModel
             // 'Public API Name' => 'eloquentMethodName'
             'translations' => 'translations',
             'categories' => 'categories',
+            'sector' => 'sector',
             'organizations' => 'organizations',
             'partners' => 'partners',
             'sponsors' => 'sponsors',
@@ -150,6 +154,8 @@ class Blog extends GeneralModel
             'title' => 'translations.title',
             'content' => 'translations.content',
             'short_content' => 'translations.short_content',
+            'category_id' => 'categories.id',
+            'sector_id' => 'sector.id',
         ];
 
         return array_merge($defaultMap, $customMap);
@@ -163,6 +169,8 @@ class Blog extends GeneralModel
         $relatedAttributes = [
             'translations.title', // <-- Allow filtering by the translated title
             'categories.id',      // <-- Allow filtering by category ID
+            'category_id',
+            'sector_id',
         ];
 
         // Logic for custom attributes remains the same

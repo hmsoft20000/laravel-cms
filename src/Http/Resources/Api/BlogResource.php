@@ -94,8 +94,14 @@ class BlogResource extends BaseJsonResource
                     return  resolve(PlanResource::class, ['resource' => $item])->toArray($request);
                 });
             }),
-           
-
+            'faqs' => $this->whenLoaded('faqs', function () use ($request) {
+                return collect($this->faqs)->map(function ($item) use ($request) {
+                    return resolve(FaqResource::class, ['resource' => $item])->toArray($request);
+                });
+            }),
+            'sector' => $this->whenLoaded('sector', function () use ($request) {
+                return resolve(SectorResource::class, ['resource' => $this->sector])->toArray($request);
+            }),
             'attribute_values' => $this->whenLoaded('attributeValues', function () {
                 return $this->formatAndGroupAttributeValues($this->resource);
             }),

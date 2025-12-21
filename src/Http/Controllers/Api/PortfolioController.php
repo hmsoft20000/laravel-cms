@@ -36,7 +36,6 @@ class PortfolioController extends Controller
                 $query->with([
                     'translations',
                     'media',
-                    'keywords',
                     'categories.translations',
                     'features.translations',
                     'partners.translations',

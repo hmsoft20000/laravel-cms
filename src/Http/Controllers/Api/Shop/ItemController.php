@@ -31,7 +31,6 @@ class ItemController extends Controller
                 $query->with([
                     'translations',
                     'media',
-                    'keywords',
                     'categories.translations',
                     'attributeValues.attribute.translations',
                     'attributeValues.attribute.options.translations',

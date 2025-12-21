@@ -25,14 +25,14 @@ class ColumnFilterData extends Data
     ) {}
 
     function buildQueryWhereStatment(
-        Builder &$queryBuilder,
+        \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder &$queryBuilder,
         ColumnFilterData $columnFilterData,
         string|null $columnPrefix = null,
         // The default value of this parameter is now less important
         // because we will pass `false` from the service.
         bool $autoAddPrefixFromCurrentModel = false,
         string $conditionType  = 'AND',
-    ): Builder {
+    ): \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder {
         $columnName = $columnFilterData->id;
         $value = $columnFilterData->value;
 
@@ -149,7 +149,7 @@ class ColumnFilterData extends Data
         return $queryBuilder;
     }
 
-    function buildQuery(Builder &$queryBuilder): Builder
+    function buildQuery(\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder &$queryBuilder)
     {
         $queryBuilder = $this->buildQueryWhereStatment(
             $queryBuilder,

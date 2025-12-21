@@ -152,4 +152,7 @@ interface AutoFilterable
      * ```
      */
     public function definePrimaryKeyName(): string;
+
+
+    public function defineFullTextSearchableAttributes(): array;
 }

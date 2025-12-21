@@ -10,7 +10,6 @@ use HMsoft\Cms\Traits\Downloads\HandlesDownloadSyncing;
 use HMsoft\Cms\Traits\Faqs\HandlesFaqSyncing;
 use HMsoft\Cms\Traits\Features\HandlesFeatureSyncing;
 use HMsoft\Cms\Traits\General\FileManagerTrait;
-use HMsoft\Cms\Traits\Keywords\HandlesKeywordSyncing;
 use HMsoft\Cms\Traits\Organizations\HandlesOrganizationSyncing;
 use HMsoft\Cms\Traits\Plans\HandlesPlanSyncing;
 use HMsoft\Cms\Traits\Translations\HasTranslations;
@@ -26,7 +25,6 @@ class BlogRepository implements BlogRepositoryInterface
         HandlesCategorySyncing,
         HandlesFeatureSyncing,
         HandlesDownloadSyncing,
-        HandlesKeywordSyncing,
         HandlesAttributeSyncing,
         HasTranslations,
         HandlesOrganizationSyncing,
@@ -46,7 +44,6 @@ class BlogRepository implements BlogRepositoryInterface
                 'downloads',
                 'plans',
                 'faqs',
-                'keywords',
                 'attribute_values',
                 'partner_ids',
                 'sponsor_ids'
@@ -58,7 +55,6 @@ class BlogRepository implements BlogRepositoryInterface
             $this->syncPlans($blog, $data['plans'] ?? null);
             $this->syncFaqs($blog, $data['faqs'] ?? null);
             $this->syncDownloads($blog, $data['downloads'] ?? null);
-            $this->syncKeywords($blog, $data['keywords'] ?? null);
             $this->syncAttributeValues($blog, $data['attribute_values'] ?? null);
             $this->syncOrganizations($blog, $data);
 
@@ -77,7 +73,6 @@ class BlogRepository implements BlogRepositoryInterface
                 'downloads',
                 'plans',
                 'faqs',
-                'keywords',
                 'attribute_values',
                 'partner_ids',
                 'sponsor_ids'
@@ -89,7 +84,6 @@ class BlogRepository implements BlogRepositoryInterface
             $this->syncPlans($blog, $data['plans'] ?? null);
             $this->syncFaqs($blog, $data['faqs'] ?? null);
             $this->syncDownloads($blog, $data['downloads'] ?? null);
-            $this->syncKeywords($blog, $data['keywords'] ?? null);
             $this->syncAttributeValues($blog, $data['attribute_values'] ?? null);
             $this->syncOrganizations($blog, $data);
 
@@ -102,7 +96,6 @@ class BlogRepository implements BlogRepositoryInterface
         return $model->load([
             'translations',
             'media',
-            'keywords',
             'categories.translations',
             'plans.owner',
             'plans.translations',

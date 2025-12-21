@@ -10,6 +10,10 @@ class CustomUrlGenerator extends UrlGenerator
     {
         $route = $this->routes->getByName($name);
         if (!$route) {
+            info([
+                'name' => $name,
+                'parameters' => $parameters
+            ]);
             // abort(404);
         }
         $defaultLocale = config('app.fallback_locale', 'en');

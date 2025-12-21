@@ -56,7 +56,7 @@ class CustomAttributeFilter
     /**
      * Applies a single-value condition inside the EXISTS subquery.
      */
-    protected static function applySingleValueFilter(Builder $subQuery, ColumnFilterData $filter): void
+    protected static function applySingleValueFilter(\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder $subQuery, ColumnFilterData $filter): void
     {
 
         // Create a new DTO instance with the correct aliased column name.

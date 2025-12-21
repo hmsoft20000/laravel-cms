@@ -10,7 +10,6 @@ use HMsoft\Cms\Traits\Downloads\HandlesDownloadSyncing;
 use HMsoft\Cms\Traits\Faqs\HandlesFaqSyncing;
 use HMsoft\Cms\Traits\Features\HandlesFeatureSyncing;
 use HMsoft\Cms\Traits\General\FileManagerTrait;
-use HMsoft\Cms\Traits\Keywords\HandlesKeywordSyncing;
 use HMsoft\Cms\Traits\Organizations\HandlesOrganizationSyncing;
 use HMsoft\Cms\Traits\Plans\HandlesPlanSyncing;
 use HMsoft\Cms\Traits\Translations\HasTranslations;
@@ -26,7 +25,6 @@ class ServiceRepository implements ServiceRepositoryInterface
         HandlesCategorySyncing,
         HandlesFeatureSyncing,
         HandlesDownloadSyncing,
-        HandlesKeywordSyncing,
         HandlesAttributeSyncing,
         HasTranslations,
         HandlesOrganizationSyncing,
@@ -48,7 +46,6 @@ class ServiceRepository implements ServiceRepositoryInterface
                 'downloads',
                 'plans',
                 'faqs',
-                'keywords',
                 'attribute_values',
                 'partner_ids',
                 'sponsor_ids'
@@ -60,7 +57,6 @@ class ServiceRepository implements ServiceRepositoryInterface
             $this->syncPlans($service, $data['plans'] ?? null);
             $this->syncFaqs($service, $data['faqs'] ?? null);
             $this->syncDownloads($service, $data['downloads'] ?? null);
-            $this->syncKeywords($service, $data['keywords'] ?? null);
             $this->syncAttributeValues($service, $data['attribute_values'] ?? null);
             $this->syncOrganizations($service, $data);
 
@@ -79,7 +75,6 @@ class ServiceRepository implements ServiceRepositoryInterface
                 'downloads',
                 'plans',
                 'faqs',
-                'keywords',
                 'attribute_values',
                 'partner_ids',
                 'sponsor_ids'
@@ -91,7 +86,6 @@ class ServiceRepository implements ServiceRepositoryInterface
             $this->syncPlans($service, $data['plans'] ?? null);
             $this->syncFaqs($service, $data['faqs'] ?? null);
             $this->syncDownloads($service, $data['downloads'] ?? null);
-            $this->syncKeywords($service, $data['keywords'] ?? null);
             $this->syncAttributeValues($service, $data['attribute_values'] ?? null);
             $this->syncOrganizations($service, $data);
 
@@ -104,7 +98,6 @@ class ServiceRepository implements ServiceRepositoryInterface
         return $model->load([
             'translations',
             'media',
-            'keywords',
             'categories.translations',
             'plans.owner',
             'plans.translations',

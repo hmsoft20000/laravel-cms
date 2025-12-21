@@ -117,6 +117,7 @@ class Attribute extends GeneralModel
             'name' => 'translations.name',
             'description' => 'translations.description',
             'image_url' => 'image', // The image_url accessor depends on the 'image' DB column.
+            'category_id' => 'categories.id',
         ];
 
         return array_merge($defaultMap, $customMap);
@@ -129,6 +130,8 @@ class Attribute extends GeneralModel
         $relatedAttributes = [
             'translations.name',
             'translations.description',
+            'categories.id',
+            'category_id',
         ];
 
         return array_merge($baseColumns, $relatedAttributes);
@@ -142,6 +145,7 @@ class Attribute extends GeneralModel
         $relatedAttributes = [
             'translations.name',
             'translations.description',
+            'categories.id',
         ];
 
         return array_merge($baseColumns, $relatedAttributes);

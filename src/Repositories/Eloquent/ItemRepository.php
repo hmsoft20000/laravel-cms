@@ -10,7 +10,6 @@ use HMsoft\Cms\Traits\Downloads\HandlesDownloadSyncing;
 use HMsoft\Cms\Traits\Faqs\HandlesFaqSyncing;
 use HMsoft\Cms\Traits\Features\HandlesFeatureSyncing;
 use HMsoft\Cms\Traits\General\FileManagerTrait;
-use HMsoft\Cms\Traits\Keywords\HandlesKeywordSyncing;
 use HMsoft\Cms\Traits\Organizations\HandlesOrganizationSyncing;
 use HMsoft\Cms\Traits\Plans\HandlesPlanSyncing;
 use HMsoft\Cms\Traits\Translations\HasTranslations;
@@ -32,7 +31,6 @@ class ItemRepository implements ItemRepositoryInterface
         HandlesCategorySyncing,
         HandlesFeatureSyncing,
         HandlesDownloadSyncing,
-        HandlesKeywordSyncing,
         HandlesAttributeSyncing,
         HasTranslations,
         HandlesOrganizationSyncing,
@@ -59,7 +57,6 @@ class ItemRepository implements ItemRepositoryInterface
                 'downloads',
                 'plans',
                 'faqs',
-                'keywords',
                 'attribute_values',
                 'partner_ids',
                 'sponsor_ids',
@@ -78,7 +75,6 @@ class ItemRepository implements ItemRepositoryInterface
             $this->syncPlans($item, $data['plans'] ?? null);
             $this->syncFaqs($item, $data['faqs'] ?? null);
             $this->syncDownloads($item, $data['downloads'] ?? null);
-            $this->syncKeywords($item, $data['keywords'] ?? null);
             $this->syncOrganizations($item, $data); // For partners/sponsors
             $this->syncAttributeValues($item, $data['attribute_values'] ?? null);
 
@@ -106,7 +102,6 @@ class ItemRepository implements ItemRepositoryInterface
                 'downloads',
                 'plans',
                 'faqs',
-                'keywords',
                 'attribute_values',
                 'partner_ids',
                 'sponsor_ids',
@@ -124,7 +119,6 @@ class ItemRepository implements ItemRepositoryInterface
             $this->syncPlans($item, $data['plans'] ?? null);
             $this->syncFaqs($item, $data['faqs'] ?? null);
             $this->syncDownloads($item, $data['downloads'] ?? null);
-            $this->syncKeywords($item, $data['keywords'] ?? null);
             $this->syncAttributeValues($item, $data['attribute_values'] ?? null);
             $this->syncOrganizations($item, $data);
             $this->attachDownloads($item, $data['attached_download_ids'] ?? []);
@@ -145,7 +139,6 @@ class ItemRepository implements ItemRepositoryInterface
         return $model->load([
             'translations',
             'media',
-            'keywords',
             'categories.translations',
             'plans.translations',
             'features.translations',

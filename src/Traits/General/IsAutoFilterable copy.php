@@ -119,4 +119,15 @@ trait IsAutoFilterable
     {
         return []; // Hook for models to add non-schema columns if needed.
     }
+
+    /**
+     * تحديد الأعمدة التي تمتلك Full-Text Index فعلياً في قاعدة البيانات.
+     * الصيغة:
+     * - للأعمدة الأساسية: 'title'
+     * - للعلاقات: 'relation_name.column_name' (مثل 'translations.title')
+     */
+    public function defineFullTextSearchableAttributes(): array
+    {
+        return [];
+    }
 }
