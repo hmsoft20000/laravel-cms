@@ -85,7 +85,7 @@ trait IsAutoFilterable
         if (!$this->autoIncludeAllColumns) {
             return [];
         }
-        
+
         // التحقق من الكاش الثابت (داخل نفس الـ Request)
         if (isset(self::$tableColumnsCache[$table])) {
             return self::$tableColumnsCache[$table];
@@ -96,15 +96,22 @@ trait IsAutoFilterable
         $cacheKey = "schema_columns_{$table}";
 
         $finalColumns = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addDay(), function () use ($table) {
-        $excludedColumns = [
-                'password', 'remember_token', 'api_token', 'access_token', 
-                'secret_key', 'credit_card', 'ssn', 'encrypted', 'salt'
-        ];
+            $excludedColumns = [
+                'password',
+                'remember_token',
+                'api_token',
+                'access_token',
+                'secret_key',
+                'credit_card',
+                'ssn',
+                'encrypted',
+                'salt'
+            ];
 
-        $columns = Schema::getColumnListing($table);
-        $filteredColumns = array_diff($columns, $excludedColumns);
+            $columns = Schema::getColumnListing($table);
+            $filteredColumns = array_diff($columns, $excludedColumns);
 
-        $extraColumns = $this->getAdditionalColumns($table);
+            $extraColumns = $this->getAdditionalColumns($table);
             return array_unique(array_merge($filteredColumns, $extraColumns));
         });
 
@@ -116,5 +123,16 @@ trait IsAutoFilterable
     protected function getAdditionalColumns(string $table): array
     {
         return []; // Hook for models to add non-schema columns if needed.
+    }
+
+    /**
+     * تحديد الأعمدة التي تمتلك Full-Text Index فعلياً في قاعدة البيانات.
+     * الصيغة:
+     * - للأعمدة الأساسية: 'title'
+     * - للعلاقات: 'relation_name.column_name' (مثل 'translations.title')
+     */
+    public function defineFullTextSearchableAttributes(): array
+    {
+        return [];
     }
 }
