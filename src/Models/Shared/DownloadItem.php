@@ -49,6 +49,11 @@ class DownloadItem extends GeneralModel
         return $this->hasMany(DownloadItemTranslation::class, 'download_item_id');
     }
 
+    public function downloads()
+    {
+        return $this->hasMany(Download::class, 'download_item_id');
+    }
+
 
     /**
      * Get all of the links for the DownloadItem
@@ -65,6 +70,7 @@ class DownloadItem extends GeneralModel
         return [
             'translations' => 'translations',
             'categories' => 'categories',
+            'downloads' => 'downloads',
         ];
     }
 

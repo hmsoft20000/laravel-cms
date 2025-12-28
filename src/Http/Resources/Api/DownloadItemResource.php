@@ -18,6 +18,7 @@ class DownloadItemResource extends BaseJsonResource
 
         return [
             'id' => $this->id,
+            'download_id' => $this->download_id,
             'is_active' => $this->is_active,
             'file_size' => $this->file_size,
             'file_path' => $this->file_path,

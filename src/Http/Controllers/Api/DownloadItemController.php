@@ -111,7 +111,6 @@ class DownloadItemController extends Controller
         );
     }
 
-
     public function destroy(Delete $request, $id)
     {
         $this->repo->delete($this->downloadItem->findOrFail($id));

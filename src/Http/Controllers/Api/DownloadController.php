@@ -15,6 +15,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 class DownloadController extends Controller
 {
 
@@ -45,16 +49,35 @@ class DownloadController extends Controller
         //     },
         // );
 
+        DB::listen(function ($query) {
+            Log::info('SQL:', [
+                'query'    => $query->sql,
+                'bindings' => $query->bindings,
+                'time_ms'  => $query->time,
+            ]);
+        });
+        
         $result = AutoFilterAndSortService::dynamicSearchFromRequest(
             model: resolve(DownloadItem::class),
             extraOperation: function ($query) use ($owner) {
                 // [FIX]: نقوم بعمل Join يدوي مع الجدول الوسيط لكي تعمل الفلترة
-                $query->join('downloads', 'download_items.id', '=', 'downloads.download_item_id')
-                    ->where('downloads.owner_id', $owner->id)
-                    ->where('downloads.owner_type', $owner->getMorphClass())
-                    ->select('download_items.*'); // نحدد أعمدة المدونات فقط لتجنب تضارب الـ ID
+                // $query->join('downloads', 'download_items.id', '=', 'downloads.download_item_id')
+                //     ->where('downloads.owner_id', $owner->id)
+                //     ->where('downloads.owner_type', $owner->getMorphClass())
+                //     ->select('download_items.*'); // نحدد أعمدة المدونات فقط لتجنب تضارب الـ ID
 
+                $query->whereHas('downloads', function ($q) use ($owner) {
+                    $q->where('owner_id', $owner->id)
+                        ->where('owner_type', $owner->getMorphClass());
+                });
                 // إضافة العلاقات المطلوبة
+                $query->withAggregate([
+                    'downloads as download_id' => function ($q) use ($owner) {
+                        $q->where('owner_id', $owner->id)
+                            ->where('owner_type', $owner->getMorphClass());
+                    }
+                ], 'id');
+
                 $query->with(['links', 'translations']);
             },
         );
