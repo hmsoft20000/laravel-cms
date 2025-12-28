@@ -2,7 +2,6 @@
 
 namespace HMsoft\Cms\Models\Content;
 
-use App\Models\Item\Item;
 use HMsoft\Cms\Models\GeneralModel;
 use HMsoft\Cms\Models\Shared\Attribute as CustomAttribute;
 use HMsoft\Cms\Models\Shared\Category;
@@ -19,7 +18,6 @@ use HMsoft\Cms\Traits\Media\DeletesAllMedia;
 use HMsoft\Cms\Traits\Media\HasMedia;
 use HMsoft\Cms\Traits\Plans\HasPlans;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -65,14 +63,6 @@ class Blog extends GeneralModel
     // RELATIONS
     // =================================================================
 
-    public function items()
-    {
-        return $this->morphedByMany(
-            Item::class,
-            'bloggable',
-            'bloggables'
-        );
-    }
 
     public function categories()
     {
@@ -85,13 +75,6 @@ class Blog extends GeneralModel
         );
     }
 
-    /**
-     * Get the parent owner model (e.g., Product, User).
-     */
-    public function owner(): MorphTo
-    {
-        return $this->morphTo('owner');
-    }
 
     public function sector(): BelongsTo
     {

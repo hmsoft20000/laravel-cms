@@ -44,6 +44,11 @@ class Organization extends GeneralModel
         ];
     }
 
+    public  function getMorphClass()
+    {
+        return 'organization';
+    }
+
     public function scopeOfType($query, $type)
     {
         return $query->where('type', $type);

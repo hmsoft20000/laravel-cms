@@ -10,6 +10,8 @@ return [
         $registrar->get('/conversations', 'conversations')->name('conversations');
         $registrar->post('/messages-delete-all', 'destroyAll')->name('messages.destroyAll');
         $registrar->post('messages/{message}/reply', 'reply')->name('messages.reply');
-        $registrar->apiResource('/messages', 'messages')->parameters(['messages' => 'message']);
+        $registrar->get('/messages', 'index')->name('messages.index');
+        $registrar->put('/messages/{message}', 'update')->name('messages.update')->parameters(['messages' => 'message']);
+        // $registrar->apiResource('/messages', 'messages')->parameters(['messages' => 'message']);
     }
 ];
