@@ -2,11 +2,11 @@
 
 namespace HMsoft\Cms\Models\Shop;
 
-use Illuminate\Database\Eloquent\Model;
+use HMsoft\Cms\Models\GeneralModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ItemAddon extends Model
+class ItemAddon extends GeneralModel
 {
     protected $table = 'item_addons';
     public $timestamps = false; // لا يوجد timestamps في الـ SQL

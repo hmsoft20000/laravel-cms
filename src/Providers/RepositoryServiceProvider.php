@@ -143,6 +143,16 @@ class RepositoryServiceProvider extends ServiceProvider
             \HMsoft\Cms\Repositories\Contracts\ItemRepositoryInterface::class,
             \HMsoft\Cms\Repositories\Eloquent\ItemRepository::class
         );
+
+        $this->app->bind(
+            \HMsoft\Cms\Repositories\Contracts\ItemAddonRepositoryInterface::class,
+            \HMsoft\Cms\Repositories\Eloquent\ItemAddonRepository::class
+        );
+
+        $this->app->bind(
+            \HMsoft\Cms\Repositories\Contracts\ItemVariationRepositoryInterface::class,
+            \HMsoft\Cms\Repositories\Eloquent\ItemVariationRepository::class
+        );
     }
 
     /**

@@ -67,6 +67,10 @@ use Illuminate\Support\Facades\Facade;
  *
  * --- Item Routes (المسارات الموارد العناصر) ---
  * @method static void items(string $pluralName = 'items', \Closure $callback = null)
+ *
+ * --- Item Addons Routes (المسارات الموارد الإضافات) ---
+ * @method static void itemAddons(array $options = [])
+ * @method static void itemVariations(array $options = [])
  */
 class CmsRoute extends Facade
 {

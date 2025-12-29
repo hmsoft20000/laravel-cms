@@ -48,30 +48,30 @@ class StoreItemRequest extends MyRequest
         $rules = $this->getItemRules('create');
 
         $categoryRules = $this->getCategoryIdsValidationRules('item', 'category_ids');
-        $partnerRules = $this->getOrganizationIdsValidationRules('partner', 'partner_ids');
-        $sponsorRules = $this->getOrganizationIdsValidationRules('sponsor', 'sponsor_ids');
-        $featureRules = $this->getNestedFeatureRules('features.*.', 'create');
-        $downloadRules = $this->getNestedDownloadRules('downloads.*.', 'create');
-        $planRules = $this->getNestedPlanRules('plans.*.', 'create');
-        $faqRules = $this->getNestedFaqRules('faqs.*.', 'create');
-        $attachedDownloadRules = $this->getAttachedDownloadRules('attached_download_ids');
+        // $partnerRules = $this->getOrganizationIdsValidationRules('partner', 'partner_ids');
+        // $sponsorRules = $this->getOrganizationIdsValidationRules('sponsor', 'sponsor_ids');
+        // $featureRules = $this->getNestedFeatureRules('features.*.', 'create');
+        // $downloadRules = $this->getNestedDownloadRules('downloads.*.', 'create');
+        // $planRules = $this->getNestedPlanRules('plans.*.', 'create');
+        // $faqRules = $this->getNestedFaqRules('faqs.*.', 'create');
+        // $attachedDownloadRules = $this->getAttachedDownloadRules('attached_download_ids');
 
-        $attachedBlogsRules = $this->getAttachedBlogsRules('attached_blogs_ids');
+        // $attachedBlogsRules = $this->getAttachedBlogsRules('attached_blogs_ids');
 
         $attributeRules = $this->getAttributeValidationRules(resolve(Item::class)->getMorphClass());
 
         return array_merge(
             $rules,
             $categoryRules,
-            $partnerRules,
-            $sponsorRules,
-            $featureRules,
-            $downloadRules,
-            $planRules,
-            $faqRules,
+            // $partnerRules,
+            // $sponsorRules,
+            // $featureRules,
+            // $downloadRules,
+            // $planRules,
+            // $faqRules,
             $attributeRules,
-            $attachedDownloadRules,
-            $attachedBlogsRules
+            // $attachedDownloadRules,
+            // $attachedBlogsRules
         );
     }
 }

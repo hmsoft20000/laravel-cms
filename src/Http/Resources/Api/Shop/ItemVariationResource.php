@@ -16,6 +16,8 @@ class ItemVariationResource extends BaseJsonResource
      */
     public function resolveData(Request $request): array
     {
+        $defaultImageFromConfig = config("app.web_config.default_item_image");
+
         return [
             'id' => $this->id,
             'price' => $this->price,
@@ -30,6 +32,35 @@ class ItemVariationResource extends BaseJsonResource
                 return $this->attributeOptions->map(function ($item) use ($request) {
                     return resolve(AttributeOptionResource::class, ['resource' => $item])->toArray($request);
                 });
+            }),
+            'image_url' => $this->whenLoaded('media', function () use ($defaultImageFromConfig) {
+                $defaultImage = collect($this->media)->where('is_default', true)->first();
+                return $defaultImage ? $defaultImage->file_url : $defaultImageFromConfig;
+            }),
+            'images' => $this->whenLoaded('media', function () {
+                return collect($this->media)->sortBy('sort_number')?->map(function ($medium) {
+                    return [
+                        'id' => $medium->id,
+                        'image_url' => $medium->file_url,
+                        'is_default' => $medium->is_default,
+                        'sort_number' => $medium->sort_number,
+                    ];
+                })->all();
+            }),
+            'image_urls' => $this->whenLoaded('media', function () {
+                return collect($this->media)->sortBy('sort_number')?->map(function ($medium) {
+                    return $medium->file_url;
+                })->all();
+            }),
+            'image' => $this->whenLoaded('media', function () {
+                return collect($this->media)->where('is_default', true)?->map(function ($medium) {
+                    return [
+                        'id' => $medium->id,
+                        'image_url' => $medium->file_url,
+                        'is_default' => $medium->is_default,
+                        'sort_number' => $medium->sort_number,
+                    ];
+                })->first();
             }),
         ];
     }

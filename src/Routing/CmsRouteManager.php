@@ -177,6 +177,35 @@ class CmsRouteManager
         $this->resource('items', $pluralName, $callback);
     }
 
+    public function itemAddons(?Closure $callback = null): void
+    {
+        $defaults = [
+            'file' => 'shop_addons.php', // اسم الملف الذي أنشأناه في الخطوة السابقة
+            // {owner} سيتم استبدالها تلقائياً بـ {_OWNER_BINDING_}
+            // المسار النهائي سيكون: api/items/{owner}/addons
+            'prefix' => 'items/{_OWNER_BINDING_}/addons',
+            'as' => 'api.items.addons.',
+            'middleware' => ['api'],
+            'options' => [
+                'parent_resource' => 'items' // خيار إضافي للمساعدة لاحقاً
+            ]
+        ];
+
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
+    public function itemVariations(?Closure $callback = null): void
+    {
+        $defaults = [
+            'file' => 'shop_variations.php',
+            'prefix' => 'items/{_OWNER_BINDING_}/variations',
+            'as' => 'api.items.variations.',
+            'middleware' => ['api'],
+        ];
+
+        $this->registerRouteGroup($defaults, $callback);
+    }
+
     /**
      * Registers the core sector resource routes.
      * يقوم بتسجيل مسارات المورد الأساسية للقطاعات.

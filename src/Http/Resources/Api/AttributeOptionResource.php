@@ -16,6 +16,7 @@ class AttributeOptionResource extends BaseJsonResource
     {
         return [
             'id' => $this->id,
+            'attribute_id' => $this->attribute_id,
             'translations' => $this->whenLoaded('translations', function () {
                 return $this->translations;
             }),

@@ -71,37 +71,37 @@ trait ItemValidationRules
 
         return [
             // Variations
-            'variations' => 'nullable|array|required_if:type,variable',
-            'variations.*.id' => 'nullable|integer', // For updates
-            'variations.*.price' => 'nullable|numeric|min:0',
-            'variations.*.sku' => 'nullable|string|max:100',
-            'variations.*.stock_quantity' => 'nullable|integer|min:0',
-            'variations.*.manage_stock' => 'boolean',
-            'variations.*.is_active' => 'boolean',
-            'variations.*.attribute_options' => 'required|array|min:1',
-            'variations.*.attribute_options.*' => 'required|integer|exists:attribute_options,id',
+            // 'variations' => 'nullable|array|sometimes|required_if:type,variable',
+            // 'variations.*.id' => 'nullable|integer', // For updates
+            // 'variations.*.price' => 'nullable|numeric|min:0',
+            // 'variations.*.sku' => 'nullable|string|max:100',
+            // 'variations.*.stock_quantity' => 'nullable|integer|min:0',
+            // 'variations.*.manage_stock' => 'boolean',
+            // 'variations.*.is_active' => 'boolean',
+            // 'variations.*.attribute_options' => 'required|array|min:1',
+            // 'variations.*.attribute_options.*' => 'required|integer|exists:attribute_options,id',
 
             // Addons
-            'addons' => 'nullable|array',
-            'addons.*.id' => 'nullable|integer', // For updates
-            'addons.*.type' => 'required|in:select,radio,checkbox,text,textarea,boolean',
-            'addons.*.price' => 'nullable|numeric|min:0', // For text/boolean types
-            'addons.*.is_required' => 'boolean',
+            // 'addons' => 'nullable|array|sometimes',
+            // 'addons.*.id' => 'nullable|integer', // For updates
+            // 'addons.*.type' => 'required|in:select,radio,checkbox,text,textarea,boolean',
+            // 'addons.*.price' => 'nullable|numeric|min:0', // For text/boolean types
+            // 'addons.*.is_required' => 'boolean',
 
             // [تعديل] قواعد الترجمة للإضافات
-            'addons.*.locales' => 'required|array|min:1',
-            'addons.*.locales.*.locale' => "required|string",
-            'addons.*.locales.*.title' => 'nullable|string|max:255',
+            // 'addons.*.locales' => 'required|array|min:1|sometimes',
+            // 'addons.*.locales.*.locale' => "required|string",
+            // 'addons.*.locales.*.title' => 'nullable|string|max:255',
 
-            'addons.*.options' => 'nullable|array', // For addon options
-            'addons.*.options.*.id' => 'nullable|integer', // For updates
-            'addons.*.options.*.price' => 'nullable|numeric|min:0',
-            'addons.*.options.*.is_default' => 'boolean',
+            // 'addons.*.options' => 'nullable|array', // For addon options
+            // 'addons.*.options.*.id' => 'nullable|integer', // For updates
+            // 'addons.*.options.*.price' => 'nullable|numeric|min:0',
+            // 'addons.*.options.*.is_default' => 'boolean',
 
-            // [تعديل] قواعد الترجمة لخيارات الإضافات
-            'addons.*.options.*.locales' => 'required|array|min:1',
-            'addons.*.options.*.locales.*.locale' => "required|string",
-            'addons.*.options.*.locales.*.title' => 'nullable|string|max:255',
+            // // [تعديل] قواعد الترجمة لخيارات الإضافات
+            // 'addons.*.options.*.locales' => 'required|array|min:1',
+            // 'addons.*.options.*.locales.*.locale' => "required|string",
+            // 'addons.*.options.*.locales.*.title' => 'nullable|string|max:255',
 
             // Bundled / Grouped
             'joins' => 'nullable|array',

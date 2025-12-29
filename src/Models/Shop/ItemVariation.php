@@ -2,13 +2,19 @@
 
 namespace HMsoft\Cms\Models\Shop;
 
-use Illuminate\Database\Eloquent\Model;
+use HMsoft\Cms\Models\GeneralModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use HMsoft\Cms\Models\Shared\AttributeOption; //
+use HMsoft\Cms\Traits\Media\HasMedia;
+use HMsoft\Cms\Traits\General\FileManagerTrait;
 
-class ItemVariation extends Model
+class ItemVariation extends GeneralModel
 {
+
+    use HasMedia;
+    use FileManagerTrait;
+
     protected $table = 'item_variations';
     public $timestamps = false; // لا يوجد timestamps في الـ SQL
     protected $guarded = ['id'];
@@ -23,6 +29,11 @@ class ItemVariation extends Model
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function getMorphClass()
+    {
+        return 'item_variation';
     }
 
     /**
