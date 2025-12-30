@@ -49,6 +49,7 @@ class SetWebConfigMiddleware
         }
         try {
             $language = Lang::active()->get();
+            
         } catch (\Throwable $th) {
             throw $th;
         }

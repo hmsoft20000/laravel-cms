@@ -3,6 +3,7 @@
 namespace HMsoft\Cms\Http\Middleware;
 
 use Closure;
+use HMsoft\Cms\Models\Lang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
@@ -27,8 +28,8 @@ class SetLocale
     public function handle(Request $request, Closure $next): Response
     {
         /* get supported locales */
-        $supportedLocales = array_keys(config('cms.locales', []));
-
+        // $supportedLocales = array_keys(config('cms.locales', []));
+        $supportedLocales = Lang::active()->select('locale')->pluck('locale')->toArray();
 
         /* get fallback locale */
         $fallbackLocale = config('app.fallback_locale', 'en');
