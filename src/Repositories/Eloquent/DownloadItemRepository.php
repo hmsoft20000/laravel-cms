@@ -83,7 +83,7 @@ class DownloadItemRepository implements DownloadItemRepositoryInterface
 
     public function show(Model $model): Model
     {
-        return $model->load('translations', 'categories', 'media', 'links');
+        return $model->load('translations', 'categories', 'media', 'links', 'categories.translations');
     }
 
     public function delete(Model $model): bool

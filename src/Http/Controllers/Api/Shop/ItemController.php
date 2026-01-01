@@ -38,6 +38,7 @@ class ItemController extends Controller
                     // Add other relations as needed for the list view
                     'variations.attributeOptions.translations',
                     'relationships.relatedItem.translations',
+                    'categories.translations',
                 ]);
             },
         );

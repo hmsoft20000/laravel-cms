@@ -12,7 +12,7 @@ use HMsoft\Cms\Traits\General\IsAutoFilterable;
 class GeneralModel extends Model implements AutoFilterable
 {
     use ResolvesExtendedModel;
-    use CURDTrait;
+    // use CURDTrait;
     use IsAutoFilterable;
     use ClearsResponseCache;
 }

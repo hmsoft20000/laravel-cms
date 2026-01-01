@@ -147,6 +147,10 @@ class Category extends GeneralModel
         return array_merge($baseColumns, $relatedAttributes);
     }
 
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('is_active', true);
+    }
 
     public function defineGlobalSearchRelatedAttributes(): array
     {

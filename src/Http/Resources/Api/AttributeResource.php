@@ -30,6 +30,11 @@ class AttributeResource extends BaseJsonResource
             'category_ids' => $this->whenLoaded('categories', function () {
                 return $this->categories->pluck('id')->all();
             }),
+            'categories' => $this->whenLoaded('categories', function () {
+                return $this->categories->map(function ($category) {
+                    return resolve(CategoryResource::class, ['resource' => $category]);
+                });
+            }),
             'translations' => $this->whenLoaded('translations', function () {
                 return $this->translations;
             }),

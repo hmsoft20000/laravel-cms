@@ -114,6 +114,7 @@ class ServiceRepository implements ServiceRepositoryInterface
             'attributeValues.attribute.translations',
             'attributeValues.attribute.options.translations',
             'attributeValues.selectedOptions.option.translations',
+            'categories.translations',
         ]);
     }
 

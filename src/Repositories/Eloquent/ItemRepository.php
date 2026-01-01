@@ -65,7 +65,7 @@ class ItemRepository implements ItemRepositoryInterface
                 'joins',
                 'relationships',
                 'images',
-                'attached_blogs_ids'
+                'attached_blogs_ids',
             ]));
 
             // Use existing sync traits
@@ -160,6 +160,8 @@ class ItemRepository implements ItemRepositoryInterface
             'childItems.item.translations', // Load bundled item data
             'relationships.relatedItem.translations', // Load related item data
             'blogs.translations',
+
+            'categories.translations',
         ]);
     }
 

@@ -45,7 +45,8 @@ class ItemResource extends BaseJsonResource
             'is_active' => $this->is_active,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-
+            'discount'=>$this->discount,
+            'discount_type'=>$this->discount_type,
             // --- علاقات الـ Traits (مثل BlogResource) ---
             'translations' => $this->whenLoaded('translations', function () {
                 return $this->translations;
@@ -79,8 +80,8 @@ class ItemResource extends BaseJsonResource
                 return collect($this->keywords)->pluck('keyword')->all();
             }),
             'categories' => $this->whenLoaded('categories', function () use ($request) {
-                return collect($this->categories)->map(function ($item) use ($request) {
-                    return resolve(CategoryResource::class, ['resource' => $item])->toArray($request);
+                return $this->categories->map(function ($category) use ($request) {
+                    return resolve(CategoryResource::class, ['resource' => $category])->toArray($request);
                 });
             }),
             'features' => $this->whenLoaded('features', function () use ($request) {

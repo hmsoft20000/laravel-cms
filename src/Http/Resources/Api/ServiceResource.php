@@ -76,8 +76,8 @@ class ServiceResource extends BaseJsonResource
             }),
 
             'categories' => $this->whenLoaded('categories', function () use ($request) {
-                return collect($this->categories)->map(function ($item) use ($request) {
-                    return  resolve(CategoryResource::class, ['resource' => $item])->toArray($request);
+                return $this->categories->map(function ($category) use ($request) {
+                    return resolve(CategoryResource::class, ['resource' => $category])->toArray($request);
                 });
             }),
             'features' => $this->whenLoaded('features', function () use ($request) {

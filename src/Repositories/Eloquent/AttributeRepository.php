@@ -73,7 +73,7 @@ class AttributeRepository implements AttributeRepositoryInterface
 
     public function show(Model $model): Model
     {
-        return $model->load(['translations', 'options.translations', 'categories']);
+        return $model->load(['translations', 'options.translations', 'categories.translations']);
     }
 
     public function delete(Model $model): bool

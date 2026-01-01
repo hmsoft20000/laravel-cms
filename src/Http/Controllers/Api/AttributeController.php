@@ -35,7 +35,7 @@ class AttributeController extends Controller
             model: resolve(Attribute::class),
             extraOperation: function (\Illuminate\Database\Eloquent\Builder &$query) use ($scope) {
                 $query->ofScope($scope);
-                $query->with(['translations', 'options.translations', 'categories']);
+                $query->with(['translations', 'options.translations', 'categories.translations']);
             },
         );
 

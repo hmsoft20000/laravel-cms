@@ -31,6 +31,7 @@ class DownloadItemController extends Controller
                     'translations',
                     'categories',
                     'media',
+                    'categories.translations',
                 ]);
                 $query->withCount('links');
             },
