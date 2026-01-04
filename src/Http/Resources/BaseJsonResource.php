@@ -88,10 +88,10 @@ class BaseJsonResource extends JsonResource
         }
 
         $ignoredKeys = ['id', 'locale', 'created_at', 'updated_at', 'deleted_at', 'created_by', 'updated_by', 'deleted_by'];
-        
+
         // Fields that we can't find from the first translation (dangerous fields)
         $ignoredFieldsToFindFromFirstTranslation = ['slug'];
-        
+
         foreach ($allTranslatableFields as $field) {
             if (in_array($field, $ignoredKeys) || str_ends_with($field, '_id')) {
                 continue;
@@ -188,12 +188,30 @@ class BaseJsonResource extends JsonResource
 
                 case 'select':
                 case 'radio':
+                    // $valueModel = $values->first();
+                    // if ($valueModel && $attributeData->relationLoaded('options')) {
+                    //     $option = $attributeData->options->firstWhere('id', $valueModel->value);
+                    //     if ($option) {
+                    //         $optionTranslations = $this->formatTranslations($option->translations);
+                    //         $finalValue = $this->processTranslations(['translations' => $optionTranslations]);
+                    //     }
+                    // }
                     $valueModel = $values->first();
+
                     if ($valueModel && $attributeData->relationLoaded('options')) {
                         $option = $attributeData->options->firstWhere('id', $valueModel->value);
+
                         if ($option) {
                             $optionTranslations = $this->formatTranslations($option->translations);
-                            $finalValue = $this->processTranslations(['translations' => $optionTranslations]);
+                            $processedOption = $this->processTranslations([
+                                'translations' => $optionTranslations
+                            ]);
+
+                            $finalValue = [
+                                'id'           => $option->id,
+                                'title'        => $processedOption['title'] ?? null,
+                                'translations' => $processedOption['translations'],
+                            ];
                         }
                     }
                     break;

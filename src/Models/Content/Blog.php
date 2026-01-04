@@ -154,6 +154,9 @@ class Blog extends GeneralModel
             'categories.id',      // <-- Allow filtering by category ID
             'category_id',
             'sector_id',
+            'title',
+            'content',
+            'short_content',
         ];
 
         // Logic for custom attributes remains the same
