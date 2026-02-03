@@ -85,7 +85,6 @@ class AutoFilterAndSortService
         $finalAdvanceFilter = $advanceFilter ?? self::getAdvanceFilterFromRequest($request);
         $finalGlobalFilter = $globalFilter ?? $request->input('globalFilter');
 
-
         // [CHANGED] Read columns from request instead of fields
         $finalColumns = $columns ?? $request->input('columns');
 
@@ -106,7 +105,6 @@ class AutoFilterAndSortService
                 return $sort;
             });
         }
-
         return new DynamicFilterData(
             page: $finalPage,
             perPage: $finalPerPage,
@@ -123,160 +121,6 @@ class AutoFilterAndSortService
         );
     }
 
-    // public function buildQuery(?DynamicFilterData $dynamicFilterData = null, bool $applySorting = true): Builder
-    // {
-    //     if (!($this->model instanceof AutoFilterable)) {
-    //         throw new \Exception('Model ' . get_class($this->model) . ' must implement the AutoFilterable interface.');
-    //     }
-
-    //     if (!$dynamicFilterData) {
-    //         $dynamicFilterData = $this->initializeDynamicFilterData();
-    //     }
-
-    //     $query = $this->model->query();
-    //     $tableName = $this->model->getTable();
-    //     $mainTableAlias = $tableName;
-    //     $query->from($tableName, $mainTableAlias);
-
-    //     $this->joinManager = new JoinManager($query, $mainTableAlias);
-
-    //     // 1. Build dynamic SELECT clause.
-    //     if (!$dynamicFilterData->count_only) {
-    //         $this->buildSelectClause($query, $dynamicFilterData->columns);
-    //     }
-
-    //     $extraOperation = $dynamicFilterData->extraOperation;
-    //     $globaleFilterExtraOperation = $dynamicFilterData->globaleFilterExtraOperation;
-    //     $beforeOperation = $dynamicFilterData->beforeOperation;
-
-    //     $allowedFilters = $this->model->defineFilterableAttributes();
-    //     $allowedSorts = $this->model->defineSortableAttributes();
-
-    //     $dynamicFilterData->filters = collect($dynamicFilterData->filters)
-    //         ->filter(fn(ColumnFilterData $filter) => in_array($filter->id, $allowedFilters))
-    //         ->values();
-
-    //     $dynamicFilterData->sorting = collect($dynamicFilterData->sorting)
-    //         ->filter(fn(ColumnSortData $sort) => in_array($sort->id, $allowedSorts))
-    //         ->values();
-
-    //     // [REMOVED] Priority Sorting Logic (definePrioritizedAttributes) was here.
-    //     // Filters are now processed in the order they were received.
-
-    //     $pFilterKeys = collect($dynamicFilterData->filters)->groupBy('id');
-    //     $sortingKeys = collect($dynamicFilterData->sorting)->groupBy('id');
-
-    //     if (isset($beforeOperation)) {
-    //         $beforeOperation(
-    //             $query,
-    //             ['filterKeys' => $pFilterKeys, 'sortingKeys' => $sortingKeys, 'mainTableAlias' => $mainTableAlias]
-    //         );
-    //     }
-
-    //     // if (!empty($dynamicFilterData->advanceFilter)) {
-    //     //     $attributeIds = self::extractAttributeIdsFromGroup($dynamicFilterData->advanceFilter);
-    //     //     $attributes = !empty($attributeIds)
-    //     //         ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
-    //     //         : collect();
-
-    //     //     $query->where(function (Builder $builder) use ($dynamicFilterData, $allowedFilters, $attributes) {
-    //     //         self::applyAdvancedFilterGroup($builder, $dynamicFilterData->advanceFilter, $allowedFilters, $attributes);
-    //     //     });
-    //     // } else {
-    //     //     $customAttributeFilters = collect($dynamicFilterData->filters)->filter(
-    //     //         fn($filter) => CustomAttributeFilter::isCustomAttribute($filter)
-    //     //     );
-
-    //     //     $attributeIds = $customAttributeFilters->map(
-    //     //         fn($filter) => (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id)
-    //     //     )->unique()->toArray();
-
-    //     //     $attributes = !empty($attributeIds)
-    //     //         ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
-    //     //         : collect();
-
-
-    //     //     foreach ($dynamicFilterData->filters as $filter) {
-    //     //         if (CustomAttributeFilter::isCustomAttribute($filter)) {
-    //     //             $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id);
-    //     //             $attribute = $attributes->get($attributeId);
-    //     //             if ($attribute) {
-    //     //                 CustomAttributeFilter::apply($query, $attribute, $filter, $this->model);
-    //     //             }
-    //     //         } else {
-    //     //             if (isset($pFilterKeys[$filter->id])) {
-    //     //                 self::handelFilterOne($query, collect($pFilterKeys[$filter->id])->toArray(), $filter->id);
-    //     //             }
-    //     //         }
-    //     //     }
-    //     // }
-
-    //     if (!empty($dynamicFilterData->advanceFilter)) {
-    //         $attributeIds = self::extractAttributeIdsFromGroup($dynamicFilterData->advanceFilter);
-    //         $attributes = !empty($attributeIds)
-    //             ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
-    //             : collect();
-
-    //         // نستخدم where هنا لضمان دمجها مع الشروط الأخرى بـ AND
-    //         $query->where(function (Builder $builder) use ($dynamicFilterData, $allowedFilters, $attributes) {
-    //             self::applyAdvancedFilterGroup($builder, $dynamicFilterData->advanceFilter, $allowedFilters, $attributes);
-    //         });
-    //     }
-
-    //     if ($dynamicFilterData->filters->isNotEmpty()) {
-    //         $customAttributeFilters = collect($dynamicFilterData->filters)->filter(
-    //             fn($filter) => CustomAttributeFilter::isCustomAttribute($filter)
-    //         );
-
-    //         $attributeIds = $customAttributeFilters->map(
-    //             fn($filter) => (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id)
-    //         )->unique()->toArray();
-
-    //         $attributes = !empty($attributeIds)
-    //             ? Attribute::whereIn('id', $attributeIds)->get()->keyBy('id')
-    //             : collect();
-
-    //         // تطبيق الفلاتر العادية حلقة تلو الأخرى
-    //         // بما أنها تطبق مباشرة على الـ query، فهي تعمل كـ AND بشكل افتراضي مع ما سبق
-    //         foreach ($dynamicFilterData->filters as $filter) {
-    //             if (CustomAttributeFilter::isCustomAttribute($filter)) {
-    //                 $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $filter->id);
-    //                 $attribute = $attributes->get($attributeId);
-    //                 if ($attribute) {
-    //                     CustomAttributeFilter::apply($query, $attribute, $filter, $this->model);
-    //                 }
-    //             } else {
-    //                 if (isset($pFilterKeys[$filter->id])) {
-    //                     // تمرير المصفوفة كاملة للدالة لضمان التوافق
-    //                     self::handelFilterOne($query, collect($pFilterKeys[$filter->id])->toArray(), $filter->id);
-    //                 }
-    //             }
-    //         }
-    //     }
-
-
-    //     if (isset($dynamicFilterData->globalFilter) && !empty($dynamicFilterData->globalFilter)) {
-    //         $this->applyGlobalFilter($query, $dynamicFilterData->globalFilter);
-    //     }
-
-    //     if (isset($extraOperation)) {
-    //         $extraOperation(
-    //             $query,
-    //             [
-    //                 'filterKeys' => $pFilterKeys,
-    //                 'sortingKeys' => $sortingKeys,
-    //                 'globalFilter' => $dynamicFilterData->globalFilter,
-    //                 'mainTableAlias'    => $mainTableAlias
-    //             ]
-    //         );
-    //     }
-
-    //     if ($applySorting && !$dynamicFilterData->count_only) {
-    //         self::handelSorting($query, $sortingKeys, $this->joinManager);
-    //     }
-
-    //     return $query;
-    // }
     public function buildQuery(?DynamicFilterData $dynamicFilterData = null, bool $applySorting = true): Builder
     {
         if (!($this->model instanceof AutoFilterable)) {
@@ -1076,7 +920,6 @@ class AutoFilterAndSortService
         int $cacheDuration = 0
     ) {
         $request = request();
-
 
         // 1. تجهيز المعطيات الأساسية
         $modelInstance = is_string($model) ? new $model : $model;
