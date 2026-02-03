@@ -107,6 +107,7 @@ class BusinessSettingRepository implements BusinessSettingRepositoryInterface
             'footer_logo',
             ...static::$defaultImages
         ];
+
         $updateData = collect($data)->except($imagesKeys)->toArray();
 
         foreach ($imagesKeys as $key) {
@@ -130,7 +131,7 @@ class BusinessSettingRepository implements BusinessSettingRepositoryInterface
         foreach ($updateData as $key => $value) {
             $model = $this->model->where('type', $key)->update(['value' => $value]);
             $this->refreshCache();
-            return $model;
+            // return $model;
         }
     }
 
