@@ -44,6 +44,7 @@ class SetWebConfigMiddleware
                 'web_config' => $web_config,
                 'pages_meta' => $pages_meta,
             ]);
+
         } catch (\Exception $exception) {
             throw $exception;
         }

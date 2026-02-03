@@ -56,11 +56,16 @@ class SetLocale
         if ($request->route('locale') && in_array($request->route('locale'), $supportedLocales)) {
             return $request->route('locale');
         }
-
         /* check accept language header */
-        $acceptLang = $request->header('Accept-Language');
-        if ($acceptLang) {
-            foreach (explode(',', $acceptLang) as $lang) {
+        $acceptLangHeader = $request->header('Accept-Language');
+        $acceptLangs = explode(',', $acceptLangHeader);
+        if (count($acceptLangs) > 0) {
+            $acceptLangs = [
+                $fallbackLocale
+            ];
+        }
+        if ($acceptLangHeader) {
+            foreach ($acceptLangs as $lang) {
                 $localeCode = strtolower(trim(explode(';', $lang)[0]));
                 if (in_array($localeCode, $supportedLocales)) {
                     return $localeCode;

@@ -35,10 +35,24 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
 
+        // Route::macro('localized', function ($callback) {
+        //     Route::group(['prefix' => '{locale?}', 'middleware' => ['set.web_config']], function () use ($callback) {
+        //         $callback();
+        //     });
+        // });
+
         Route::macro('localized', function ($callback) {
-            Route::group(['prefix' => '{locale?}', 'middleware' => ['set.web_config']], function () use ($callback) {
-                $callback();
-            });
+            // 1. جلب اللغات المدعومة من الإعدادات وتحويلها لنص مفصول بـ | (مثل: ar|en)
+            $supportedLocales = implode('|', array_keys(config('app.locales')));
+
+            // في حال لم تكن الإعدادات محملة، نضع قيمة افتراضية لتجنب الأخطاء
+            if (empty($supportedLocales)) $supportedLocales = 'ar|en';
+
+            // 2. تعريف المجموعة مع شرط (where)
+            Route::prefix('{locale?}')
+                ->middleware(['set.web_config'])
+                ->where(['locale' => $supportedLocales]) // <--- هذا السطر هو الحل السحري
+                ->group($callback);
         });
 
 

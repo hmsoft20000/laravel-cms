@@ -85,6 +85,7 @@ class AutoFilterAndSortService
         $finalAdvanceFilter = $advanceFilter ?? self::getAdvanceFilterFromRequest($request);
         $finalGlobalFilter = $globalFilter ?? $request->input('globalFilter');
 
+
         // [CHANGED] Read columns from request instead of fields
         $finalColumns = $columns ?? $request->input('columns');
 
@@ -659,47 +660,49 @@ class AutoFilterAndSortService
         }
 
         // Prepare the filter data
-        $filterData = $filterObjects[0];
-        $value = is_array($filterData) ? $filterData['value'] : $filterData->value;
-        $filterFns = is_array($filterData) ? $filterData['filterFns'] : $filterData->filterFns;
-        $filterFnsEnum = is_string($filterFns) ? FilterFnsEnum::from($filterFns) : $filterFns;
+        // $filterData = $filterObjects[0];
+        foreach ($filterObjects as $filterData) {
+            $value = is_array($filterData) ? $filterData['value'] : $filterData->value;
+            $filterFns = is_array($filterData) ? $filterData['filterFns'] : $filterData->filterFns;
+            $filterFnsEnum = is_string($filterFns) ? FilterFnsEnum::from($filterFns) : $filterFns;
 
-        // 3. DECISION: Check types
+            // 3. DECISION: Check types
 
-        // A. Is it a Custom Attribute? (e.g. 'attribute_5')
-        // We create a temp ColumnFilterData to check the ID pattern
-        $tempFilter = new ColumnFilterData(id: $columnId, value: $value, filterFns: $filterFnsEnum);
-        if (CustomAttributeFilter::isCustomAttribute($tempFilter)) {
-            $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $columnId);
-            // Fetch attribute model (Optimized: ideally passed from outside, but fine for single filter)
-            $attribute = Attribute::find($attributeId);
-            if ($attribute) {
-                CustomAttributeFilter::apply($query, $attribute, $tempFilter, $model);
-                return;
+            // A. Is it a Custom Attribute? (e.g. 'attribute_5')
+            // We create a temp ColumnFilterData to check the ID pattern
+            $tempFilter = new ColumnFilterData(id: $columnId, value: $value, filterFns: $filterFnsEnum);
+            if (CustomAttributeFilter::isCustomAttribute($tempFilter)) {
+                $attributeId = (int) str_replace(CustomAttributeFilter::ATTRIBUTE_PREFIX, '', $columnId);
+                // Fetch attribute model (Optimized: ideally passed from outside, but fine for single filter)
+                $attribute = Attribute::find($attributeId);
+                if ($attribute) {
+                    CustomAttributeFilter::apply($query, $attribute, $tempFilter, $model);
+                    return;
+                }
             }
-        }
 
-        // B. Is it a Relation? (e.g. 'category.name')
-        if (str_contains($columnId, '.')) {
-            // Split into Relation Path and Column Name
-            $relationPath = Str::beforeLast($columnId, '.');
-            $targetColumn = Str::afterLast($columnId, '.');
+            // B. Is it a Relation? (e.g. 'category.name')
+            if (str_contains($columnId, '.')) {
+                // Split into Relation Path and Column Name
+                $relationPath = Str::beforeLast($columnId, '.');
+                $targetColumn = Str::afterLast($columnId, '.');
 
-            // Apply whereHas (Recursive EXISTS)
-            $query->whereHas($relationPath, function (Builder $q) use ($targetColumn, $value, $filterFnsEnum) {
-                // Recursive call! This allows handling Custom Attributes INSIDE relations
-                // e.g. 'category.color' -> 'category.attribute_5'
-                self::handelFilterOne($q, [new ColumnFilterData($targetColumn, $value, $filterFnsEnum)], $targetColumn);
-            });
-        } else {
-            // C. Direct Column Logic
-            $simpleFilter = new ColumnFilterData(
-                id: $columnId,
-                value: $value,
-                filterFns: $filterFnsEnum
-            );
-            // Apply directly on the main query.
-            $simpleFilter->buildQueryWhereStatment($query, $simpleFilter, null, true);
+                // Apply whereHas (Recursive EXISTS)
+                $query->whereHas($relationPath, function (Builder $q) use ($targetColumn, $value, $filterFnsEnum) {
+                    // Recursive call! This allows handling Custom Attributes INSIDE relations
+                    // e.g. 'category.color' -> 'category.attribute_5'
+                    self::handelFilterOne($q, [new ColumnFilterData($targetColumn, $value, $filterFnsEnum)], $targetColumn);
+                });
+            } else {
+                // C. Direct Column Logic
+                $simpleFilter = new ColumnFilterData(
+                    id: $columnId,
+                    value: $value,
+                    filterFns: $filterFnsEnum
+                );
+                // Apply directly on the main query.
+                $simpleFilter->buildQueryWhereStatment($query, $simpleFilter, null, true);
+            }
         }
     }
 
@@ -1073,6 +1076,7 @@ class AutoFilterAndSortService
         int $cacheDuration = 0
     ) {
         $request = request();
+
 
         // 1. تجهيز المعطيات الأساسية
         $modelInstance = is_string($model) ? new $model : $model;

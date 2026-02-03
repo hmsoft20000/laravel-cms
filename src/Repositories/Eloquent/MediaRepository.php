@@ -64,7 +64,7 @@ class MediaRepository implements MediaRepositoryInterface
                 $newMedia = $owner->media()->create(array_merge($fileDetails, [
                     'file_path' => $filePath,
                     'is_default' => $isDefault,
-                    'sort_number' => $item['sort_number'] ?? ++$sortNumber,
+                    'sort_number' => ++$sortNumber,
                 ]));
 
                 $mediaCollection->push($newMedia);
