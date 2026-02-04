@@ -54,6 +54,7 @@ class Item extends GeneralModel
             'updated_at' => 'datetime',
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'sort_number' => 'integer',
         ];
     }
 

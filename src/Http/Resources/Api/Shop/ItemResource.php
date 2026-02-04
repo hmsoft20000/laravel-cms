@@ -39,6 +39,7 @@ class ItemResource extends BaseJsonResource
             'type' => $this->type,
             'sku' => $this->sku,
             'price' => $this->price,
+            'sort_number' => $this->sort_number,
             'stock_quantity' => $this->stock_quantity,
             'manage_stock' => $this->manage_stock,
             'is_virtual' => $this->is_virtual,

@@ -30,10 +30,9 @@ class SetLocale
         /* get supported locales */
         // $supportedLocales = array_keys(config('cms.locales', []));
         $supportedLocales = Lang::active()->select('locale')->pluck('locale')->toArray();
-
         /* get fallback locale */
         $fallbackLocale = config('app.fallback_locale', 'en');
-
+        
         /* determine locale */
         $locale = $this->determineLocale($request, $supportedLocales, $fallbackLocale);
 
