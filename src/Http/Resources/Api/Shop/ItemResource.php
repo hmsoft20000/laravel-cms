@@ -46,8 +46,8 @@ class ItemResource extends BaseJsonResource
             'is_active' => $this->is_active,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'discount' => $this->discount,
-            'discount_type' => $this->discount_type,
+            'discount'=>$this->discount,
+            'discount_type'=>$this->discount_type,
             // --- علاقات الـ Traits (مثل BlogResource) ---
             'translations' => $this->whenLoaded('translations', function () {
                 return $this->translations;
