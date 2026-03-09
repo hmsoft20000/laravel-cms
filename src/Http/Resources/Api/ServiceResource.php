@@ -23,6 +23,7 @@ class ServiceResource extends BaseJsonResource
             'id' => $this->id,
             'type' => $this->type,
             'is_active' => $this->is_active,
+            'is_featured' => $this->is_featured,
             'show_in_footer' => $this->show_in_footer,
             'show_in_header' => $this->show_in_header,
             'partners' => $this->whenLoaded('partners', function () use ($request) {

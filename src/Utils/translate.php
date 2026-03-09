@@ -37,13 +37,18 @@ if (!function_exists('getDefaultLanguage')) {
         } elseif (session()->has('locale')) {
             $lang = session('locale');
         } else {
+
             // $data = getWebConfig('language');
             // dd($data);
+
             $locale = 'en';
             $direction = 'ltr';
-            $data =  Lang::where('id', getWebConfig('system_default_lang'))->first();
-            $locale = $data->locale;
-            $direction = $data->direction;
+            $data =  Lang::where('id', getWebConfig('system_default_lang'))?->first();
+
+            if ($data) {
+                $locale = $data?->locale;
+                $direction = $data?->direction;
+            }
 
             session()->put('local', $locale);
             Session::put('direction', $direction);
@@ -60,12 +65,12 @@ if (!function_exists('getLocaleDirection')) {
         if (is_null($locale)) {
             $locale = app()->getLocale();
         }
-        
+
         // Use the helper function if available
         if (class_exists(\App\Helpers\LanguageHelper::class)) {
             return \App\Helpers\LanguageHelper::getLocaleDirection($locale);
         }
-        
+
         // Fallback to hardcoded RTL locales
         $rtlLocales = ['ar', 'he', 'fa', 'ur']; // Add other RTL locales if needed
         return in_array($locale, $rtlLocales) ? 'rtl' : 'ltr';

@@ -4,7 +4,7 @@ use HMsoft\Cms\Http\Controllers\Api\ContactUsController;
 use HMsoft\Cms\Routing\RouteRegistrar;
 
 return [
-    'controller' => ContactUsController::class,
+    'controller' => resolve(ContactUsController::class),
     'routes' => function (RouteRegistrar $registrar) {
         $registrar->post('/', 'store')->name('store');
         $registrar->get('/conversations', 'conversations')->name('conversations');
