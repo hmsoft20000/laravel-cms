@@ -71,22 +71,22 @@ class ItemRepository implements ItemRepositoryInterface
             // Use existing sync traits
             $this->syncTranslations($item, $data['locales'] ?? null);
             $this->syncCategories($item, $data['category_ids'] ?? null);
-            $this->syncFeatures($item, $data['features'] ?? null);
-            $this->syncPlans($item, $data['plans'] ?? null);
-            $this->syncFaqs($item, $data['faqs'] ?? null);
-            $this->syncDownloads($item, $data['downloads'] ?? null);
-            $this->syncOrganizations($item, $data); // For partners/sponsors
+            // $this->syncFeatures($item, $data['features'] ?? null);
+            // $this->syncPlans($item, $data['plans'] ?? null);
+            // $this->syncFaqs($item, $data['faqs'] ?? null);
+            // $this->syncDownloads($item, $data['downloads'] ?? null);
+            // $this->syncOrganizations($item, $data); // For partners/sponsors
             $this->syncAttributeValues($item, $data['attribute_values'] ?? null);
 
-            $this->syncVariations($item, $data['variations'] ?? null);
-            $this->syncAddons($item, $data['addons'] ?? null);
+            // $this->syncVariations($item, $data['variations'] ?? null);
+            // $this->syncAddons($item, $data['addons'] ?? null);
             $this->syncJoins($item, $data['joins'] ?? null);
             $this->syncRelationships($item, $data['relationships'] ?? null);
             // attached_download_ids
-            $this->attachDownloads($item, $data['attached_download_ids'] ?? []);
-            if (isset($data['attached_blogs_ids'])) {
-                $item->syncBlogs($data['attached_blogs_ids']);
-            }
+            // $this->attachDownloads($item, $data['attached_download_ids'] ?? []);
+            // if (isset($data['attached_blogs_ids'])) {
+            //     $item->syncBlogs($data['attached_blogs_ids']);
+            // }
             return $this->show($item);
         });
     }
@@ -115,20 +115,20 @@ class ItemRepository implements ItemRepositoryInterface
             // Use existing sync traits
             $this->syncTranslations($item, $data['locales'] ?? null);
             $this->syncCategories($item, $data['category_ids'] ?? null);
-            $this->syncFeatures($item, $data['features'] ?? null);
-            $this->syncPlans($item, $data['plans'] ?? null);
-            $this->syncFaqs($item, $data['faqs'] ?? null);
-            $this->syncDownloads($item, $data['downloads'] ?? null);
+            // $this->syncFeatures($item, $data['features'] ?? null);
+            // $this->syncPlans($item, $data['plans'] ?? null);
+            // $this->syncFaqs($item, $data['faqs'] ?? null);
+            // $this->syncDownloads($item, $data['downloads'] ?? null);
             $this->syncAttributeValues($item, $data['attribute_values'] ?? null);
-            $this->syncOrganizations($item, $data);
-            $this->attachDownloads($item, $data['attached_download_ids'] ?? []);
-            $this->syncVariations($item, $data['variations'] ?? null);
-            $this->syncAddons($item, $data['addons'] ?? null);
+            // $this->syncOrganizations($item, $data);
+            // $this->attachDownloads($item, $data['attached_download_ids'] ?? []);
+            // $this->syncVariations($item, $data['variations'] ?? null);
+            // $this->syncAddons($item, $data['addons'] ?? null);
             $this->syncJoins($item, $data['joins'] ?? null);
             $this->syncRelationships($item, $data['relationships'] ?? null);
-            if (isset($data['attached_blogs_ids'])) {
-                $item->syncBlogs($data['attached_blogs_ids']);
-            }
+            // if (isset($data['attached_blogs_ids'])) {
+            //     $item->syncBlogs($data['attached_blogs_ids']);
+            // }
             return $this->show($item->fresh());
         });
     }

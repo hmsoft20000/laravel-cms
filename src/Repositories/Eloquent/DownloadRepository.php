@@ -22,8 +22,15 @@ class DownloadRepository implements DownloadRepositoryInterface
     {
         return DB::transaction(function () use ($data) {
 
-            $model = $this->model->create(Arr::except($data, ['locales', 'file']));
-
+            // $model = $this->model->create(Arr::except($data, ['locales', 'file']));
+            $model = $this->model->updateOrCreate(
+                [
+                    'owner_type' => $data['owner_type'],
+                    'owner_id' => $data['owner_id'],
+                    'download_item_id' => $data['download_item_id']
+                ],
+                Arr::except($data, ['locales', 'file'])
+            );
             $this->syncTranslations($model, $data['locales'] ?? null);
             $this->syncSingleFile($model, $data, $this->mediaRepository);
 
