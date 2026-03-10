@@ -7,6 +7,7 @@ use HMsoft\Cms\Routing\CustomUrlGenerator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
 use HMsoft\Cms\Services\BindingService;
+use Illuminate\Support\Facades\Cache;
 
 class RouteServiceProvider extends ServiceProvider
 {
