@@ -41,18 +41,73 @@ class RouteServiceProvider extends ServiceProvider
         //     });
         // });
 
+        // Route::macro('localized', function ($callback) {
+        //     // 1. جلب اللغات المدعومة من الإعدادات وتحويلها لنص مفصول بـ | (مثل: ar|en)
+        //     $supportedLocales = implode('|', array_keys(config('app.locales')));
+
+        //     // في حال لم تكن الإعدادات محملة، نضع قيمة افتراضية لتجنب الأخطاء
+        //     if (empty($supportedLocales)) $supportedLocales = 'ar|en';
+
+        //     // 2. تعريف المجموعة مع شرط (where)
+        //     Route::prefix('{locale?}')
+        //         ->middleware(['set.web_config'])
+        //         ->where(['locale' => $supportedLocales]) // <--- هذا السطر هو الحل السحري
+        //         ->group($callback);
+        // });
+
+
         Route::macro('localized', function ($callback) {
-            // 1. جلب اللغات المدعومة من الإعدادات وتحويلها لنص مفصول بـ | (مثل: ar|en)
-            $supportedLocales = implode('|', array_keys(config('app.locales')));
 
-            // في حال لم تكن الإعدادات محملة، نضع قيمة افتراضية لتجنب الأخطاء
-            if (empty($supportedLocales)) $supportedLocales = 'ar|en';
+            // 1. جلب رموز اللغات النشطة بذكاء (من الكاش أو الداتابيز)
+            $supportedLocales = Cache::rememberForever('cms_active_locales_codes', function () {
+                try {
+                    // نجلب فقط اللغات المفعلة (أو حسب المنطق الخاص بك في الـ CMS)
+                    // إذا لم يكن لديك دالة active() استخدم where('is_active', 1)
+                    return Lang::active()->pluck('code')->toArray();
+                } catch (\Throwable $e) {
+                    // هذه الـ Catch ضرورية جداً لحماية النظام أثناء تشغيل php artisan migrate 
+                    // لأول مرة عندما لا يكون جدول اللغات موجوداً في قاعدة البيانات بعد
+                    return [];
+                }
+            });
 
-            // 2. تعريف المجموعة مع شرط (where)
+            // 2. إذا فشل الجلب (أو كان الجدول فارغاً)، نعتمد على لغة النظام الافتراضية
+            if (empty($supportedLocales)) {
+                $supportedLocales = [config('app.fallback_locale', 'en')];
+            }
+
+            // 3. التحقق مما إذا كان الموقع متعدد اللغات (أكثر من لغة واحدة مفعلة)
+            $isMultilingual = count($supportedLocales) > 1;
+
+
+            // 4. السلوك الأول: الموقع ذو لغة واحدة (لا نستخدم أي Prefix)
+            if (!$isMultilingual) {
+                Route::middleware(['set.web_config'])->group($callback);
+                return; // نخرج من الـ Macro هنا
+            }
+
+            // 5. السلوك الثاني: الموقع متعدد اللغات (نطبق نظام اللاحقة)
+            $localeRegex = implode('|', $supportedLocales);
+
+
             Route::prefix('{locale?}')
                 ->middleware(['set.web_config'])
-                ->where(['locale' => $supportedLocales]) // <--- هذا السطر هو الحل السحري
+                ->where(['locale' => $localeRegex])
                 ->group($callback);
+
+
+
+            // // 1. جلب اللغات المدعومة من الإعدادات وتحويلها لنص مفصول بـ | (مثل: ar|en)
+            // $supportedLocales = implode('|', array_keys(config('cms.locales', [])));
+
+            // // في حال لم تكن الإعدادات محملة، نضع قيمة افتراضية لتجنب الأخطاء
+            // if (empty($supportedLocales)) $supportedLocales = 'ar|en';
+
+            // // 2. تعريف المجموعة مع شرط (where)
+            // Route::prefix('{locale?}')
+            //     ->middleware(['set.web_config'])
+            //     ->where(['locale' => $supportedLocales]) // <--- هذا السطر هو الحل السحري
+            //     ->group($callback);
         });
 
 

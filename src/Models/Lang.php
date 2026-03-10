@@ -4,6 +4,8 @@ namespace HMsoft\Cms\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Class Lang
@@ -48,5 +50,24 @@ class Lang extends GeneralModel
             'name',
             'locale',
         ];
+    }
+
+    protected static function booted()
+    {
+        static::saved(function ($lang) {
+            Cache::forget('cms_active_locales_codes');
+            // مسح كاش المسارات ليتم إعادة بنائها باللغات الجديدة
+            if (app()->environment('production')) {
+                Artisan::call('route:clear');
+                // أو Artisan::call('route:cache'); 
+            }
+        });
+
+        static::deleted(function ($lang) {
+            Cache::forget('cms_active_locales_codes');
+            if (app()->environment('production')) {
+                Artisan::call('route:clear');
+            }
+        });
     }
 }
