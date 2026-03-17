@@ -12,7 +12,6 @@ use HMsoft\Cms\Http\Resources\Api\DownloadItemResource;
 use HMsoft\Cms\Http\Resources\Api\FeatureResource;
 use HMsoft\Cms\Http\Resources\Api\DownloadResource;
 use HMsoft\Cms\Http\Resources\Api\FaqResource;
-use HMsoft\Cms\Http\Resources\Api\PlanResource;
 use HMsoft\Cms\Http\Resources\Api\OrganizationResource;
 
 // --- ريسورسز جديدة خاصة بالمتجر ---
@@ -98,11 +97,6 @@ class ItemResource extends BaseJsonResource
             'faqs' => $this->whenLoaded('faqs', function () use ($request) {
                 return collect($this->faqs)->map(function ($item) use ($request) {
                     return resolve(FaqResource::class, ['resource' => $item])->toArray($request);
-                });
-            }),
-            'plans' => $this->whenLoaded('plans', function () use ($request) {
-                return collect($this->plans)->map(function ($item) use ($request) {
-                    return resolve(PlanResource::class, ['resource' => $item])->toArray($request);
                 });
             }),
             'partners' => $this->whenLoaded('partners', function () use ($request) {

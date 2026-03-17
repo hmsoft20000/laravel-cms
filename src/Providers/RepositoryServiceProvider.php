@@ -57,12 +57,6 @@ class RepositoryServiceProvider extends ServiceProvider
             \HMsoft\Cms\Repositories\Eloquent\FaqRepository::class
         );
 
-        // Bind the polymorphic Plan Repository
-        $this->app->bind(
-            \HMsoft\Cms\Repositories\Contracts\PlanRepositoryInterface::class,
-            \HMsoft\Cms\Repositories\Eloquent\PlanRepository::class
-        );
-
         // Bind the polymorphic Media Repository
         $this->app->bind(
             \HMsoft\Cms\Repositories\Contracts\MediaRepositoryInterface::class,

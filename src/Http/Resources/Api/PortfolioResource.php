@@ -89,11 +89,6 @@ class PortfolioResource extends BaseJsonResource
                     return  resolve(DownloadResource::class, ['resource' => $item])->toArray($request);
                 });
             }),
-            'plans' => $this->whenLoaded('plans', function () use ($request) {
-                return collect($this->plans)->map(function ($item) use ($request) {
-                    return  resolve(PlanResource::class, ['resource' => $item])->toArray($request);
-                });
-            }),
             'sector' => $this->whenLoaded('sector', function () use ($request) {
                 return resolve(SectorResource::class, ['resource' => $this->sector])->toArray($request);
             }),

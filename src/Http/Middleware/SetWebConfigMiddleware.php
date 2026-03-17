@@ -25,6 +25,13 @@ class SetWebConfigMiddleware
     public function handle(Request $request, Closure $next): Response
     {
 
+        $locale = $request->route('locale') ?? config('app.locale');
+        app()->setLocale($locale);
+
+        if ($request->route()) {
+            $request->route()->forgetParameter('locale');
+        }
+
         $web_config = [];
         $language = [];
 
@@ -44,13 +51,11 @@ class SetWebConfigMiddleware
                 'web_config' => $web_config,
                 'pages_meta' => $pages_meta,
             ]);
-
         } catch (\Exception $exception) {
             throw $exception;
         }
         try {
             $language = Lang::active()->get();
-            
         } catch (\Throwable $th) {
             throw $th;
         }

@@ -143,7 +143,6 @@ class UserModelHelper
             'pages.view',
             'faqs.view',
             'features.view',
-            'plans.view'
         ];
     }
 }

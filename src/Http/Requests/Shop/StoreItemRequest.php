@@ -10,7 +10,6 @@ use HMsoft\Cms\Traits\Features\FeatureValidationRules;
 use HMsoft\Cms\Traits\Downloads\DownloadValidationRules;
 use HMsoft\Cms\Traits\Categories\CategoryValidationRules;
 use HMsoft\Cms\Traits\Organizations\OrganizationValidationRules;
-use HMsoft\Cms\Traits\Plans\PlanValidationRules;
 use HMsoft\Cms\Traits\Faqs\FaqValidationRules;
 use HMsoft\Cms\Traits\Blogs\BlogValidationRules;
 
@@ -22,7 +21,6 @@ class StoreItemRequest extends MyRequest
         DownloadValidationRules,
         CategoryValidationRules,
         OrganizationValidationRules,
-        PlanValidationRules,
         FaqValidationRules,
         BlogValidationRules;
 
@@ -52,7 +50,6 @@ class StoreItemRequest extends MyRequest
         // $sponsorRules = $this->getOrganizationIdsValidationRules('sponsor', 'sponsor_ids');
         // $featureRules = $this->getNestedFeatureRules('features.*.', 'create');
         // $downloadRules = $this->getNestedDownloadRules('downloads.*.', 'create');
-        // $planRules = $this->getNestedPlanRules('plans.*.', 'create');
         // $faqRules = $this->getNestedFaqRules('faqs.*.', 'create');
         // $attachedDownloadRules = $this->getAttachedDownloadRules('attached_download_ids');
 
@@ -67,7 +64,6 @@ class StoreItemRequest extends MyRequest
             // $sponsorRules,
             // $featureRules,
             // $downloadRules,
-            // $planRules,
             // $faqRules,
             $attributeRules,
             // $attachedDownloadRules,

@@ -16,7 +16,6 @@ use HMsoft\Cms\Traits\General\Linkable;
 use HMsoft\Cms\Traits\Keywords\HasKeywords;
 use HMsoft\Cms\Traits\Media\DeletesAllMedia;
 use HMsoft\Cms\Traits\Media\HasMedia;
-use HMsoft\Cms\Traits\Plans\HasPlans;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,7 +30,6 @@ class Blog extends GeneralModel
         HasMedia,
         HasFaqs,
         HasDownloads,
-        HasPlans,
         DeletesAllMedia,
         HasKeywords,
         HasAttributeValues;
@@ -122,7 +120,6 @@ class Blog extends GeneralModel
             'keywords' => 'keywords',
             'features' => 'features',
             'downloads' => 'downloads',
-            'plans' => 'plans',
             'faqs' => 'faqs',
             'attributeValues' => 'attributeValues',
         ];

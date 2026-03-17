@@ -17,7 +17,6 @@ use HMsoft\Cms\Traits\General\Linkable;
 use HMsoft\Cms\Traits\Keywords\HasKeywords;
 use HMsoft\Cms\Traits\Media\DeletesAllMedia;
 use HMsoft\Cms\Traits\Media\HasMedia;
-use HMsoft\Cms\Traits\Plans\HasPlans;
 use HMsoft\Cms\Traits\Services\HasNestedServices;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -37,7 +36,6 @@ class Portfolio extends GeneralModel
         HasMedia,
         HasFaqs,
         HasDownloads,
-        HasPlans,
         DeletesAllMedia,
         HasKeywords,
         HasAttributeValues,
@@ -136,7 +134,6 @@ class Portfolio extends GeneralModel
             'keywords' => 'keywords',
             'features' => 'features',
             'downloads' => 'downloads',
-            'plans' => 'plans',
             'faqs' => 'faqs',
             'attributeValues' => 'attributeValues',
         ];

@@ -29,7 +29,6 @@ class AuthServiceProvider extends ServiceProvider
         // \HMsoft\Cms\Models\Shared\Faq::class => \HMsoft\Cms\Policies\FaqPolicy::class,
         // \HMsoft\Cms\Models\Shared\Category::class => \HMsoft\Cms\Policies\CategoryPolicy::class,
         // \HMsoft\Cms\Models\Shared\Attribute::class => \HMsoft\Cms\Policies\AttributePolicy::class,
-        // \HMsoft\Cms\Models\Shared\Plan::class => \HMsoft\Cms\Policies\PlanPolicy::class,
 
         // Content Models
         // \HMsoft\Cms\Models\Content\Post::class => \HMsoft\Cms\Policies\PostPolicy::class,

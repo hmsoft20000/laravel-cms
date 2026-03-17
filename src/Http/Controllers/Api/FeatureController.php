@@ -103,7 +103,7 @@ class FeatureController extends Controller
         /** @var Feature $feature */
         $feature = $this->resolveRouteParameter($request, 'feature');
 
-        // Optional: Add a check to ensure the plan belongs to the correct type
+        // Optional: Add a check to ensure the  belongs to the correct type
         if ($feature->owner_type != $owner->getMorphClass() || $feature->owner_id != $owner->id) {
             abort(404);
         }

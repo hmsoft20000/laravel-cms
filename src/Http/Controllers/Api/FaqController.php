@@ -85,7 +85,7 @@ class FaqController extends Controller
     {
         // $this->authorize('view', $faq);
 
-        // Optional: Add a check to ensure the plan belongs to the correct type
+        // Optional: Add a check to ensure the  belongs to the correct type
         if ($faq->owner_type != $owner->getMorphClass() || $faq->owner_id != $owner->id) {
             abort(404);
         }

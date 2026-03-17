@@ -6,7 +6,7 @@ trait TestimonialValidationRule
 {
 
     /**
-     * Get the shared validation rules for a plan based on the context.
+     * Get the shared validation rules for a  based on the context.
      *
      * @param string $context The context of the validation ('create' or 'update').
      * @return array

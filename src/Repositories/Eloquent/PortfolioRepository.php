@@ -11,7 +11,6 @@ use HMsoft\Cms\Traits\Faqs\HandlesFaqSyncing;
 use HMsoft\Cms\Traits\Features\HandlesFeatureSyncing;
 use HMsoft\Cms\Traits\General\FileManagerTrait;
 use HMsoft\Cms\Traits\Organizations\HandlesOrganizationSyncing;
-use HMsoft\Cms\Traits\Plans\HandlesPlanSyncing;
 use HMsoft\Cms\Traits\Translations\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -28,7 +27,6 @@ class PortfolioRepository implements PortfolioRepositoryInterface
         HandlesAttributeSyncing,
         HasTranslations,
         HandlesOrganizationSyncing,
-        HandlesPlanSyncing,
         HandlesFaqSyncing;
 
     public function __construct(private readonly Portfolio $model) {}
@@ -42,7 +40,6 @@ class PortfolioRepository implements PortfolioRepositoryInterface
                 'category_ids',
                 'features',
                 'downloads',
-                'plans',
                 'faqs',
                 'attribute_values',
                 'partner_ids',
@@ -52,7 +49,6 @@ class PortfolioRepository implements PortfolioRepositoryInterface
             $this->syncTranslations($portfolio, $data['locales'] ?? null);
             $this->syncCategories($portfolio, $data['category_ids'] ?? null);
             $this->syncFeatures($portfolio, $data['features'] ?? null);
-            $this->syncPlans($portfolio, $data['plans'] ?? null);
             $this->syncFaqs($portfolio, $data['faqs'] ?? null);
             $this->syncDownloads($portfolio, $data['downloads'] ?? null);
             $this->syncAttributeValues($portfolio, $data['attribute_values'] ?? null);
@@ -71,7 +67,6 @@ class PortfolioRepository implements PortfolioRepositoryInterface
                 'category_ids',
                 'features',
                 'downloads',
-                'plans',
                 'faqs',
                 'attribute_values',
                 'partner_ids',
@@ -81,7 +76,6 @@ class PortfolioRepository implements PortfolioRepositoryInterface
             $this->syncTranslations($portfolio, $data['locales'] ?? null);
             $this->syncCategories($portfolio, $data['category_ids'] ?? null);
             $this->syncFeatures($portfolio, $data['features'] ?? null);
-            $this->syncPlans($portfolio, $data['plans'] ?? null);
             $this->syncFaqs($portfolio, $data['faqs'] ?? null);
             $this->syncDownloads($portfolio, $data['downloads'] ?? null);
             $this->syncAttributeValues($portfolio, $data['attribute_values'] ?? null);
@@ -97,9 +91,6 @@ class PortfolioRepository implements PortfolioRepositoryInterface
             'translations',
             'media',
             'categories.translations',
-            'plans.owner',
-            'plans.translations',
-            'plans.features.translations',
             'features.owner',
             'features.translations',
 

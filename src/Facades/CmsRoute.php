@@ -39,7 +39,6 @@ use Illuminate\Support\Facades\Facade;
  * @method static void features(string $parent, \Closure $callback = null)
  * @method static void downloads(string $parent, \Closure $callback = null)
  * @method static void faqs(string $parent, \Closure $callback = null)
- * @method static void plans(string $parent, \Closure $callback = null)
  * @method static void media(string $parent, \Closure $callback = null)
  * @method static void nestedBlogs(string $parent, \Closure $callback = null)
  * @method static void nestedServices(string $parent, \Closure $callback = null)

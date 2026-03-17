@@ -11,7 +11,6 @@ use HMsoft\Cms\Traits\Faqs\HandlesFaqSyncing;
 use HMsoft\Cms\Traits\Features\HandlesFeatureSyncing;
 use HMsoft\Cms\Traits\General\FileManagerTrait;
 use HMsoft\Cms\Traits\Organizations\HandlesOrganizationSyncing;
-use HMsoft\Cms\Traits\Plans\HandlesPlanSyncing;
 use HMsoft\Cms\Traits\Translations\HasTranslations;
 
 use HMsoft\Cms\Traits\Shop\HandlesAddonSyncing;
@@ -34,7 +33,6 @@ class ItemRepository implements ItemRepositoryInterface
         HandlesAttributeSyncing,
         HasTranslations,
         HandlesOrganizationSyncing,
-        HandlesPlanSyncing,
         HandlesFaqSyncing,
         HandlesAddonSyncing,
         HandlesVariationSyncing,
@@ -55,7 +53,6 @@ class ItemRepository implements ItemRepositoryInterface
                 'category_ids',
                 'features',
                 'downloads',
-                'plans',
                 'faqs',
                 'attribute_values',
                 'partner_ids',
@@ -72,7 +69,6 @@ class ItemRepository implements ItemRepositoryInterface
             $this->syncTranslations($item, $data['locales'] ?? null);
             $this->syncCategories($item, $data['category_ids'] ?? null);
             // $this->syncFeatures($item, $data['features'] ?? null);
-            // $this->syncPlans($item, $data['plans'] ?? null);
             // $this->syncFaqs($item, $data['faqs'] ?? null);
             // $this->syncDownloads($item, $data['downloads'] ?? null);
             // $this->syncOrganizations($item, $data); // For partners/sponsors
@@ -100,7 +96,6 @@ class ItemRepository implements ItemRepositoryInterface
                 'category_ids',
                 'features',
                 'downloads',
-                'plans',
                 'faqs',
                 'attribute_values',
                 'partner_ids',
@@ -116,7 +111,6 @@ class ItemRepository implements ItemRepositoryInterface
             $this->syncTranslations($item, $data['locales'] ?? null);
             $this->syncCategories($item, $data['category_ids'] ?? null);
             // $this->syncFeatures($item, $data['features'] ?? null);
-            // $this->syncPlans($item, $data['plans'] ?? null);
             // $this->syncFaqs($item, $data['faqs'] ?? null);
             // $this->syncDownloads($item, $data['downloads'] ?? null);
             $this->syncAttributeValues($item, $data['attribute_values'] ?? null);
@@ -140,7 +134,6 @@ class ItemRepository implements ItemRepositoryInterface
             'translations',
             'media',
             'categories.translations',
-            'plans.translations',
             'features.translations',
 
             'downloads.translations',

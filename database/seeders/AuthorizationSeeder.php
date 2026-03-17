@@ -88,13 +88,6 @@ class AuthorizationSeeder extends Seeder
             ['name' => 'Delete Organizations', 'slug' => 'organizations.delete', 'module' => 'organizations', 'description' => 'Can delete organizations'],
             ['name' => 'Publish Organizations', 'slug' => 'organizations.publish', 'module' => 'organizations', 'description' => 'Can publish/unpublish organizations'],
 
-            // Plans Management
-            ['name' => 'View Plans', 'slug' => 'plans.view', 'module' => 'plans', 'description' => 'Can view plans'],
-            ['name' => 'Create Plans', 'slug' => 'plans.create', 'module' => 'plans', 'description' => 'Can create plans'],
-            ['name' => 'Edit Plans', 'slug' => 'plans.edit', 'module' => 'plans', 'description' => 'Can edit plans'],
-            ['name' => 'Delete Plans', 'slug' => 'plans.delete', 'module' => 'plans', 'description' => 'Can delete plans'],
-            ['name' => 'Publish Plans', 'slug' => 'plans.publish', 'module' => 'plans', 'description' => 'Can publish/unpublish plans'],
-
             // Sectors Management
             ['name' => 'View Sectors', 'slug' => 'sectors.view', 'module' => 'sectors', 'description' => 'Can view sectors'],
             ['name' => 'Create Sectors', 'slug' => 'sectors.create', 'module' => 'sectors', 'description' => 'Can create sectors'],
@@ -270,37 +263,100 @@ class AuthorizationSeeder extends Seeder
         $rolePermissions = [
             'super-admin' => [
                 // All permissions
-                'users.*', 'posts.*', 'categories.*', 'attributes.*', 'features.*', 'faqs.*', 'organizations.*', 'plans.*', 'sectors.*', 'settings.*', 'messages.*', 'reports.*', 'pages.*', 'legal.*', 'roles.*', 'permissions.*', 'system.*'
+                'users.*',
+                'posts.*',
+                'categories.*',
+                'attributes.*',
+                'features.*',
+                'faqs.*',
+                'organizations.*',
+                'sectors.*',
+                'settings.*',
+                'messages.*',
+                'reports.*',
+                'pages.*',
+                'legal.*',
+                'roles.*',
+                'permissions.*',
+                'system.*'
             ],
             'system-admin' => [
                 // System-level permissions
-                'users.*', 'settings.*', 'pages.*', 'legal.*', 'roles.manage', 'permissions.manage', 'system.*', 'reports.*'
+                'users.*',
+                'settings.*',
+                'pages.*',
+                'legal.*',
+                'roles.manage',
+                'permissions.manage',
+                'system.*',
+                'reports.*'
             ],
             'content-manager' => [
                 // Content management permissions
-                'posts.*', 'categories.*', 'attributes.*', 'features.*', 'faqs.*', 'pages.*', 'legal.*', 'messages.view', 'reports.view'
+                'posts.*',
+                'categories.*',
+                'attributes.*',
+                'features.*',
+                'faqs.*',
+                'pages.*',
+                'legal.*',
+                'messages.view',
+                'reports.view'
             ],
             'editor' => [
                 // Editor permissions (inherits from content-manager)
-                'posts.view', 'posts.create', 'posts.edit', 'posts.publish', 'posts.manage-media',
-                'categories.view', 'categories.create', 'categories.edit', 'categories.publish',
-                'attributes.view', 'attributes.create', 'attributes.edit', 'attributes.publish',
-                'features.view', 'features.create', 'features.edit', 'features.publish',
-                'faqs.view', 'faqs.create', 'faqs.edit', 'faqs.publish',
-                'pages.view', 'pages.edit', 'legal.view'
+                'posts.view',
+                'posts.create',
+                'posts.edit',
+                'posts.publish',
+                'posts.manage-media',
+                'categories.view',
+                'categories.create',
+                'categories.edit',
+                'categories.publish',
+                'attributes.view',
+                'attributes.create',
+                'attributes.edit',
+                'attributes.publish',
+                'features.view',
+                'features.create',
+                'features.edit',
+                'features.publish',
+                'faqs.view',
+                'faqs.create',
+                'faqs.edit',
+                'faqs.publish',
+                'pages.view',
+                'pages.edit',
+                'legal.view'
             ],
             'author' => [
                 // Author permissions (inherits from editor)
-                'posts.view', 'posts.create', 'posts.edit', 'posts.manage-media',
-                'categories.view', 'attributes.view', 'features.view', 'faqs.view', 'pages.view'
+                'posts.view',
+                'posts.create',
+                'posts.edit',
+                'posts.manage-media',
+                'categories.view',
+                'attributes.view',
+                'features.view',
+                'faqs.view',
+                'pages.view'
             ],
             'user-manager' => [
                 // User management permissions
-                'users.view', 'users.create', 'users.edit', 'users.manage-roles', 'messages.*'
+                'users.view',
+                'users.create',
+                'users.edit',
+                'users.manage-roles',
+                'messages.*'
             ],
             'moderator' => [
                 // Moderator permissions (inherits from user-manager)
-                'users.view', 'posts.view', 'posts.edit', 'messages.view', 'messages.reply'
+                'users.view',
+                'posts.view',
+                'posts.edit',
+                'messages.view',
+                'messages.reply'
             ],
             'user' => [
                 // Basic user permissions
@@ -316,7 +372,6 @@ class AuthorizationSeeder extends Seeder
                 'pages.view',
                 'faqs.view',
                 'features.view',
-                'plans.view'
             ]
         ];
 

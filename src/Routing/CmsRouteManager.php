@@ -326,17 +326,6 @@ class CmsRouteManager
         $this->nestedResource('faq', $parent, $callback);
     }
 
-    /**
-     * Registers nested Plan routes for a parent resource.
-     * يقوم بتسجيل مسارات الخطط المتداخلة لمورد أب.
-     * @param string $parent The plural name of the parent resource. | اسم الجمع للمورد الأب.
-     * @param \Closure|null $callback
-     * @return void
-     */
-    public function plans(string $parent, ?Closure $callback = null): void
-    {
-        $this->nestedResource('plan', $parent, $callback);
-    }
 
     /**
      * Registers nested media routes for a parent resource.

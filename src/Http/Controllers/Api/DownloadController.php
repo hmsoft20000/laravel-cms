@@ -125,7 +125,7 @@ class DownloadController extends Controller
     {
         // $this->authorize('view', $feature);
 
-        // Optional: Add a check to ensure the plan belongs to the correct type
+        // Optional: Add a check to ensure the  belongs to the correct type
         if ($download->owner_type != $owner->getMorphClass() || $download->owner_id != $owner->id) {
             abort(404);
         }

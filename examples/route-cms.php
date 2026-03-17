@@ -22,7 +22,6 @@ CmsRoute::statistics();
 // 2. المسارات المتداخلة الخاصة بـ Portfolio
 CmsRoute::category('portfolio');
 CmsRoute::attribute('portfolio');
-CmsRoute::plans('portfolios');
 CmsRoute::features('portfolios');
 CmsRoute::downloads('portfolios');
 CmsRoute::faqs('portfolios');
@@ -37,7 +36,6 @@ CmsRoute::media('portfolios', function (CmsRouteBlueprint $blueprint) {
 // 3. المسارات المتداخلة الخاصة بـ Blog
 CmsRoute::category('blog');
 CmsRoute::attribute('blog');
-CmsRoute::plans('blogs');
 CmsRoute::features('blogs');
 CmsRoute::downloads('blogs');
 CmsRoute::faqs('blogs');
@@ -49,7 +47,6 @@ CmsRoute::media('blogs', function (CmsRouteBlueprint $blueprint) {
 // 4. المسارات المتداخلة الخاصة بـ Service
 CmsRoute::category('service');
 CmsRoute::attribute('service');
-CmsRoute::plans('services');
 CmsRoute::features('services');
 CmsRoute::downloads('services');
 CmsRoute::faqs('services');
@@ -101,9 +98,6 @@ CmsRoute::downloads('products', function(CmsRouteBlueprint $blueprint) {
 });
 CmsRoute::faqs('products', function(CmsRouteBlueprint $blueprint) {
     $blueprint->name('api.faqs-products.');
-});
-CmsRoute::plans('products', function(CmsRouteBlueprint $blueprint) {
-    $blueprint->name('api.plans-products.');
 });
 */
 

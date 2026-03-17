@@ -2,7 +2,7 @@
 
 namespace HMsoft\Cms\Providers;
 
-
+use HMsoft\Cms\Models\Lang;
 use HMsoft\Cms\Routing\CustomUrlGenerator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
@@ -64,13 +64,15 @@ class RouteServiceProvider extends ServiceProvider
                 try {
                     // نجلب فقط اللغات المفعلة (أو حسب المنطق الخاص بك في الـ CMS)
                     // إذا لم يكن لديك دالة active() استخدم where('is_active', 1)
-                    return Lang::active()->pluck('code')->toArray();
+                    return Lang::active()->pluck('locale')->toArray();
                 } catch (\Throwable $e) {
                     // هذه الـ Catch ضرورية جداً لحماية النظام أثناء تشغيل php artisan migrate 
                     // لأول مرة عندما لا يكون جدول اللغات موجوداً في قاعدة البيانات بعد
                     return [];
                 }
             });
+
+            // $supportedLocales = Lang::active()->pluck('locale')->toArray();
 
             // 2. إذا فشل الجلب (أو كان الجدول فارغاً)، نعتمد على لغة النظام الافتراضية
             if (empty($supportedLocales)) {

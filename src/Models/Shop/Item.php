@@ -16,7 +16,6 @@ use HMsoft\Cms\Traits\General\Linkable;
 use HMsoft\Cms\Traits\Keywords\HasKeywords;
 use HMsoft\Cms\Traits\Media\DeletesAllMedia;
 use HMsoft\Cms\Traits\Media\HasMedia;
-use HMsoft\Cms\Traits\Plans\HasPlans;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
@@ -32,7 +31,6 @@ class Item extends GeneralModel
         HasFaqs,
         HasDownloads,
         HasBlogs,
-        HasPlans,
         DeletesAllMedia,
         HasKeywords,
         HasAttributeValues;
@@ -161,7 +159,6 @@ class Item extends GeneralModel
             'keywords' => 'keywords',
             'features' => 'features',
             'downloads' => 'downloads',
-            'plans' => 'plans',
             'faqs' => 'faqs',
             'attributeValues' => 'attributeValues',
 
